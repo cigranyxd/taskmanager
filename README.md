@@ -8,7 +8,9 @@ Lényege a tanulmányok gyakorlása:
  
 Szimpla feladatkezelő, mely képes bezárni és elindítani alkalmazásokat. Egy Youtube videó alapján, gyakorlásképp készítettem én, és Orosz Dániel. Célunk ezzel az akadozásmentes Feladatkezelő elkészítése, mely hamarabb képes betölteni, mint a Windowsban szereplő Feladatkezelő. A program még készítés alatt áll, és nem tökéletes, de dolgozunk rajta. <br />
 ## Az ablakban található funkciók:
+
 <br />
+
 ### Maga a feladatkezelő: <br />
 
 ### Első, főablak: <br />
