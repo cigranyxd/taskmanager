@@ -1,0 +1,11 @@
+C:\Users\User\Desktop\c# winforms\taskmanager\taskmanager\obj\Debug\taskmanager.csproj.AssemblyReference.cache
+C:\Users\User\Desktop\c# winforms\taskmanager\taskmanager\obj\Debug\taskmanager.Form1.resources
+C:\Users\User\Desktop\c# winforms\taskmanager\taskmanager\obj\Debug\taskmanager.frmRunTask.resources
+C:\Users\User\Desktop\c# winforms\taskmanager\taskmanager\obj\Debug\taskmanager.Properties.Resources.resources
+C:\Users\User\Desktop\c# winforms\taskmanager\taskmanager\obj\Debug\taskmanager.csproj.GenerateResource.cache
+C:\Users\User\Desktop\c# winforms\taskmanager\taskmanager\obj\Debug\taskmanager.csproj.CoreCompileInputs.cache
+C:\Users\User\Desktop\c# winforms\taskmanager\taskmanager\bin\Debug\taskmanager.exe.config
+C:\Users\User\Desktop\c# winforms\taskmanager\taskmanager\bin\Debug\taskmanager.exe
+C:\Users\User\Desktop\c# winforms\taskmanager\taskmanager\bin\Debug\taskmanager.pdb
+C:\Users\User\Desktop\c# winforms\taskmanager\taskmanager\obj\Debug\taskmanager.exe
+C:\Users\User\Desktop\c# winforms\taskmanager\taskmanager\obj\Debug\taskmanager.pdb
