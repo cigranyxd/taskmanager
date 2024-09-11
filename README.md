@@ -10,6 +10,7 @@ Szimpla feladatkezelő, mely képes bezárni és elindítani alkalmazásokat. Eg
 ## Az ablakban található funkciók:
 <br />
 ### Maga a feladatkezelő: <br />
+
 ### Első, főablak: <br />
   - Itt található a Feladatkezelő fő feladata, mely az, hogy képes a futó programokat egy gombnyomás segítségével bezárni. Ez az összes futó programot megjeleníti, ahol ki kell jelölni mely programot kívánjuk bezárni egy kattintással, és azután pedig miután kijelöltük, a gombra rányomva bezárul. Mellékelten a File fül lenyitásával kettő másik alprogramot érhetünk el, melyek bővítése folyamatban van. <br />
   
