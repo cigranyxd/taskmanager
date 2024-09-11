@@ -20,10 +20,12 @@ Szimpla feladatkezelő, mely képes bezárni és elindítani alkalmazásokat. Eg
   - Képes exe fájl alapján megkeresni, és elindítani a programot, amit kívánunk. Ezt úgy teszi, hogy egy TextBox mezőből bekéri, majd a gépen található fájlt pedig elindítja ami egyezik a beírt névvel. Ezt is úgy érjük el, hogy miután beírtuk a szöveget, rányomunk a jobb alsó sarokban található gombra, mely elindítja az eljárást.<br />
   
 ##### Második alprogram <br />
-  - Ez szimplán egy kalendár, mely megjeleníti a hónapot, és az abban szereplő napok számát, és hogy melyik nap hányadikára esik. Ez még készülőben van, mivel nem tökéletes. <br />
+  - Ez szimplán egy kalendár, mely megjeleníti a hónapot, és az abban szereplő napok számát, és hogy melyik nap hányadikára esik, Illetve meg lehet jelölni adott napokat. <br />
 
 
 
-###### A youtube videó:
+###### A youtube videók:
+###### Maga a feladatkezelő:
+[https://www.youtube.com/watch?v=HcQUEjjjaBQ](https://www.youtube.com/watch?v=HcQUEjjjaBQ)<br /> ###### A kalendár:
+[https://www.youtube.com/watch?v=6E5nImQJC-Y](https://www.youtube.com/watch?v=6E5nImQJC-Y)<br />
 
-[https://www.youtube.com/watch?v=HcQUEjjjaBQ](https://www.youtube.com/watch?v=HcQUEjjjaBQ)<br />
