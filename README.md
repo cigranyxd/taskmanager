@@ -26,6 +26,7 @@ Szimpla feladatkezelő, mely képes bezárni és elindítani alkalmazásokat. Eg
 
 ###### A youtube videók:
 ###### Maga a feladatkezelő:
-[https://www.youtube.com/watch?v=HcQUEjjjaBQ](https://www.youtube.com/watch?v=HcQUEjjjaBQ)<br /> ###### A kalendár:
+[https://www.youtube.com/watch?v=HcQUEjjjaBQ](https://www.youtube.com/watch?v=HcQUEjjjaBQ)<br /> 
+###### A kalendár:
 [https://www.youtube.com/watch?v=6E5nImQJC-Y](https://www.youtube.com/watch?v=6E5nImQJC-Y)<br />
 
