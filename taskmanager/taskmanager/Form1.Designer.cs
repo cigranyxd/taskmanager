@@ -33,11 +33,13 @@
             this.runTaskToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.listBox1 = new System.Windows.Forms.ListBox();
             this.endTaskBtn = new System.Windows.Forms.Button();
+            this.calendarToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
             // menuStrip1
             // 
+            this.menuStrip1.BackColor = System.Drawing.SystemColors.ActiveCaption;
             this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.fileToolStripMenuItem});
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
@@ -50,7 +52,8 @@
             // fileToolStripMenuItem
             // 
             this.fileToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.runTaskToolStripMenuItem});
+            this.runTaskToolStripMenuItem,
+            this.calendarToolStripMenuItem});
             this.fileToolStripMenuItem.Name = "fileToolStripMenuItem";
             this.fileToolStripMenuItem.Size = new System.Drawing.Size(37, 20);
             this.fileToolStripMenuItem.Text = "File";
@@ -58,12 +61,14 @@
             // runTaskToolStripMenuItem
             // 
             this.runTaskToolStripMenuItem.Name = "runTaskToolStripMenuItem";
-            this.runTaskToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.runTaskToolStripMenuItem.Size = new System.Drawing.Size(147, 22);
             this.runTaskToolStripMenuItem.Text = "Run New Task";
             this.runTaskToolStripMenuItem.Click += new System.EventHandler(this.runTaskToolStripMenuItem_Click);
             // 
             // listBox1
             // 
+            this.listBox1.BackColor = System.Drawing.Color.Black;
+            this.listBox1.ForeColor = System.Drawing.Color.Transparent;
             this.listBox1.FormattingEnabled = true;
             this.listBox1.Location = new System.Drawing.Point(13, 28);
             this.listBox1.Name = "listBox1";
@@ -80,10 +85,18 @@
             this.endTaskBtn.UseVisualStyleBackColor = true;
             this.endTaskBtn.Click += new System.EventHandler(this.endTaskBtn_Click);
             // 
+            // calendarToolStripMenuItem
+            // 
+            this.calendarToolStripMenuItem.Name = "calendarToolStripMenuItem";
+            this.calendarToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.calendarToolStripMenuItem.Text = "calendar";
+            this.calendarToolStripMenuItem.Click += new System.EventHandler(this.calendarToolStripMenuItem_Click);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.BackColor = System.Drawing.SystemColors.MenuHighlight;
             this.ClientSize = new System.Drawing.Size(800, 460);
             this.Controls.Add(this.endTaskBtn);
             this.Controls.Add(this.listBox1);
@@ -107,6 +120,7 @@
         private System.Windows.Forms.ToolStripMenuItem runTaskToolStripMenuItem;
         private System.Windows.Forms.ListBox listBox1;
         private System.Windows.Forms.Button endTaskBtn;
+        private System.Windows.Forms.ToolStripMenuItem calendarToolStripMenuItem;
     }
 }
 

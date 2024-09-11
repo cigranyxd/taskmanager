@@ -16,6 +16,7 @@ namespace taskmanager
         public Form1()
         {
             InitializeComponent();
+            
         }
 
         Process[] proc;
@@ -61,6 +62,13 @@ namespace taskmanager
                 {
                     getAllProcesses();
                 }
+            }
+        }
+
+        private void calendarToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            using (frmCalendar frm = new frmCalendar()) { 
+            frm.ShowDialog();
             }
         }
     }

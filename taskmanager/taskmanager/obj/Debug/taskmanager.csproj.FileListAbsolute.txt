@@ -9,3 +9,16 @@ C:\Users\User\Desktop\c# winforms\taskmanager\taskmanager\bin\Debug\taskmanager.
 C:\Users\User\Desktop\c# winforms\taskmanager\taskmanager\bin\Debug\taskmanager.pdb
 C:\Users\User\Desktop\c# winforms\taskmanager\taskmanager\obj\Debug\taskmanager.exe
 C:\Users\User\Desktop\c# winforms\taskmanager\taskmanager\obj\Debug\taskmanager.pdb
+D:\taskmanager\taskmanager\taskmanager\bin\Debug\taskmanager.exe.config
+D:\taskmanager\taskmanager\taskmanager\bin\Debug\taskmanager.exe
+D:\taskmanager\taskmanager\taskmanager\bin\Debug\taskmanager.pdb
+D:\taskmanager\taskmanager\taskmanager\obj\Debug\taskmanager.csproj.AssemblyReference.cache
+D:\taskmanager\taskmanager\taskmanager\obj\Debug\taskmanager.Form1.resources
+D:\taskmanager\taskmanager\taskmanager\obj\Debug\taskmanager.frmRunTask.resources
+D:\taskmanager\taskmanager\taskmanager\obj\Debug\taskmanager.Properties.Resources.resources
+D:\taskmanager\taskmanager\taskmanager\obj\Debug\taskmanager.csproj.GenerateResource.cache
+D:\taskmanager\taskmanager\taskmanager\obj\Debug\taskmanager.csproj.CoreCompileInputs.cache
+D:\taskmanager\taskmanager\taskmanager\obj\Debug\taskmanager.exe
+D:\taskmanager\taskmanager\taskmanager\obj\Debug\taskmanager.pdb
+D:\taskmanager\taskmanager\taskmanager\obj\Debug\taskmanager.frmCalendar.resources
+D:\taskmanager\taskmanager\taskmanager\obj\Debug\taskmanager.ucDayrs.resources
