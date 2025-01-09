@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="16dp">
+
+    <EditText
+        android:id="@+id/osszegInput"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Összeg"
+        android:inputType="numberDecimal" />
+
+    <Spinner
+        android:id="@+id/kategoriakSpinner"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp" />
+
+    <!-- Leírás mező -->
+    <EditText
+        android:id="@+id/leirasInput"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Leírás"
+        android:inputType="textMultiLine"
+        android:maxLines="5"
+        android:gravity="start|top"
+        android:layout_marginTop="8dp"
+        android:background="@android:drawable/edit_text" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginTop="16dp">
+
+        <Button
+            android:id="@+id/mentesGomb"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:text="Mentés" />
+
+        <Button
+            android:id="@+id/megseGomb"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:text="Mégse" />
+    </LinearLayout>
+</LinearLayout>
