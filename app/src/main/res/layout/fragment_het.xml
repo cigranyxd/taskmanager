@@ -9,40 +9,14 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <TextView
-            android:id="@+id/KiadasokText"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Kiadások"
-            android:textSize="34sp"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+        <!-- Grafikon a képernyő felső részén -->
+        <com.github.mikephil.charting.charts.LineChart
+            android:id="@+id/vonalDiagram"
+            android:layout_width="match_parent"
+            android:layout_height="300dp"
+            android:layout_centerInParent="true"
+            tools:ignore="MissingConstraints" />
 
-        <TextView
-            android:id="@+id/BevetelekText"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Bevételek"
-            android:textSize="34sp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 
-    <TextView
-        android:id="@+id/kiadasokText"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Kiadások"
-        android:textSize="34sp"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
-    <TextView
-        android:id="@+id/bevetelekText"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Bevételek"
-        android:textSize="34sp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
 </androidx.constraintlayout.widget.ConstraintLayout>

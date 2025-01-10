@@ -3,7 +3,10 @@ package com.example.szemelyes_penzugyi_menedzser
 import android.annotation.SuppressLint
 import android.content.Intent
 import android.graphics.Color
+import android.os.Build
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -14,6 +17,7 @@ import android.widget.EditText
 import android.widget.Spinner
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
+import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
@@ -26,7 +30,10 @@ import com.github.mikephil.charting.data.LineDataSet
 import com.google.firebase.Timestamp
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import java.text.SimpleDateFormat
 import java.time.LocalDate
+import java.util.Calendar
+import java.util.Locale
 
 @Suppress("IMPLICIT_CAST_TO_ANY")
 class ElemzesActivity : AppCompatActivity() {
@@ -285,8 +292,11 @@ class ElemzesActivity : AppCompatActivity() {
         }
     }
 
-    class EvFragment : Fragment() {
+    class NapFragment : Fragment() {
         private lateinit var vonalDiagram: LineChart
+        private val firestore = FirebaseFirestore.getInstance()
+
+        @RequiresApi(Build.VERSION_CODES.O)
         override fun onCreateView(
             inflater: LayoutInflater, container: ViewGroup?,
             savedInstanceState: Bundle?
@@ -295,19 +305,40 @@ class ElemzesActivity : AppCompatActivity() {
 
             vonalDiagram = gyokerNezet.findViewById(R.id.vonalDiagram)
 
-            val bevetelAdatok = listOf(
-                Entry(0f, 1000f),
-                Entry(1f, 1200f),
-                Entry(2f, 800f),
-                Entry(3f, 1500f)
-            )
-            val kiadasAdatok = listOf(
-                Entry(0f, 500f),
-                Entry(1f, 700f),
-                Entry(2f, 600f),
-                Entry(3f, 900f)
-            )
+            // Napi adatok lekérdezése az aktuális dátum alapján
+            val maiDatum = LocalDate.now().toString() // Pl. "2025-01-10"
+            firestore.collection("nap").document(maiDatum).get()
+                .addOnSuccessListener { document ->
+                    if (document.exists()) {
+                        // Lekérdezett adatok feldolgozása
+                        val tranzakciok = document.get("tranzakciok") as? List<Map<String, Any>> ?: emptyList()
+                        val bevetelAdatok = mutableListOf<Entry>()
+                        val kiadasAdatok = mutableListOf<Entry>()
 
+                        tranzakciok.forEachIndexed { index, tranzakcio ->
+                            val mennyiseg = (tranzakcio["mennyiseg"] as Double).toFloat()
+                            val kategoria = tranzakcio["kategoria"] as String
+                            if (kategoria == "Bevétel") {
+                                bevetelAdatok.add(Entry(index.toFloat(), mennyiseg))
+                            } else if (kategoria == "Kiadás") {
+                                kiadasAdatok.add(Entry(index.toFloat(), mennyiseg))
+                            }
+                        }
+
+                        // Diagram beállítása az adatok alapján
+                        setupChart(bevetelAdatok, kiadasAdatok)
+                    } else {
+                        Toast.makeText(context, "Nincs adat a mai napra.", Toast.LENGTH_SHORT).show()
+                    }
+                }
+                .addOnFailureListener { e ->
+                    Toast.makeText(context, "Hiba az adatok lekérdezése során: ${e.message}", Toast.LENGTH_SHORT).show()
+                }
+
+            return gyokerNezet
+        }
+
+        private fun setupChart(bevetelAdatok: List<Entry>, kiadasAdatok: List<Entry>) {
             val bevetelSor = LineDataSet(bevetelAdatok, "Bevételek").apply {
                 color = Color.GREEN
                 lineWidth = 2f
@@ -326,88 +357,84 @@ class ElemzesActivity : AppCompatActivity() {
 
             val diagramAdatok = LineData(bevetelSor, kiadasSor)
             vonalDiagram.data = diagramAdatok
-
             vonalDiagram.description.isEnabled = false
             vonalDiagram.animateX(1000)
             vonalDiagram.invalidate()
-
-            return gyokerNezet
         }
     }
 
-    class HonapFragment : Fragment() {
-        private lateinit var vonalDiagram: LineChart
-        override fun onCreateView(
-            inflater: LayoutInflater, container: ViewGroup?,
-            savedInstanceState: Bundle?
-        ): View? {
-            val gyokerNezet = inflater.inflate(R.layout.fragment_nap, container, false)
-
-            vonalDiagram = gyokerNezet.findViewById(R.id.vonalDiagram)
-
-            val bevetelAdatok = listOf(
-                Entry(0f, 1000f),
-                Entry(1f, 1200f),
-                Entry(2f, 800f),
-                Entry(3f, 1500f)
-            )
-            val kiadasAdatok = listOf(
-                Entry(0f, 500f),
-                Entry(1f, 700f),
-                Entry(2f, 600f),
-                Entry(3f, 900f)
-            )
-
-            val bevetelSor = LineDataSet(bevetelAdatok, "Bevételek").apply {
-                color = Color.GREEN
-                lineWidth = 2f
-                setCircleColor(Color.GREEN)
-                circleRadius = 4f
-                valueTextColor = Color.BLACK
-            }
-
-            val kiadasSor = LineDataSet(kiadasAdatok, "Kiadások").apply {
-                color = Color.RED
-                lineWidth = 2f
-                setCircleColor(Color.RED)
-                circleRadius = 4f
-                valueTextColor = Color.BLACK
-            }
-
-            val diagramAdatok = LineData(bevetelSor, kiadasSor)
-            vonalDiagram.data = diagramAdatok
-
-            vonalDiagram.description.isEnabled = false
-            vonalDiagram.animateX(1000)
-            vonalDiagram.invalidate()
-
-            return gyokerNezet
-        }
-    }
 
     class HetFragment : Fragment() {
         private lateinit var vonalDiagram: LineChart
+        private val firestore = FirebaseFirestore.getInstance()
+
         override fun onCreateView(
             inflater: LayoutInflater, container: ViewGroup?,
             savedInstanceState: Bundle?
         ): View? {
-            val gyokerNezet = inflater.inflate(R.layout.fragment_nap, container, false)
+            val gyokerNezet = inflater.inflate(R.layout.fragment_het, container, false)
 
             vonalDiagram = gyokerNezet.findViewById(R.id.vonalDiagram)
 
-            val bevetelAdatok = listOf(
-                Entry(0f, 1000f),
-                Entry(1f, 1200f),
-                Entry(2f, 800f),
-                Entry(3f, 1500f)
-            )
-            val kiadasAdatok = listOf(
-                Entry(0f, 500f),
-                Entry(1f, 700f),
-                Entry(2f, 600f),
-                Entry(3f, 900f)
-            )
+            // Heti adatok lekérdezése
+            val kalendar = Calendar.getInstance()
+            val datumformatum = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
 
+            // Hét első napja (hétfő)
+            kalendar.set(Calendar.DAY_OF_WEEK, Calendar.MONDAY)
+            val hetKezdete = kalendar.time
+
+            // Hét utolsó napja (vasárnap)
+            kalendar.set(Calendar.DAY_OF_WEEK, Calendar.SUNDAY)
+            val hetVege = kalendar.time
+
+            val bevetelAdatok = mutableListOf<Entry>()
+            val kiadasAdatok = mutableListOf<Entry>()
+
+            // Iterálunk az összes napra a hét folyamán
+            val napokSzama = 7
+            for (i in 0 until napokSzama) {
+                val nap = kalendar.time
+                val napStr = datumformatum.format(nap)  // A napi dátum stringje
+
+                // Lekérdezzük a napi tranzakciókat a Firestore-ból
+                firestore.collection("nap")
+                    .document(napStr) // A dokumentum neve a napi dátum
+                    .get()
+                    .addOnSuccessListener { document ->
+                        if (document.exists()) {
+                            val tranzakciok = document.get("tranzakciok") as? List<Map<String, Any>> ?: emptyList()
+
+                            tranzakciok.forEachIndexed { index, tranzakcio ->
+                                val mennyiseg = (tranzakcio["mennyiseg"] as? Double)?.toFloat() ?: 0f
+                                val kategoria = tranzakcio["kategoria"] as? String ?: ""
+
+                                if (kategoria == "Bevétel") {
+                                    bevetelAdatok.add(Entry(index.toFloat(), mennyiseg))
+                                } else if (kategoria == "Kiadás") {
+                                    kiadasAdatok.add(Entry(index.toFloat(), mennyiseg))
+                                }
+                            }
+                        }
+                    }
+                    .addOnFailureListener { e ->
+                        Toast.makeText(context, "Hiba történt a tranzakciók lekérésekor: ${e.message}", Toast.LENGTH_SHORT).show()
+                    }
+
+                // Növeljük a napot a következő napra
+                kalendar.add(Calendar.DAY_OF_YEAR, 1)
+            }
+
+            // Várakozás az összes adat lekérdezésére (asynchronous)
+            Handler(Looper.getMainLooper()).postDelayed({
+                // Diagram beállítása az összegyűjtött adatokkal
+                chartBeallitas(bevetelAdatok, kiadasAdatok)
+            }, 2000) // 2 másodperc várakozás
+
+            return gyokerNezet
+        }
+
+        private fun chartBeallitas(bevetelAdatok: List<Entry>, kiadasAdatok: List<Entry>) {
             val bevetelSor = LineDataSet(bevetelAdatok, "Bevételek").apply {
                 color = Color.GREEN
                 lineWidth = 2f
@@ -426,39 +453,85 @@ class ElemzesActivity : AppCompatActivity() {
 
             val diagramAdatok = LineData(bevetelSor, kiadasSor)
             vonalDiagram.data = diagramAdatok
-
             vonalDiagram.description.isEnabled = false
             vonalDiagram.animateX(1000)
             vonalDiagram.invalidate()
-
-            return gyokerNezet
         }
     }
 
-    class NapFragment : Fragment() {
+
+
+    class HonapFragment : Fragment() {
         private lateinit var vonalDiagram: LineChart
+        private val firestore = FirebaseFirestore.getInstance()
 
         override fun onCreateView(
             inflater: LayoutInflater, container: ViewGroup?,
             savedInstanceState: Bundle?
         ): View? {
-            val gyokerNezet = inflater.inflate(R.layout.fragment_nap, container, false)
+            val gyokerNezet = inflater.inflate(R.layout.fragment_honap, container, false)
 
             vonalDiagram = gyokerNezet.findViewById(R.id.vonalDiagram)
 
-            val bevetelAdatok = listOf(
-                Entry(0f, 1000f),
-                Entry(1f, 1200f),
-                Entry(2f, 800f),
-                Entry(3f, 1500f)
-            )
-            val kiadasAdatok = listOf(
-                Entry(0f, 500f),
-                Entry(1f, 700f),
-                Entry(2f, 600f),
-                Entry(3f, 900f)
-            )
+            // Havi adatok lekérdezése
+            val kalendar = Calendar.getInstance()
+            val datumformatum = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
 
+            // A hónap első napja
+            kalendar.set(Calendar.DAY_OF_MONTH, 1)
+            val honapKezdete = kalendar.time
+
+            // A hónap utolsó napja
+            kalendar.set(Calendar.DAY_OF_MONTH, kalendar.getActualMaximum(Calendar.DAY_OF_MONTH))
+            val honapVege = kalendar.time
+
+            val bevetelAdatok = mutableListOf<Entry>()
+            val kiadasAdatok = mutableListOf<Entry>()
+
+            // Iterálunk az összes napra a hónap folyamán
+            val napokSzama = kalendar.getActualMaximum(Calendar.DAY_OF_MONTH)
+            for (i in 0 until napokSzama) {
+                val nap = kalendar.time
+                val napStr = datumformatum.format(nap)  // A napi dátum stringje
+
+                // Lekérdezzük a napi tranzakciókat a Firestore-ból
+                firestore.collection("nap")
+                    .document(napStr) // A dokumentum neve a napi dátum
+                    .get()
+                    .addOnSuccessListener { document ->
+                        if (document.exists()) {
+                            val tranzakciok = document.get("tranzakciok") as? List<Map<String, Any>> ?: emptyList()
+
+                            tranzakciok.forEachIndexed { index, tranzakcio ->
+                                val mennyiseg = (tranzakcio["mennyiseg"] as? Double)?.toFloat() ?: 0f
+                                val kategoria = tranzakcio["kategoria"] as? String ?: ""
+
+                                if (kategoria == "Bevétel") {
+                                    bevetelAdatok.add(Entry(index.toFloat(), mennyiseg))
+                                } else if (kategoria == "Kiadás") {
+                                    kiadasAdatok.add(Entry(index.toFloat(), mennyiseg))
+                                }
+                            }
+                        }
+                    }
+                    .addOnFailureListener { e ->
+                        Toast.makeText(context, "Hiba történt a tranzakciók lekérésekor: ${e.message}", Toast.LENGTH_SHORT).show()
+                    }
+
+                // Növeljük a napot a következő napra
+                kalendar.add(Calendar.DAY_OF_YEAR, 1)
+            }
+
+            // Várakozás az összes adat lekérdezésére (asynchronous)
+            Handler(Looper.getMainLooper()).postDelayed({
+                // Diagram beállítása az összegyűjtött adatokkal
+                chartBeallitas(bevetelAdatok, kiadasAdatok)
+            }, 2000) // 2 másodperc várakozás
+
+            return gyokerNezet
+        }
+
+        private fun chartBeallitas(bevetelAdatok: List<Entry>, kiadasAdatok: List<Entry>) {
             val bevetelSor = LineDataSet(bevetelAdatok, "Bevételek").apply {
                 color = Color.GREEN
                 lineWidth = 2f
@@ -477,14 +550,116 @@ class ElemzesActivity : AppCompatActivity() {
 
             val diagramAdatok = LineData(bevetelSor, kiadasSor)
             vonalDiagram.data = diagramAdatok
-
             vonalDiagram.description.isEnabled = false
             vonalDiagram.animateX(1000)
             vonalDiagram.invalidate()
+        }
+    }
+
+
+
+
+
+
+    class EvFragment : Fragment() {
+        private lateinit var vonalDiagram: LineChart
+        private val firestore = FirebaseFirestore.getInstance()
+
+        override fun onCreateView(
+            inflater: LayoutInflater, container: ViewGroup?,
+            savedInstanceState: Bundle?
+        ): View? {
+            val gyokerNezet = inflater.inflate(R.layout.fragment_ev, container, false)
+
+            vonalDiagram = gyokerNezet.findViewById(R.id.vonalDiagram)
+
+            // Éves adatok lekérdezése
+            val kalendar = Calendar.getInstance()
+            val datumformatum = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+
+            // Az év első napja
+            kalendar.set(Calendar.MONTH, Calendar.JANUARY)
+            kalendar.set(Calendar.DAY_OF_MONTH, 1)
+            val evKezdete = kalendar.time
+
+            // Az év utolsó napja
+            kalendar.set(Calendar.MONTH, Calendar.DECEMBER)
+            kalendar.set(Calendar.DAY_OF_MONTH, 31)
+            val evVege = kalendar.time
+
+            val bevetelAdatok = mutableListOf<Entry>()
+            val kiadasAdatok = mutableListOf<Entry>()
+
+            // Iterálunk az összes hónapra az év folyamán
+            for (i in 0 until 12) {
+                kalendar.set(Calendar.MONTH, i)
+                val honapKezdete = kalendar.time
+                val honapStr = datumformatum.format(honapKezdete)  // A havi dátum stringje
+
+                // Lekérdezzük a havi tranzakciókat a Firestore-ból
+                firestore.collection("honap")
+                    .document(honapStr) // A dokumentum neve a havi dátum
+                    .get()
+                    .addOnSuccessListener { document ->
+                        if (document.exists()) {
+                            val tranzakciok = document.get("tranzakciok") as? List<Map<String, Any>> ?: emptyList()
+
+                            tranzakciok.forEachIndexed { index, tranzakcio ->
+                                val mennyiseg = (tranzakcio["mennyiseg"] as? Double)?.toFloat() ?: 0f
+                                val kategoria = tranzakcio["kategoria"] as? String ?: ""
+
+                                if (kategoria == "Bevétel") {
+                                    bevetelAdatok.add(Entry(index.toFloat(), mennyiseg))
+                                } else if (kategoria == "Kiadás") {
+                                    kiadasAdatok.add(Entry(index.toFloat(), mennyiseg))
+                                }
+                            }
+                        }
+                    }
+                    .addOnFailureListener { e ->
+                        Toast.makeText(context, "Hiba történt a tranzakciók lekérésekor: ${e.message}", Toast.LENGTH_SHORT).show()
+                    }
+            }
+
+            // Várakozás az összes adat lekérdezésére (asynchronous)
+            Handler(Looper.getMainLooper()).postDelayed({
+                // Diagram beállítása az összegyűjtött adatokkal
+                chartBeallitas(bevetelAdatok, kiadasAdatok)
+            }, 2000) // 2 másodperc várakozás
 
             return gyokerNezet
         }
+
+        private fun chartBeallitas(bevetelAdatok: List<Entry>, kiadasAdatok: List<Entry>) {
+            val bevetelSor = LineDataSet(bevetelAdatok, "Bevételek").apply {
+                color = Color.GREEN
+                lineWidth = 2f
+                setCircleColor(Color.GREEN)
+                circleRadius = 4f
+                valueTextColor = Color.BLACK
+            }
+
+            val kiadasSor = LineDataSet(kiadasAdatok, "Kiadások").apply {
+                color = Color.RED
+                lineWidth = 2f
+                setCircleColor(Color.RED)
+                circleRadius = 4f
+                valueTextColor = Color.BLACK
+            }
+
+            val diagramAdatok = LineData(bevetelSor, kiadasSor)
+            vonalDiagram.data = diagramAdatok
+            vonalDiagram.description.isEnabled = false
+            vonalDiagram.animateX(1000)
+            vonalDiagram.invalidate()
+        }
     }
+
+
+
+
+
+
 
     class DefaultFragment : Fragment() {
         override fun onCreateView(
