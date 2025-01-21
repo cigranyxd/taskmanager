@@ -13,6 +13,7 @@ import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.Button
 import android.widget.EditText
+import android.widget.ProgressBar
 import android.widget.Spinner
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
@@ -26,6 +27,8 @@ import com.github.mikephil.charting.charts.LineChart
 import com.github.mikephil.charting.data.Entry
 import com.github.mikephil.charting.data.LineData
 import com.github.mikephil.charting.data.LineDataSet
+import com.github.mikephil.charting.highlight.Highlight
+import com.github.mikephil.charting.listener.OnChartValueSelectedListener
 import com.google.firebase.Timestamp
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FieldPath
@@ -67,6 +70,8 @@ class ElemzesActivity : AppCompatActivity() {
         spinner.adapter = adapter
 
         val currentUser = FirebaseAuth.getInstance().currentUser
+        val uid = currentUser?.uid
+
         if (currentUser != null) {
             // Felhasználó bejelentkezve
         } else {
@@ -75,6 +80,7 @@ class ElemzesActivity : AppCompatActivity() {
             startActivity(intent)
             finish()
         }
+
 
 
 
@@ -110,10 +116,17 @@ class ElemzesActivity : AppCompatActivity() {
                     val kategoria = kategoriakSpinner.selectedItem.toString()
                     val leiras = leirasInput.text.toString()  // A leírás mező szövege
                     val firestore = FirebaseFirestore.getInstance()
+                    val currentUser = FirebaseAuth.getInstance().currentUser
+
+                    if (currentUser == null) {
+                        Toast.makeText(context, "Nincs bejelentkezett felhasználó!", Toast.LENGTH_SHORT).show()
+                        return@setOnClickListener
+                    }
+
+                    val uid = currentUser.uid  // Az aktuális felhasználó azonosítója
                     val dokNev = LocalDate.now().toString()  // A dokumentum neve: a mai nap dátuma
 
                     if (osszeg != null && leiras.isNotBlank()) {
-
                         // A tranzakció létrehozása HashMap-ben
                         val transaction = hashMapOf<String, Any>(
                             "mennyiseg" to osszeg,  // Összeg elmentése
@@ -122,10 +135,12 @@ class ElemzesActivity : AppCompatActivity() {
                             "leiras" to leiras  // Leírás elmentése
                         )
 
-                        // Aznapra már létező dokumentumban tároljuk a tranzakciókat egy listában
-                        firestore.collection("nap")  // A kollekció neve
+                        // Felhasználó-specifikus adatbázis struktúra
+                        firestore.collection("users")  // Felhasználók gyűjteménye
+                            .document(uid)  // Az aktuális felhasználó dokumentuma
+                            .collection("nap")  // Napi tranzakciók al-gyűjteménye
                             .document(dokNev)  // Dokumentum neve (a nap dátuma)
-                            .get()  // Lekérjük az aktuális dokumentumot
+                            .get()
                             .addOnSuccessListener { document ->
                                 if (document.exists()) {
                                     // Ha létezik már dokumentum, akkor hozzáadjuk a tranzakciót a listához
@@ -134,7 +149,9 @@ class ElemzesActivity : AppCompatActivity() {
                                     mutableTransactions.add(transaction)  // Hozzáadjuk az új tranzakciót
 
                                     // Frissítjük a dokumentumot a tranzakciók listájával
-                                    firestore.collection("nap")
+                                    firestore.collection("users")
+                                        .document(uid)
+                                        .collection("nap")
                                         .document(dokNev)
                                         .update("tranzakciok", mutableTransactions)
                                         .addOnSuccessListener {
@@ -147,7 +164,9 @@ class ElemzesActivity : AppCompatActivity() {
                                     // Ha nem létezik dokumentum, akkor új dokumentumot hozunk létre a tranzakcióval
                                     val transactions = mutableListOf(transaction)
 
-                                    firestore.collection("nap")
+                                    firestore.collection("users")
+                                        .document(uid)
+                                        .collection("nap")
                                         .document(dokNev)
                                         .set(mapOf("tranzakciok" to transactions))
                                         .addOnSuccessListener {
@@ -170,6 +189,9 @@ class ElemzesActivity : AppCompatActivity() {
                 return view
             }
         }
+
+
+
 
 
 
@@ -219,6 +241,8 @@ class ElemzesActivity : AppCompatActivity() {
             }
         }
     }
+
+
 
     private fun Kijelentkezes() {
         auth.signOut()
@@ -299,6 +323,7 @@ class ElemzesActivity : AppCompatActivity() {
     class NapFragment : Fragment() {
         private lateinit var vonalDiagram: LineChart
         private val firestore = FirebaseFirestore.getInstance()
+        private val currentUser = FirebaseAuth.getInstance().currentUser
 
         @RequiresApi(Build.VERSION_CODES.O)
         override fun onCreateView(
@@ -309,9 +334,20 @@ class ElemzesActivity : AppCompatActivity() {
 
             vonalDiagram = gyokerNezet.findViewById(R.id.vonalDiagram)
 
+            if (currentUser == null) {
+                Toast.makeText(context, "Nincs bejelentkezett felhasználó!", Toast.LENGTH_SHORT).show()
+                return gyokerNezet
+            }
+
             // Napi adatok lekérdezése az aktuális dátum alapján
             val maiDatum = LocalDate.now().toString() // Pl. "2025-01-10"
-            firestore.collection("nap").document(maiDatum).get()
+            val uid = currentUser.uid
+
+            firestore.collection("users")
+                .document(uid)  // Felhasználói dokumentum
+                .collection("nap")  // Napi tranzakciók gyűjteménye
+                .document(maiDatum)  // Az aktuális nap dokumentuma
+                .get()
                 .addOnSuccessListener { document ->
                     if (document.exists()) {
                         try {
@@ -383,9 +419,12 @@ class ElemzesActivity : AppCompatActivity() {
 
 
 
+
     class HetFragment : Fragment() {
         private lateinit var vonalDiagram: LineChart
+        private lateinit var progressBar: ProgressBar
         private val firestore = FirebaseFirestore.getInstance()
+        private val currentUser = FirebaseAuth.getInstance().currentUser
 
         @RequiresApi(Build.VERSION_CODES.O)
         override fun onCreateView(
@@ -395,55 +434,68 @@ class ElemzesActivity : AppCompatActivity() {
             val gyokerNezet = inflater.inflate(R.layout.fragment_het, container, false)
 
             vonalDiagram = gyokerNezet.findViewById(R.id.vonalDiagram)
+            progressBar = gyokerNezet.findViewById(R.id.progressBar)
 
-            // Az aktuális hét kezdő- és végdátumának meghatározása
+            if (currentUser == null) {
+                Toast.makeText(context, "Nincs bejelentkezett felhasználó!", Toast.LENGTH_SHORT).show()
+                return gyokerNezet
+            }
+
             val maiDatum = LocalDate.now()
             val hetElsoNapja = maiDatum.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY))
             val hetUtsoNapja = maiDatum.with(TemporalAdjusters.nextOrSame(DayOfWeek.SUNDAY))
 
-            // Lekérdezés az aktuális hét napjaira
-            firestore.collection("nap")
+            progressBar.visibility = View.VISIBLE
+            val uid = currentUser.uid
+
+            firestore.collection("users")
+                .document(uid)  // Felhasználói dokumentum
+                .collection("nap")  // Napi tranzakciók gyűjteménye
                 .whereGreaterThanOrEqualTo(FieldPath.documentId(), hetElsoNapja.toString())
                 .whereLessThanOrEqualTo(FieldPath.documentId(), hetUtsoNapja.toString())
                 .get()
-                .addOnSuccessListener { querySnapshot ->
-                    val bevetelAdatok = mutableListOf<Entry>()
-                    val kiadasAdatok = mutableListOf<Entry>()
+                .addOnCompleteListener { task ->
+                    progressBar.visibility = View.GONE
+                    if (task.isSuccessful) {
+                        val bevetelAdatok = mutableListOf<Entry>()
+                        val kiadasAdatok = mutableListOf<Entry>()
 
-                    querySnapshot.documents.forEach { document ->
-                        try {
-                            val datum = LocalDate.parse(document.id) // A dokumentum ID-ja a dátum
-                            val napIndex = ChronoUnit.DAYS.between(hetElsoNapja, datum).toFloat()
+                        task.result?.documents?.forEach { document ->
+                            try {
+                                val datumString = document.id
+                                val datum = LocalDate.parse(datumString)
+                                val napIndex = ChronoUnit.DAYS.between(hetElsoNapja, datum).toFloat()
 
-                            val tranzakciok = document.get("tranzakciok") as? List<Map<String, Any>> ?: emptyList()
-                            tranzakciok.forEach { tranzakcio ->
-                                val mennyiseg = when (val mennyisegValue = tranzakcio["mennyiseg"]) {
-                                    is Double -> mennyisegValue.toFloat() // Ha Double, akkor Float-ra konvertáljuk
-                                    is Long -> mennyisegValue.toFloat()  // Ha Long, akkor Float-ra konvertáljuk
-                                    else -> {
-                                        Log.e("FirestoreDebug", "Hibás típusú mennyiseg érték: $mennyisegValue")
-                                        return@forEach // Ha nem Double vagy Long, akkor kilépünk
+                                val tranzakciok = document.get("tranzakciok") as? List<Map<String, Any>> ?: emptyList()
+                                tranzakciok.forEach { tranzakcio ->
+                                    val mennyiseg = (tranzakcio["mennyiseg"] as? Number)?.toFloat()
+                                    val kategoria = tranzakcio["kategoria"] as? String
+
+                                    if (mennyiseg != null && kategoria != null) {
+                                        when (kategoria) {
+                                            "Bevétel" -> bevetelAdatok.add(Entry(napIndex, mennyiseg))
+                                            "Kiadás" -> kiadasAdatok.add(Entry(napIndex, mennyiseg))
+                                        }
+                                    } else {
+                                        Log.w("FirestoreDebug", "Hibás tranzakció: $tranzakcio")
                                     }
                                 }
-
-                                val kategoria = tranzakcio["kategoria"] as String
-                                if (kategoria == "Bevétel") {
-                                    bevetelAdatok.add(Entry(napIndex, mennyiseg))
-                                } else if (kategoria == "Kiadás") {
-                                    kiadasAdatok.add(Entry(napIndex, mennyiseg))
-                                }
+                            } catch (e: Exception) {
+                                Log.e("FirestoreDebug", "Hiba a dokumentum feldolgozása során: ${e.message}")
                             }
-                        } catch (e: Exception) {
-                            Log.e("FirestoreDebug", "Hiba a tranzakciók feldolgozása során: ${e.message}")
                         }
-                    }
 
-                    // Diagram beállítása az adatok alapján
-                    setupChart(bevetelAdatok, kiadasAdatok)
-                }
-                .addOnFailureListener { e ->
-                    Log.e("FirestoreDebug", "Hiba az adatok lekérdezése során: ${e.message}")
-                    Toast.makeText(context, "Hiba az adatok lekérdezése során: ${e.message}", Toast.LENGTH_SHORT).show()
+                        if (bevetelAdatok.isEmpty() && kiadasAdatok.isEmpty()) {
+                            Toast.makeText(context, "Nincs adat az aktuális hétre.", Toast.LENGTH_SHORT).show()
+                            vonalDiagram.clear()
+                            vonalDiagram.invalidate()
+                        } else {
+                            setupChart(bevetelAdatok, kiadasAdatok)
+                        }
+                    } else {
+                        Log.e("FirestoreDebug", "Hiba az adatok lekérdezése során: ${task.exception?.message}")
+                        Toast.makeText(context, "Hiba az adatok lekérdezése során.", Toast.LENGTH_SHORT).show()
+                    }
                 }
 
             return gyokerNezet
@@ -471,15 +523,32 @@ class ElemzesActivity : AppCompatActivity() {
             vonalDiagram.description.isEnabled = false
             vonalDiagram.animateX(1000)
             vonalDiagram.invalidate()
+
+            vonalDiagram.setOnChartValueSelectedListener(object : OnChartValueSelectedListener {
+                override fun onValueSelected(e: Entry?, h: Highlight?) {
+                    e?.let {
+                        Toast.makeText(context, "Dátum: ${e.x}, Összeg: ${e.y}", Toast.LENGTH_SHORT).show()
+                    }
+                }
+
+                override fun onNothingSelected() {
+                    // Nem történik semmi, ha nincs kijelölés
+                }
+            })
         }
     }
 
 
 
 
+
+
+
     class HonapFragment : Fragment() {
         private lateinit var vonalDiagram: LineChart
+        private lateinit var progressBar: ProgressBar
         private val firestore = FirebaseFirestore.getInstance()
+        private val currentUser = FirebaseAuth.getInstance().currentUser
 
         @RequiresApi(Build.VERSION_CODES.O)
         override fun onCreateView(
@@ -489,6 +558,12 @@ class ElemzesActivity : AppCompatActivity() {
             val gyokerNezet = inflater.inflate(R.layout.fragment_honap, container, false)
 
             vonalDiagram = gyokerNezet.findViewById(R.id.vonalDiagram)
+            progressBar = gyokerNezet.findViewById(R.id.progressBar)
+
+            if (currentUser == null) {
+                Toast.makeText(context, "Nincs bejelentkezett felhasználó!", Toast.LENGTH_SHORT).show()
+                return gyokerNezet
+            }
 
             // Az aktuális hónap első és utolsó napjának meghatározása
             val maiDatum = LocalDate.now()
@@ -496,67 +571,57 @@ class ElemzesActivity : AppCompatActivity() {
             val honapUtsoNapja = maiDatum.withDayOfMonth(maiDatum.lengthOfMonth()).atTime(23, 59, 59)
                 .atZone(ZoneId.systemDefault()).toInstant()
 
-            // Lekérdezés az aktuális hónap napjaira (dokumentum nevek alapján)
-            firestore.collection("nap")
+            progressBar.visibility = View.VISIBLE
+            val uid = currentUser.uid
+
+            firestore.collection("users")
+                .document(uid)  // Felhasználói dokumentum
+                .collection("nap")  // Napi tranzakciók gyűjteménye
+                .whereGreaterThanOrEqualTo(FieldPath.documentId(), honapElsoNapja.toString())
+                .whereLessThanOrEqualTo(FieldPath.documentId(), honapUtsoNapja.toString())
                 .get()
-                .addOnSuccessListener { querySnapshot ->
-                    val bevetelAdatok = mutableListOf<Entry>()
-                    val kiadasAdatok = mutableListOf<Entry>()
+                .addOnCompleteListener { task ->
+                    progressBar.visibility = View.GONE
+                    if (task.isSuccessful) {
+                        val bevetelAdatok = mutableListOf<Entry>()
+                        val kiadasAdatok = mutableListOf<Entry>()
 
-                    if (querySnapshot.isEmpty) {
-                        Log.d("FirestoreDebug", "Nincs adat a megadott hónapra.")
-                    } else {
-                        querySnapshot.documents.forEach { document ->
+                        task.result?.documents?.forEach { document ->
                             try {
-                                // Dokumentum neve = nap dátum
-                                val datumString = document.id // A dokumentum neve mint dátum
-
-                                // A dátum formázása
+                                val datumString = document.id
                                 val datum = LocalDate.parse(datumString)
-
                                 val napIndex = datum.dayOfMonth.toFloat()
 
-                                // Tranzakciók ellenőrzése
                                 val tranzakciok = document.get("tranzakciok") as? List<Map<String, Any>> ?: emptyList()
                                 tranzakciok.forEach { tranzakcio ->
-                                    // Ellenőrizzük, hogy létezik-e a "mennyiseg" mező a tranzakcióban
-                                    val mennyisegValue = tranzakcio["mennyiseg"]
-                                    if (mennyisegValue != null) {
-                                        val mennyiseg = when (mennyisegValue) {
-                                            is Double -> mennyisegValue.toFloat() // Ha Double, akkor Float-ra konvertáljuk
-                                            is Long -> mennyisegValue.toFloat()  // Ha Long, akkor Float-ra konvertáljuk
-                                            else -> {
-                                                Log.e("FirestoreDebug", "Hibás típusú mennyiseg érték: $mennyisegValue")
-                                                return@forEach // Ha nem Double vagy Long, akkor kilépünk
-                                            }
-                                        }
+                                    val mennyiseg = (tranzakcio["mennyiseg"] as? Number)?.toFloat()
+                                    val kategoria = tranzakcio["kategoria"] as? String
 
-                                        val kategoria = tranzakcio["kategoria"] as? String
-                                        if (kategoria == null) {
-                                            Log.e("FirestoreDebug", "Hiányzó 'kategoria' mező a tranzakcióban: $tranzakcio")
-                                            return@forEach
-                                        }
-
-                                        if (kategoria == "Bevétel") {
-                                            bevetelAdatok.add(Entry(napIndex, mennyiseg))
-                                        } else if (kategoria == "Kiadás") {
-                                            kiadasAdatok.add(Entry(napIndex, mennyiseg))
+                                    if (mennyiseg != null && kategoria != null) {
+                                        when (kategoria) {
+                                            "Bevétel" -> bevetelAdatok.add(Entry(napIndex, mennyiseg))
+                                            "Kiadás" -> kiadasAdatok.add(Entry(napIndex, mennyiseg))
                                         }
                                     } else {
-                                        Log.w("FirestoreDebug", "Hiányzó 'mennyiseg' mező a tranzakcióban: $tranzakcio")
+                                        Log.w("FirestoreDebug", "Hibás tranzakció: $tranzakcio")
                                     }
                                 }
                             } catch (e: Exception) {
                                 Log.e("FirestoreDebug", "Hiba a dokumentum feldolgozása során: ${e.message}")
                             }
                         }
-                        // Diagram beállítása az adatok alapján
-                        setupChart(bevetelAdatok, kiadasAdatok)
+
+                        if (bevetelAdatok.isEmpty() && kiadasAdatok.isEmpty()) {
+                            Toast.makeText(context, "Nincs adat az aktuális hónapra.", Toast.LENGTH_SHORT).show()
+                            vonalDiagram.clear()
+                            vonalDiagram.invalidate()
+                        } else {
+                            setupChart(bevetelAdatok, kiadasAdatok)
+                        }
+                    } else {
+                        Log.e("FirestoreDebug", "Hiba az adatok lekérdezése során: ${task.exception?.message}")
+                        Toast.makeText(context, "Hiba az adatok lekérdezése során.", Toast.LENGTH_SHORT).show()
                     }
-                }
-                .addOnFailureListener { e ->
-                    Log.e("FirestoreDebug", "Hiba az adatok lekérdezése során: ${e.message}")
-                    Toast.makeText(context, "Hiba az adatok lekérdezése során: ${e.message}", Toast.LENGTH_SHORT).show()
                 }
 
             return gyokerNezet
@@ -590,16 +655,11 @@ class ElemzesActivity : AppCompatActivity() {
 
 
 
-
-
-
-
-
-
-
     class EvFragment : Fragment() {
         private lateinit var vonalDiagram: LineChart
+        private lateinit var progressBar: ProgressBar
         private val firestore = FirebaseFirestore.getInstance()
+        private val currentUser = FirebaseAuth.getInstance().currentUser
 
         @RequiresApi(Build.VERSION_CODES.O)
         override fun onCreateView(
@@ -609,27 +669,37 @@ class ElemzesActivity : AppCompatActivity() {
             val gyokerNezet = inflater.inflate(R.layout.fragment_ev, container, false)
 
             vonalDiagram = gyokerNezet.findViewById(R.id.vonalDiagram)
+            progressBar = gyokerNezet.findViewById(R.id.progressBar)
+
+            if (currentUser == null) {
+                Toast.makeText(context, "Nincs bejelentkezett felhasználó!", Toast.LENGTH_SHORT).show()
+                return gyokerNezet
+            }
 
             // Az aktuális év meghatározása
             val maiDatum = LocalDate.now()
             val aktualisEv = maiDatum.year
 
             // Lekérdezés az aktuális év napjaira (dokumentum nevek alapján)
-            firestore.collection("nap")
-                .get()
-                .addOnSuccessListener { querySnapshot ->
-                    val bevetelAdatok = mutableListOf<Entry>()
-                    val kiadasAdatok = mutableListOf<Entry>()
+            progressBar.visibility = View.VISIBLE
+            val uid = currentUser.uid
 
-                    if (querySnapshot.isEmpty) {
-                        Log.d("FirestoreDebug", "Nincs adat az adott évre.")
-                    } else {
-                        querySnapshot.documents.forEach { document ->
+            firestore.collection("users")
+                .document(uid)  // Felhasználói dokumentum
+                .collection("nap")  // Napi tranzakciók gyűjteménye
+                .whereGreaterThanOrEqualTo(FieldPath.documentId(), "${aktualisEv}-01-01")
+                .whereLessThanOrEqualTo(FieldPath.documentId(), "${aktualisEv}-12-31")
+                .get()
+                .addOnCompleteListener { task ->
+                    progressBar.visibility = View.GONE
+                    if (task.isSuccessful) {
+                        val bevetelAdatok = mutableListOf<Entry>()
+                        val kiadasAdatok = mutableListOf<Entry>()
+
+                        task.result?.documents?.forEach { document ->
                             try {
                                 // Dokumentum neve = nap dátum (pl. "2025-01-10")
                                 val datumString = document.id
-
-                                // A dátum formázása
                                 val datum = LocalDate.parse(datumString)
 
                                 // Ha az év megegyezik az aktuális évvel, folytatjuk
@@ -639,7 +709,6 @@ class ElemzesActivity : AppCompatActivity() {
                                     // Tranzakciók ellenőrzése
                                     val tranzakciok = document.get("tranzakciok") as? List<Map<String, Any>> ?: emptyList()
                                     tranzakciok.forEach { tranzakcio ->
-                                        // Ellenőrizzük, hogy létezik-e a "mennyiseg" mező a tranzakcióban
                                         val mennyisegValue = tranzakcio["mennyiseg"]
                                         if (mennyisegValue != null) {
                                             val mennyiseg = when (mennyisegValue) {
@@ -673,12 +742,17 @@ class ElemzesActivity : AppCompatActivity() {
                         }
 
                         // Diagram beállítása az adatok alapján
-                        setupChart(bevetelAdatok, kiadasAdatok)
+                        if (bevetelAdatok.isEmpty() && kiadasAdatok.isEmpty()) {
+                            Toast.makeText(context, "Nincs adat az aktuális évre.", Toast.LENGTH_SHORT).show()
+                            vonalDiagram.clear()
+                            vonalDiagram.invalidate()
+                        } else {
+                            setupChart(bevetelAdatok, kiadasAdatok)
+                        }
+                    } else {
+                        Log.e("FirestoreDebug", "Hiba az adatok lekérdezése során: ${task.exception?.message}")
+                        Toast.makeText(context, "Hiba az adatok lekérdezése során.", Toast.LENGTH_SHORT).show()
                     }
-                }
-                .addOnFailureListener { e ->
-                    Log.e("FirestoreDebug", "Hiba az adatok lekérdezése során: ${e.message}")
-                    Toast.makeText(context, "Hiba az adatok lekérdezése során: ${e.message}", Toast.LENGTH_SHORT).show()
                 }
 
             return gyokerNezet
@@ -708,6 +782,7 @@ class ElemzesActivity : AppCompatActivity() {
             vonalDiagram.invalidate()
         }
     }
+
 
 
 
