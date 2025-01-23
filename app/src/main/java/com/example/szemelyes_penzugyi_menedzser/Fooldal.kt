@@ -145,7 +145,8 @@ class Telefonszam : AppCompatActivity() {
                         startActivity(intent)
                     }
                     "Rendszeres kifizetések" -> {
-                        Toast.makeText(this@Telefonszam, "Rendszeres kifizetések még nem implementáltak", Toast.LENGTH_SHORT).show()
+                        val intent = Intent(this@Telefonszam, Rendszeres_kifizetesek::class.java)
+                        startActivity(intent)
                     }
                     "Kijelentkezés" -> {
                         Kijelentkezes()
