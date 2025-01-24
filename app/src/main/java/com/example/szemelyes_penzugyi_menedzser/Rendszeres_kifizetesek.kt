@@ -98,13 +98,11 @@ class Rendszeres_kifizetesek : AppCompatActivity() {
                 .addOnFailureListener { e ->
                     kifizetesekTextView.text = "Törlési hiba: ${e.message}"
                 }
-
+return null
         }
 
 
-torlesButton.setOnClickListener{
-   torlesKifizetes()
-}
+
 
 
 

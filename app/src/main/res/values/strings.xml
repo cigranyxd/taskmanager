@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">Szemelyes_penzugyi_menedzser</string>
+    <string name="title_activity_beallitasok">BeallitasokActivity</string>
 </resources>

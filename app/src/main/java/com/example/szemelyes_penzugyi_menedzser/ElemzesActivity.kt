@@ -1,6 +1,7 @@
 package com.example.szemelyes_penzugyi_menedzser
 
 import android.annotation.SuppressLint
+import android.content.Context
 import android.content.Intent
 import android.graphics.Color
 import android.os.Build
@@ -15,6 +16,7 @@ import android.widget.Button
 import android.widget.EditText
 import android.widget.ProgressBar
 import android.widget.Spinner
+import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.annotation.RequiresApi
@@ -188,6 +190,7 @@ class ElemzesActivity : AppCompatActivity() {
 
                 return view
             }
+
         }
 
 
@@ -238,6 +241,28 @@ class ElemzesActivity : AppCompatActivity() {
 
             override fun onNothingSelected(parent: AdapterView<*>?) {
                 // Semmi sem történt
+            }
+        }
+        applyFontSizeToCurrentActivity()
+    }
+    private fun applyFontSizeToCurrentActivity() {
+        val prefs = getSharedPreferences("UserPreferences", Context.MODE_PRIVATE)
+        val fontSize = prefs.getString("betumeret", "Közepes") ?: "Közepes"
+        val size = when (fontSize) {
+            "Kicsi" -> 12f
+            "Nagy" -> 20f
+            else -> 16f
+        }
+        updateTextViewsFontSize(findViewById(android.R.id.content), size)
+    }
+
+    private fun updateTextViewsFontSize(view: View, fontSize: Float) {
+        if (view is TextView) {
+            view.textSize = fontSize
+        }
+        if (view is ViewGroup) {
+            for (i in 0 until view.childCount) {
+                updateTextViewsFontSize(view.getChildAt(i), fontSize)
             }
         }
     }

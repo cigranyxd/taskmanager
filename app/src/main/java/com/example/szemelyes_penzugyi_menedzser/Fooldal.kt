@@ -6,6 +6,7 @@ import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
 import android.view.View
+import android.view.ViewGroup
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.Button
@@ -42,6 +43,8 @@ class Telefonszam : AppCompatActivity() {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
         }
+
+
 
         // Pénzösszeg megjelenítése
         aktualisPenzTextView = findViewById(R.id.JelenlegiText)
@@ -117,7 +120,7 @@ class Telefonszam : AppCompatActivity() {
 
         // Lenyíló menü inicializálása
         val spinner: Spinner = findViewById(R.id.lenyilo_menu)
-        val lehetosegek = listOf("Főoldal", "Elemzés", "Rendszeres kifizetések", "Kijelentkezés")
+        val lehetosegek = listOf("Főoldal", "Elemzés", "Rendszeres kifizetések", "Beállítások", "Kijelentkezés")
         val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, lehetosegek)
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         spinner.adapter = adapter
@@ -148,6 +151,10 @@ class Telefonszam : AppCompatActivity() {
                         val intent = Intent(this@Telefonszam, Rendszeres_kifizetesek::class.java)
                         startActivity(intent)
                     }
+                    "Beállítások" -> {
+                        val intent = Intent(this@Telefonszam, BeallitasokActivity::class.java)
+                        startActivity(intent)
+                    }
                     "Kijelentkezés" -> {
                         Kijelentkezes()
                     }
@@ -160,7 +167,28 @@ class Telefonszam : AppCompatActivity() {
             }
         }
 
+        applyFontSizeToCurrentActivity()
+    }
+    private fun applyFontSizeToCurrentActivity() {
+        val prefs = getSharedPreferences("UserPreferences", Context.MODE_PRIVATE)
+        val fontSize = prefs.getString("betumeret", "Közepes") ?: "Közepes"
+        val size = when (fontSize) {
+            "Kicsi" -> 12f
+            "Nagy" -> 20f
+            else -> 16f
+        }
+        updateTextViewsFontSize(findViewById(android.R.id.content), size)
+    }
 
+    private fun updateTextViewsFontSize(view: View, fontSize: Float) {
+        if (view is TextView) {
+            view.textSize = fontSize
+        }
+        if (view is ViewGroup) {
+            for (i in 0 until view.childCount) {
+                updateTextViewsFontSize(view.getChildAt(i), fontSize)
+            }
+        }
     }
 
     // Kijelentkezési funkció

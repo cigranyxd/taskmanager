@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="16dp">
+
+    <Button
+        android:id="@+id/betumeret_button"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Betűméret" />
+
+    <Button
+        android:id="@+id/nyelv_button"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Nyelv" />
+
+    <Button
+        android:id="@+id/jelszo_button"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Jelszó változtatás" />
+
+    <Button
+        android:id="@+id/profil_torles_button"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Profil törlése" />
+
+</LinearLayout>
