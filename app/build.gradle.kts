@@ -62,7 +62,10 @@ dependencies {
     implementation (libs.play.services.auth)
     implementation (libs.play.services.base)
     implementation (libs.play.services.auth)
-
+    implementation(kotlin("script-runtime"))
+    implementation ("com.google.firebase:firebase-auth:21.0.1")  // Firebase Authentication
+    implementation ("com.google.firebase:firebase-firestore:24.0.1") // Firestore
+    implementation ("androidx.recyclerview:recyclerview:1.2.")
 
 }
 
