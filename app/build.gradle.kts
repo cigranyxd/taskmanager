@@ -83,18 +83,15 @@ dependencies {
     implementation (libs.play.services.auth)
     implementation (libs.play.services.base)
     implementation (libs.play.services.auth)
-<<<<<<< HEAD
     androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.androidx.ui.test.junit4)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
 
-=======
     implementation(kotlin("script-runtime"))
     implementation ("com.google.firebase:firebase-auth:21.0.1")  // Firebase Authentication
     implementation ("com.google.firebase:firebase-firestore:24.0.1") // Firestore
     implementation ("androidx.recyclerview:recyclerview:1.2.")
->>>>>>> 685468e7bef85880a61ac245013a85481ae0c87c
 
 }
 

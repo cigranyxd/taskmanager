@@ -134,25 +134,8 @@ class Rendszeres_kifizetesek : AppCompatActivity() {
                 .addOnFailureListener { e ->
                     kifizetesekTextView.text = "Törlési hiba: ${e.message}"
                 }
-<<<<<<< HEAD
-return null
-        }
-
-
-
-
-
-
-
-        // Ablak insets kezelése
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
-            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
-            insets
-=======
         } else {
             kifizetesekTextView.text = "Felhasználói azonosító nem található!"
->>>>>>> 685468e7bef85880a61ac245013a85481ae0c87c
         }
     }
 }
