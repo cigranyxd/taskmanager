@@ -2,29 +2,25 @@ package com.example.szemelyes_penzugyi_menedzser
 
 import android.annotation.SuppressLint
 import android.os.Bundle
-import android.util.Log
 import android.view.View
 import android.widget.Button
 import android.widget.EditText
 import android.widget.TextView
+import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
-import com.google.firebase.auth.FirebaseAuth
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 import com.google.firebase.firestore.FirebaseFirestore
 
 class Rendszeres_kifizetesek : AppCompatActivity() {
 
     private lateinit var db: FirebaseFirestore
-    private lateinit var recyclerView: RecyclerView
-    private lateinit var kifizetesekAdapter: KifizetesAdapter
-    private lateinit var kifizetesekTextView: TextView  // A változó osztály szintjén
-
     private var osszeg: Double = 100000.0 // Kezdeti fő összeg
 
     @SuppressLint("MissingInflatedId")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        enableEdgeToEdge()
         setContentView(R.layout.activity_rendszeres_kifizetesek)
 
         // Firebase Firestore inicializálása
@@ -36,7 +32,8 @@ class Rendszeres_kifizetesek : AppCompatActivity() {
         val osszegEditText: EditText = findViewById(R.id.osszegEditText)
         val hozzaadButton: Button = findViewById(R.id.hozzaadButton)
         val megjelenitButton: Button = findViewById(R.id.megjelenitButton)
-        kifizetesekTextView = findViewById(R.id.kifizetesekTextView) // Az osztály szintjén deklaráljuk
+        val kifizetesekTextView: TextView = findViewById(R.id.kifizetesekTextView)
+        val torlesButton: Button = findViewById(R.id.torlesButton)
 
         // Kezdeti összeg megjelenítése
         osszegTextView.text = "Fő összeg: ${osszeg} Ft"
@@ -47,85 +44,52 @@ class Rendszeres_kifizetesek : AppCompatActivity() {
             val osszegInput = osszegEditText.text.toString().toDoubleOrNull()
 
             if (nev.isNotEmpty() && osszegInput != null) {
-                val currentUser = FirebaseAuth.getInstance().currentUser
-                val uid = currentUser?.uid
+                val kifizetes = hashMapOf(
+                    "nev" to nev,
+                    "osszeg" to osszegInput
+                )
 
-                if (uid != null) {
-                    val kifizetes = hashMapOf(
-                        "nev" to nev,
-                        "osszeg" to osszegInput
-                    )
-
-                    // Kifizetés mentése az aktuális felhasználó alá
-                    db.collection("users")
-                        .document(uid)
-                        .collection("kifizetesek")
-                        .add(kifizetes)
-                        .addOnSuccessListener {
-                            Log.d("Firestore", "Sikeresen mentve: $it")
-                        }
-                        .addOnFailureListener { e ->
-                            Log.w("Firestore", "Hiba történt a mentés során", e)
-                        }
-                } else {
-                    Log.w("Firestore", "Nincs bejelentkezett felhasználó")
-                }
+                db.collection("kifizetesek")
+                    .add(kifizetes)
+                    .addOnSuccessListener {
+                        osszeg -= osszegInput
+                        osszegTextView.text = "Fő összeg: ${osszeg} Ft"
+                        nevEditText.text.clear()
+                        osszegEditText.text.clear()
+                    }
+                    .addOnFailureListener { e ->
+                        kifizetesekTextView.text = "Hiba: ${e.message}"
+                    }
             }
         }
-
         // Kifizetések megjelenítése (kiegészítve törlési lehetőséggel)
-        megjelenitButton.setOnClickListener {
-            frissitKifizetesekMegjelenites()
-        }
 
-        // RecyclerView beállítása
-        recyclerView = findViewById(R.id.recyclerView)
-        recyclerView.layoutManager = LinearLayoutManager(this)
-    }
 
-    // Kifizetések frissítése
-    private fun frissitKifizetesekMegjelenites() {
-        val currentUser = FirebaseAuth.getInstance().currentUser
-        val uid = currentUser?.uid
-
-        if (uid != null) {
-            db.collection("users")
-                .document(uid)
-                .collection("kifizetesek")
+        fun frissitKifizetesekMegjelenites() {
+            db.collection("kifizetesek")
                 .get()
                 .addOnSuccessListener { result ->
-                    val kifizetesek = mutableListOf<Kifizetes>()
+                    val builder = StringBuilder()
                     for (document in result) {
                         val docId = document.id
                         val nev = document.getString("nev") ?: "N/A"
                         val osszeg = document.getDouble("osszeg") ?: 0.0
-                        kifizetesek.add(Kifizetes(nev, osszeg, docId))
+                        builder.append("Név: $nev, Összeg: $osszeg Ft\n")
+                        builder.append("Törléshez kattints ide: $docId\n")
                     }
-
-                    // Adapter inicializálása a kifizetések listájával és törlés eseménykezelővel
-                    kifizetesekAdapter = KifizetesAdapter(kifizetesek) { docId ->
-                        torlesKifizetes(docId)
-                    }
-                    recyclerView.adapter = kifizetesekAdapter
+                    kifizetesekTextView.text = builder.toString()
                 }
                 .addOnFailureListener { e ->
                     kifizetesekTextView.text = "Hiba: ${e.message}"
                 }
-        } else {
-            kifizetesekTextView.text = "Felhasználói azonosító nem található!"
         }
-    }
 
-    // Kifizetés törléséhez szükséges funkció
-    private fun torlesKifizetes(docId: String) {
-        val currentUser = FirebaseAuth.getInstance().currentUser
-        val uid = currentUser?.uid
-
-        if (uid != null) {
-            db.collection("users")
-                .document(uid)
-                .collection("kifizetesek")
-                .document(docId)
+        megjelenitButton.setOnClickListener {
+            frissitKifizetesekMegjelenites()
+        }
+        // Új funkció: Kifizetés törlése
+        fun torlesKifizetes(docId: String): View.OnClickListener? {
+            db.collection("kifizetesek").document(docId)
                 .delete()
                 .addOnSuccessListener {
                     kifizetesekTextView.text = "Sikeres törlés!"
@@ -134,7 +98,6 @@ class Rendszeres_kifizetesek : AppCompatActivity() {
                 .addOnFailureListener { e ->
                     kifizetesekTextView.text = "Törlési hiba: ${e.message}"
                 }
-<<<<<<< HEAD
 return null
         }
 
@@ -149,10 +112,6 @@ return null
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
-=======
-        } else {
-            kifizetesekTextView.text = "Felhasználói azonosító nem található!"
->>>>>>> 685468e7bef85880a61ac245013a85481ae0c87c
         }
     }
 }
