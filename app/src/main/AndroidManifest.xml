@@ -22,7 +22,7 @@
             android:theme="@style/Theme.Szemelyes_penzugyi_menedzser" />
 
         <activity
-            android:name=".Rendszeres_kifizetesek"
+            android:name=".RendszeresKifizetesek"
             android:exported="false" />
 
         <activity

@@ -2,7 +2,6 @@ package com.example.szemelyes_penzugyi_menedzser
 
 import android.annotation.SuppressLint
 import android.os.Bundle
-import android.view.View
 import android.widget.Button
 import android.widget.EditText
 import android.widget.TextView
@@ -12,7 +11,7 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import com.google.firebase.firestore.FirebaseFirestore
 
-class Rendszeres_kifizetesek : AppCompatActivity() {
+class RendszeresKifizetesek : AppCompatActivity() {
 
     private lateinit var db: FirebaseFirestore
     private var osszeg: Double = 100000.0 // Kezdeti fő összeg
@@ -33,7 +32,6 @@ class Rendszeres_kifizetesek : AppCompatActivity() {
         val hozzaadButton: Button = findViewById(R.id.hozzaadButton)
         val megjelenitButton: Button = findViewById(R.id.megjelenitButton)
         val kifizetesekTextView: TextView = findViewById(R.id.kifizetesekTextView)
-        val torlesButton: Button = findViewById(R.id.torlesButton)
 
         // Kezdeti összeg megjelenítése
         osszegTextView.text = "Fő összeg: ${osszeg} Ft"
@@ -63,8 +61,6 @@ class Rendszeres_kifizetesek : AppCompatActivity() {
             }
         }
         // Kifizetések megjelenítése (kiegészítve törlési lehetőséggel)
-
-
         fun frissitKifizetesekMegjelenites() {
             db.collection("kifizetesek")
                 .get()
@@ -83,12 +79,11 @@ class Rendszeres_kifizetesek : AppCompatActivity() {
                     kifizetesekTextView.text = "Hiba: ${e.message}"
                 }
         }
-
         megjelenitButton.setOnClickListener {
             frissitKifizetesekMegjelenites()
         }
         // Új funkció: Kifizetés törlése
-        fun torlesKifizetes(docId: String): View.OnClickListener? {
+        fun torlesKifizetes(docId: String) {
             db.collection("kifizetesek").document(docId)
                 .delete()
                 .addOnSuccessListener {
@@ -98,11 +93,7 @@ class Rendszeres_kifizetesek : AppCompatActivity() {
                 .addOnFailureListener { e ->
                     kifizetesekTextView.text = "Törlési hiba: ${e.message}"
                 }
-return null
         }
-
-
-
 
 
 

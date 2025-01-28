@@ -148,7 +148,7 @@ class Telefonszam : AppCompatActivity() {
                         startActivity(intent)
                     }
                     "Rendszeres kifizetések" -> {
-                        val intent = Intent(this@Telefonszam, Rendszeres_kifizetesek::class.java)
+                        val intent = Intent(this@Telefonszam, RendszeresKifizetesek::class.java)
                         startActivity(intent)
                     }
                     "Beállítások" -> {
