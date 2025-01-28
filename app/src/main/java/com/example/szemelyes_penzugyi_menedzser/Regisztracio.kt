@@ -12,9 +12,6 @@ import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import com.google.firebase.auth.FirebaseAuth
 import android.app.AlertDialog
-import android.content.Context
-import android.view.ViewGroup
-import android.widget.TextView
 import com.google.firebase.auth.FirebaseAuthUserCollisionException
 
 class Regisztracio : AppCompatActivity() {
@@ -113,31 +110,7 @@ class Regisztracio : AppCompatActivity() {
                     }
                 }
         }
-        applyFontSizeToCurrentActivity()
     }
-
-    private fun applyFontSizeToCurrentActivity() {
-        val prefs = getSharedPreferences("UserPreferences", Context.MODE_PRIVATE)
-        val fontSize = prefs.getString("betumeret", "Közepes") ?: "Közepes"
-        val size = when (fontSize) {
-            "Kicsi" -> 12f
-            "Nagy" -> 20f
-            else -> 16f
-        }
-        updateTextViewsFontSize(findViewById(android.R.id.content), size)
-    }
-
-    private fun updateTextViewsFontSize(view: View, fontSize: Float) {
-        if (view is TextView) {
-            view.textSize = fontSize
-        }
-        if (view is ViewGroup) {
-            for (i in 0 until view.childCount) {
-                updateTextViewsFontSize(view.getChildAt(i), fontSize)
-            }
-        }
-    }
-}
 
     // Jelszó formátum ellenőrzése
     private fun isValidPassword(password: String): Boolean {
@@ -145,4 +118,4 @@ class Regisztracio : AppCompatActivity() {
         val regex = "^(?=.*[A-Za-z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]{8,}$"
         return password.matches(regex.toRegex())
     }
-
+}
