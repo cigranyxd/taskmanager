@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+<item
+    android:id="@+id/Fooldal"
+    android:title="Főoldal" />
+<item
+    android:id="@+id/elemzes"
+    android:title="Elemzés" />
+<item
+    android:id="@+id/kilepes"
+    android:title="Kijelentkezés" />
+</menu>

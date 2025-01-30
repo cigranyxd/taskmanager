@@ -1,0 +1,130 @@
+[
+    {
+        "merged": "C:\\Users\\User\\.gradle\\daemon\\8.7\\com.example.szemelyes_penzugyi_menedzser.app-debug-67:\\layout_dialog_hozzadas.xml.flat",
+        "source": "C:\\Users\\User\\.gradle\\daemon\\8.7\\com.example.szemelyes_penzugyi_menedzser.app-main-69:\\layout\\dialog_hozzadas.xml"
+    },
+    {
+        "merged": "C:\\Users\\User\\.gradle\\daemon\\8.7\\com.example.szemelyes_penzugyi_menedzser.app-debug-67:\\mipmap-hdpi_ic_launcher_round.webp.flat",
+        "source": "C:\\Users\\User\\.gradle\\daemon\\8.7\\com.example.szemelyes_penzugyi_menedzser.app-main-69:\\mipmap-hdpi\\ic_launcher_round.webp"
+    },
+    {
+        "merged": "C:\\Users\\User\\.gradle\\daemon\\8.7\\com.example.szemelyes_penzugyi_menedzser.app-debug-67:\\mipmap-xhdpi_ic_launcher_round.webp.flat",
+        "source": "C:\\Users\\User\\.gradle\\daemon\\8.7\\com.example.szemelyes_penzugyi_menedzser.app-main-69:\\mipmap-xhdpi\\ic_launcher_round.webp"
+    },
+    {
+        "merged": "C:\\Users\\User\\.gradle\\daemon\\8.7\\com.example.szemelyes_penzugyi_menedzser.app-debug-67:\\drawable_ic_launcher_background.xml.flat",
+        "source": "C:\\Users\\User\\.gradle\\daemon\\8.7\\com.example.szemelyes_penzugyi_menedzser.app-main-69:\\drawable\\ic_launcher_background.xml"
+    },
+    {
+        "merged": "C:\\Users\\User\\.gradle\\daemon\\8.7\\com.example.szemelyes_penzugyi_menedzser.app-debug-67:\\layout_fragment_honap.xml.flat",
+        "source": "C:\\Users\\User\\.gradle\\daemon\\8.7\\com.example.szemelyes_penzugyi_menedzser.app-main-69:\\layout\\fragment_honap.xml"
+    },
+    {
+        "merged": "C:\\Users\\User\\.gradle\\daemon\\8.7\\com.example.szemelyes_penzugyi_menedzser.app-debug-67:\\layout_activity_fooldal.xml.flat",
+        "source": "C:\\Users\\User\\.gradle\\daemon\\8.7\\com.example.szemelyes_penzugyi_menedzser.app-main-69:\\layout\\activity_fooldal.xml"
+    },
+    {
+        "merged": "C:\\Users\\User\\.gradle\\daemon\\8.7\\com.example.szemelyes_penzugyi_menedzser.app-debug-67:\\mipmap-mdpi_ic_launcher_round.webp.flat",
+        "source": "C:\\Users\\User\\.gradle\\daemon\\8.7\\com.example.szemelyes_penzugyi_menedzser.app-main-69:\\mipmap-mdpi\\ic_launcher_round.webp"
+    },
+    {
+        "merged": "C:\\Users\\User\\.gradle\\daemon\\8.7\\com.example.szemelyes_penzugyi_menedzser.app-debug-67:\\layout_activity_rendszeres_kifizetesek.xml.flat",
+        "source": "C:\\Users\\User\\.gradle\\daemon\\8.7\\com.example.szemelyes_penzugyi_menedzser.app-main-69:\\layout\\activity_rendszeres_kifizetesek.xml"
+    },
+    {
+        "merged": "C:\\Users\\User\\.gradle\\daemon\\8.7\\com.example.szemelyes_penzugyi_menedzser.app-debug-67:\\layout_fragment_ev.xml.flat",
+        "source": "C:\\Users\\User\\.gradle\\daemon\\8.7\\com.example.szemelyes_penzugyi_menedzser.app-main-69:\\layout\\fragment_ev.xml"
+    },
+    {
+        "merged": "C:\\Users\\User\\.gradle\\daemon\\8.7\\com.example.szemelyes_penzugyi_menedzser.app-debug-67:\\xml_data_extraction_rules.xml.flat",
+        "source": "C:\\Users\\User\\.gradle\\daemon\\8.7\\com.example.szemelyes_penzugyi_menedzser.app-main-69:\\xml\\data_extraction_rules.xml"
+    },
+    {
+        "merged": "C:\\Users\\User\\.gradle\\daemon\\8.7\\com.example.szemelyes_penzugyi_menedzser.app-debug-67:\\mipmap-xxhdpi_ic_launcher.webp.flat",
+        "source": "C:\\Users\\User\\.gradle\\daemon\\8.7\\com.example.szemelyes_penzugyi_menedzser.app-main-69:\\mipmap-xxhdpi\\ic_launcher.webp"
+    },
+    {
+        "merged": "C:\\Users\\User\\.gradle\\daemon\\8.7\\com.example.szemelyes_penzugyi_menedzser.app-debug-67:\\mipmap-anydpi-v26_ic_launcher.xml.flat",
+        "source": "C:\\Users\\User\\.gradle\\daemon\\8.7\\com.example.szemelyes_penzugyi_menedzser.app-main-69:\\mipmap-anydpi-v26\\ic_launcher.xml"
+    },
+    {
+        "merged": "C:\\Users\\User\\.gradle\\daemon\\8.7\\com.example.szemelyes_penzugyi_menedzser.app-debug-67:\\layout_fragment_alap.xml.flat",
+        "source": "C:\\Users\\User\\.gradle\\daemon\\8.7\\com.example.szemelyes_penzugyi_menedzser.app-main-69:\\layout\\fragment_alap.xml"
+    },
+    {
+        "merged": "C:\\Users\\User\\.gradle\\daemon\\8.7\\com.example.szemelyes_penzugyi_menedzser.app-debug-67:\\mipmap-xhdpi_ic_launcher.webp.flat",
+        "source": "C:\\Users\\User\\.gradle\\daemon\\8.7\\com.example.szemelyes_penzugyi_menedzser.app-main-69:\\mipmap-xhdpi\\ic_launcher.webp"
+    },
+    {
+        "merged": "C:\\Users\\User\\.gradle\\daemon\\8.7\\com.example.szemelyes_penzugyi_menedzser.app-debug-67:\\xml_backup_rules.xml.flat",
+        "source": "C:\\Users\\User\\.gradle\\daemon\\8.7\\com.example.szemelyes_penzugyi_menedzser.app-main-69:\\xml\\backup_rules.xml"
+    },
+    {
+        "merged": "C:\\Users\\User\\.gradle\\daemon\\8.7\\com.example.szemelyes_penzugyi_menedzser.app-debug-67:\\layout_linechart.xml.flat",
+        "source": "C:\\Users\\User\\.gradle\\daemon\\8.7\\com.example.szemelyes_penzugyi_menedzser.app-main-69:\\layout\\linechart.xml"
+    },
+    {
+        "merged": "C:\\Users\\User\\.gradle\\daemon\\8.7\\com.example.szemelyes_penzugyi_menedzser.app-debug-67:\\mipmap-xxxhdpi_ic_launcher.webp.flat",
+        "source": "C:\\Users\\User\\.gradle\\daemon\\8.7\\com.example.szemelyes_penzugyi_menedzser.app-main-69:\\mipmap-xxxhdpi\\ic_launcher.webp"
+    },
+    {
+        "merged": "C:\\Users\\User\\.gradle\\daemon\\8.7\\com.example.szemelyes_penzugyi_menedzser.app-debug-67:\\mipmap-anydpi-v26_ic_launcher_round.xml.flat",
+        "source": "C:\\Users\\User\\.gradle\\daemon\\8.7\\com.example.szemelyes_penzugyi_menedzser.app-main-69:\\mipmap-anydpi-v26\\ic_launcher_round.xml"
+    },
+    {
+        "merged": "com.example.szemelyes_penzugyi_menedzser.app-debug-67:/layout_activity_rendszeres_kifizetesek.xml.flat",
+        "source": "com.example.szemelyes_penzugyi_menedzser.app-main-69:/layout/activity_rendszeres_kifizetesek.xml"
+    },
+    {
+        "merged": "C:\\Users\\User\\.gradle\\daemon\\8.7\\com.example.szemelyes_penzugyi_menedzser.app-debug-67:\\layout_activity_elemzes.xml.flat",
+        "source": "C:\\Users\\User\\.gradle\\daemon\\8.7\\com.example.szemelyes_penzugyi_menedzser.app-main-69:\\layout\\activity_elemzes.xml"
+    },
+    {
+        "merged": "C:\\Users\\User\\.gradle\\daemon\\8.7\\com.example.szemelyes_penzugyi_menedzser.app-debug-67:\\layout_fragment_idoszak.xml.flat",
+        "source": "C:\\Users\\User\\.gradle\\daemon\\8.7\\com.example.szemelyes_penzugyi_menedzser.app-main-69:\\layout\\fragment_idoszak.xml"
+    },
+    {
+        "merged": "com.example.szemelyes_penzugyi_menedzser.app-debug-67:/layout_kifizetes_item.xml.flat",
+        "source": "com.example.szemelyes_penzugyi_menedzser.app-main-69:/layout/kifizetes_item.xml"
+    },
+    {
+        "merged": "C:\\Users\\User\\.gradle\\daemon\\8.7\\com.example.szemelyes_penzugyi_menedzser.app-debug-67:\\mipmap-xxxhdpi_ic_launcher_round.webp.flat",
+        "source": "C:\\Users\\User\\.gradle\\daemon\\8.7\\com.example.szemelyes_penzugyi_menedzser.app-main-69:\\mipmap-xxxhdpi\\ic_launcher_round.webp"
+    },
+    {
+        "merged": "C:\\Users\\User\\.gradle\\daemon\\8.7\\com.example.szemelyes_penzugyi_menedzser.app-debug-67:\\menu_menu_options.xml.flat",
+        "source": "C:\\Users\\User\\.gradle\\daemon\\8.7\\com.example.szemelyes_penzugyi_menedzser.app-main-69:\\menu\\menu_options.xml"
+    },
+    {
+        "merged": "C:\\Users\\User\\.gradle\\daemon\\8.7\\com.example.szemelyes_penzugyi_menedzser.app-debug-67:\\mipmap-hdpi_ic_launcher.webp.flat",
+        "source": "C:\\Users\\User\\.gradle\\daemon\\8.7\\com.example.szemelyes_penzugyi_menedzser.app-main-69:\\mipmap-hdpi\\ic_launcher.webp"
+    },
+    {
+        "merged": "C:\\Users\\User\\.gradle\\daemon\\8.7\\com.example.szemelyes_penzugyi_menedzser.app-debug-67:\\layout_bejelentkezes.xml.flat",
+        "source": "C:\\Users\\User\\.gradle\\daemon\\8.7\\com.example.szemelyes_penzugyi_menedzser.app-main-69:\\layout\\bejelentkezes.xml"
+    },
+    {
+        "merged": "C:\\Users\\User\\.gradle\\daemon\\8.7\\com.example.szemelyes_penzugyi_menedzser.app-debug-67:\\mipmap-xxhdpi_ic_launcher_round.webp.flat",
+        "source": "C:\\Users\\User\\.gradle\\daemon\\8.7\\com.example.szemelyes_penzugyi_menedzser.app-main-69:\\mipmap-xxhdpi\\ic_launcher_round.webp"
+    },
+    {
+        "merged": "C:\\Users\\User\\.gradle\\daemon\\8.7\\com.example.szemelyes_penzugyi_menedzser.app-debug-67:\\drawable_ic_launcher_foreground.xml.flat",
+        "source": "C:\\Users\\User\\.gradle\\daemon\\8.7\\com.example.szemelyes_penzugyi_menedzser.app-main-69:\\drawable\\ic_launcher_foreground.xml"
+    },
+    {
+        "merged": "C:\\Users\\User\\.gradle\\daemon\\8.7\\com.example.szemelyes_penzugyi_menedzser.app-debug-67:\\layout_activity_regisztracio.xml.flat",
+        "source": "C:\\Users\\User\\.gradle\\daemon\\8.7\\com.example.szemelyes_penzugyi_menedzser.app-main-69:\\layout\\activity_regisztracio.xml"
+    },
+    {
+        "merged": "C:\\Users\\User\\.gradle\\daemon\\8.7\\com.example.szemelyes_penzugyi_menedzser.app-debug-67:\\mipmap-mdpi_ic_launcher.webp.flat",
+        "source": "C:\\Users\\User\\.gradle\\daemon\\8.7\\com.example.szemelyes_penzugyi_menedzser.app-main-69:\\mipmap-mdpi\\ic_launcher.webp"
+    },
+    {
+        "merged": "C:\\Users\\User\\.gradle\\daemon\\8.7\\com.example.szemelyes_penzugyi_menedzser.app-debug-67:\\layout_fragment_nap.xml.flat",
+        "source": "C:\\Users\\User\\.gradle\\daemon\\8.7\\com.example.szemelyes_penzugyi_menedzser.app-main-69:\\layout\\fragment_nap.xml"
+    },
+    {
+        "merged": "C:\\Users\\User\\.gradle\\daemon\\8.7\\com.example.szemelyes_penzugyi_menedzser.app-debug-67:\\layout_fragment_het.xml.flat",
+        "source": "C:\\Users\\User\\.gradle\\daemon\\8.7\\com.example.szemelyes_penzugyi_menedzser.app-main-69:\\layout\\fragment_het.xml"
+    }
+]

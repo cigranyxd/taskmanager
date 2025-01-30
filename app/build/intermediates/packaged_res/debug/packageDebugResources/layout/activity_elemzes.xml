@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:id="@+id/main"
+    tools:context=".ElemzesActivity">
+
+
+    <com.github.mikephil.charting.charts.LineChart
+        android:id="@+id/vonalDiagram"
+        android:layout_width="match_parent"
+        android:layout_height="300dp"
+        android:layout_centerInParent="true"
+        android:layout_marginTop="10dp"
+        app:layout_constraintBottom_toTopOf="@+id/NapFelirat"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/lenyilo_menu"
+        tools:ignore="MissingConstraints" />
+
+    <Spinner
+        android:id="@+id/lenyilo_menu"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="16dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        android:spinnerMode="dropdown" />
+
+    <!-- Felső feliratok arányosan elosztva -->
+
+    <!-- Tartalom megjelenítése a képernyő alsó felétől középig -->
+
+    <TextView
+        android:id="@+id/NapFelirat"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="15dp"
+        android:layout_marginTop="310dp"
+        android:layout_marginEnd="15dp"
+        android:clickable="true"
+        android:onClick="SzovegreKattint"
+        android:text="Nap"
+        app:layout_constraintBottom_toTopOf="@+id/TartalomFrame"
+        app:layout_constraintEnd_toStartOf="@+id/HetFelirat"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/lenyilo_menu" />
+
+    <TextView
+        android:id="@+id/HetFelirat"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="15dp"
+        android:layout_marginTop="310dp"
+        android:layout_marginEnd="15dp"
+        android:clickable="true"
+        android:onClick="SzovegreKattint"
+        android:text="Hét"
+        app:layout_constraintBottom_toTopOf="@+id/TartalomFrame"
+        app:layout_constraintEnd_toStartOf="@+id/HonapFelirat"
+        app:layout_constraintStart_toEndOf="@+id/NapFelirat"
+        app:layout_constraintTop_toBottomOf="@+id/lenyilo_menu" />
+
+    <TextView
+        android:id="@+id/HonapFelirat"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="15dp"
+        android:layout_marginTop="350dp"
+        android:layout_marginEnd="15dp"
+        android:clickable="true"
+        android:onClick="SzovegreKattint"
+        android:text="Hónap"
+        app:layout_constraintBottom_toTopOf="@+id/TartalomFrame"
+        app:layout_constraintEnd_toStartOf="@+id/EvFelirat"
+        app:layout_constraintStart_toEndOf="@+id/HetFelirat"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/EvFelirat"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="15dp"
+        android:layout_marginTop="350dp"
+        android:layout_marginEnd="15dp"
+        android:clickable="true"
+        android:onClick="SzovegreKattint"
+        android:text="Év"
+        app:layout_constraintBottom_toTopOf="@+id/TartalomFrame"
+        app:layout_constraintEnd_toStartOf="@+id/IdoszakFelirat"
+        app:layout_constraintStart_toEndOf="@+id/HonapFelirat"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/IdoszakFelirat"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="15dp"
+        android:layout_marginTop="350dp"
+        android:layout_marginEnd="15dp"
+        android:clickable="true"
+        android:onClick="SzovegreKattint"
+        android:text="Időszak"
+        app:layout_constraintBottom_toTopOf="@+id/TartalomFrame"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/EvFelirat"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <FrameLayout
+        android:id="@+id/TartalomFrame"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:background="#EEEEEE"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHeight_percent="0.5"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/NapFelirat" >
+
+    </FrameLayout>
+
+    <Button
+        android:id="@+id/hozzaadasGomb"
+        android:layout_width="66dp"
+        android:layout_height="wrap_content"
+        android:text="+"
+        tools:layout_editor_absoluteX="170dp"
+        tools:layout_editor_absoluteY="5dp" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>
