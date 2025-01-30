@@ -200,13 +200,11 @@ class ElemzesActivity : AppCompatActivity() {
 
 
 
-        val hozzadasGomb = findViewById<Button>(R.id.hozzaadasGomb)
-
-        hozzadasGomb.setOnClickListener {
-            val dialog = HozzadasDialogFragment()
-            dialog.show(supportFragmentManager, "HozzadasDialog")
+        val hozzaadasGomb = findViewById<Button>(R.id.hozzaadasGomb)
+        hozzaadasGomb.setOnClickListener {
+            val intent = Intent(this, HozzaadasActivity::class.java)
+            startActivity(intent)
         }
-
 
 
         // Az "Elemzés" menüpont alapértelmezett kiválasztása

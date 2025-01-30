@@ -11,37 +11,37 @@
 
     <application
         android:name=".App"
-        android:label="@string/app_name"
         android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
         android:theme="@style/Theme.Szemelyes_penzugyi_menedzser">
-
+        <activity
+            android:name=".HozzaadasActivity"
+            android:exported="false"
+            android:label="@string/title_activity_hozzaadas"
+            android:theme="@style/Theme.Szemelyes_penzugyi_menedzser" />
         <activity
             android:name=".BeallitasokActivity"
             android:exported="false"
             android:label="@string/title_activity_beallitasok"
             android:theme="@style/Theme.Szemelyes_penzugyi_menedzser" />
-
         <activity
             android:name=".RendszeresKifizetesek"
             android:exported="false" />
-
         <activity
             android:name=".ElemzesActivity"
             android:exported="false" />
-
         <activity
             android:name=".Regisztracio"
             android:exported="false" />
-
         <activity
             android:name=".Telefonszam"
             android:exported="false" />
-
         <activity
             android:name=".Bejelentkezes"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
