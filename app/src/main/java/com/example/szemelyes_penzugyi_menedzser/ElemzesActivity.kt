@@ -55,7 +55,11 @@ class ElemzesActivity : AppCompatActivity() {
 
         auth = FirebaseAuth.getInstance()
 
-
+        findViewById<TextView>(R.id.NapFelirat).setOnClickListener { SzovegreKattint(it) }
+        findViewById<TextView>(R.id.HetFelirat).setOnClickListener { SzovegreKattint(it) }
+        findViewById<TextView>(R.id.HonapFelirat).setOnClickListener { SzovegreKattint(it) }
+        findViewById<TextView>(R.id.EvFelirat).setOnClickListener { SzovegreKattint(it) }
+        findViewById<TextView>(R.id.IdoszakFelirat).setOnClickListener { SzovegreKattint(it) }
 
         // Az ablak margóinak beállítása a rendszer sávokhoz
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
@@ -389,7 +393,7 @@ class ElemzesActivity : AppCompatActivity() {
                                     }
                                 }
 
-                                val kategoria = tranzakcio["kategoria"] as String
+                                val kategoria = tranzakcio["tipus"] as String
                                 if (kategoria == "Bevétel") {
                                     bevetelAdatok.add(Entry(index.toFloat(), mennyiseg))
                                 } else if (kategoria == "Kiadás") {
@@ -492,7 +496,7 @@ class ElemzesActivity : AppCompatActivity() {
                                 val tranzakciok = document.get("tranzakciok") as? List<Map<String, Any>> ?: emptyList()
                                 tranzakciok.forEach { tranzakcio ->
                                     val mennyiseg = (tranzakcio["mennyiseg"] as? Number)?.toFloat()
-                                    val kategoria = tranzakcio["kategoria"] as? String
+                                    val kategoria = tranzakcio["tipus"] as? String
 
                                     if (mennyiseg != null && kategoria != null) {
                                         when (kategoria) {
@@ -618,7 +622,7 @@ class ElemzesActivity : AppCompatActivity() {
                                 val tranzakciok = document.get("tranzakciok") as? List<Map<String, Any>> ?: emptyList()
                                 tranzakciok.forEach { tranzakcio ->
                                     val mennyiseg = (tranzakcio["mennyiseg"] as? Number)?.toFloat()
-                                    val kategoria = tranzakcio["kategoria"] as? String
+                                    val kategoria = tranzakcio["tipus"] as? String
 
                                     if (mennyiseg != null && kategoria != null) {
                                         when (kategoria) {
@@ -743,7 +747,7 @@ class ElemzesActivity : AppCompatActivity() {
                                                 }
                                             }
 
-                                            val kategoria = tranzakcio["kategoria"] as? String
+                                            val kategoria = tranzakcio["tipus"] as? String
                                             if (kategoria == null) {
                                                 Log.e("FirestoreDebug", "Hiányzó 'kategoria' mező a tranzakcióban: $tranzakcio")
                                                 return@forEach
