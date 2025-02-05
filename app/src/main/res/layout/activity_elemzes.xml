@@ -19,6 +19,8 @@
         app:layout_constraintHeight_percent="0.4"
         app:layout_constraintBottom_toTopOf="@+id/vonalDiagram" />
 
+
+
     <Spinner
         android:id="@+id/lenyilo_menu"
         android:layout_width="0dp"
