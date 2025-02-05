@@ -2,8 +2,10 @@ package com.example.szemelyes_penzugyi_menedzser
 
 import android.content.Context
 import android.content.Intent
+import android.content.res.Configuration
 import android.os.Bundle
 import android.text.InputType
+import android.util.Log
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
@@ -15,30 +17,36 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import com.google.firebase.auth.EmailAuthProvider
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FieldValue
+import com.google.firebase.firestore.FirebaseFirestore
 import java.util.Locale
 
 @Suppress("DEPRECATION")
 class BeallitasokActivity : AppCompatActivity() {
     private lateinit var auth: FirebaseAuth
+    private lateinit var db: FirebaseFirestore
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_beallitasok)
+
+        auth = FirebaseAuth.getInstance()
+        db = FirebaseFirestore.getInstance()
 
         val betumeretButton = findViewById<Button>(R.id.betumeret_button)
         val nyelvButton = findViewById<Button>(R.id.nyelv_button)
         val jelszoButton = findViewById<Button>(R.id.jelszo_button)
         val profilTorlesButton = findViewById<Button>(R.id.profil_torles_button)
-
-
+        val penzugyiTorlesButton = findViewById<Button>(R.id.penzugyi_adatok_torles_button) // ÚJ!!
 
         betumeretButton.setOnClickListener { showBetumeretDialog() }
         nyelvButton.setOnClickListener { showNyelvDialog() }
         jelszoButton.setOnClickListener { showJelszoDialog() }
         profilTorlesButton.setOnClickListener { showProfilTorlesDialog() }
+        penzugyiTorlesButton.setOnClickListener { showPenzugyiAdatokTorlesDialog() } // ÚJ!!
 
         // Betűméret frissítése
         applyFontSizeToCurrentActivity()
-
     }
 
     private fun applyFontSizeToCurrentActivity() {
@@ -82,34 +90,44 @@ class BeallitasokActivity : AppCompatActivity() {
 
     private fun showNyelvDialog() {
         val nyelvek = arrayOf("Magyar", "Angol", "Német")
-        val nyelvkodok = arrayOf("hu", "en", "de") // Nyelvek kódjai
+        val nyelvkodok = arrayOf("hu", "en", "de")
+
         val builder = AlertDialog.Builder(this)
         builder.setTitle("Nyelv kiválasztása")
             .setItems(nyelvek) { _, which ->
-                val selectedLanguage = nyelvek[which]
                 val selectedLangCode = nyelvkodok[which]
-                val prefs = getSharedPreferences("UserPreferences", Context.MODE_PRIVATE)
-                prefs.edit().putString("nyelv", selectedLangCode).apply()
 
-                // Nyelv beállítása és Activity újraindítása
+                // Nyelv beállítása és mentése
                 setLocale(selectedLangCode)
-                Toast.makeText(this, "Nyelv: $selectedLanguage", Toast.LENGTH_SHORT).show()
 
-                // Az Activity újraindítása
-                val intent = intent
+                // Újraindítja az activity-t
+                val intent = Intent(this, BeallitasokActivity::class.java)
                 finish()
                 startActivity(intent)
+
+                Toast.makeText(this, "Nyelv: ${nyelvek[which]}", Toast.LENGTH_SHORT).show()
             }
         builder.create().show()
     }
 
-    // Nyelv beállítása (Locale frissítése)
     private fun setLocale(languageCode: String) {
         val locale = Locale(languageCode)
         Locale.setDefault(locale)
-        val config = resources.configuration
+        val config = Configuration()
         config.setLocale(locale)
+
+        // Nyelv frissítése
         resources.updateConfiguration(config, resources.displayMetrics)
+
+        // Nyelv mentése a SharedPreferences-be
+        val prefs = getSharedPreferences("UserPreferences", Context.MODE_PRIVATE)
+        prefs.edit().putString("nyelv", languageCode).apply()
+    }
+
+    private fun loadLocale() {
+        val prefs = getSharedPreferences("UserPreferences", Context.MODE_PRIVATE)
+        val languageCode = prefs.getString("nyelv", "hu") ?: "hu"
+        setLocale(languageCode)
     }
 
     private fun showJelszoDialog() {
@@ -193,7 +211,6 @@ class BeallitasokActivity : AppCompatActivity() {
         builder.create().show()
     }
 
-
     private fun Kijelentkezes() {
         // Kijelentkeztetjük a felhasználót
         FirebaseAuth.getInstance().signOut()
@@ -214,7 +231,8 @@ class BeallitasokActivity : AppCompatActivity() {
             .setMessage("Biztosan törölni szeretné a profilját?")
 
         val passwordInput = EditText(this)
-        passwordInput.inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_PASSWORD
+        passwordInput.inputType =
+            InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_PASSWORD
         passwordInput.hint = "Jelenlegi jelszó"
         builder.setView(passwordInput)
 
@@ -237,24 +255,38 @@ class BeallitasokActivity : AppCompatActivity() {
                                         Kijelentkezes()
 
                                         // Toast üzenet
-                                        Toast.makeText(this, "Profil törölve. Kijelentkeztetve.", Toast.LENGTH_SHORT).show()
+                                        Toast.makeText(
+                                            this,
+                                            "Profil törölve. Kijelentkeztetve.",
+                                            Toast.LENGTH_SHORT
+                                        ).show()
 
                                         // Újraindítjuk az alkalmazást a Bejelentkezési oldallal
-                                        val intent = Intent(applicationContext, Bejelentkezes::class.java)
+                                        val intent =
+                                            Intent(applicationContext, Bejelentkezes::class.java)
                                         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
                                         startActivity(intent)
                                         // Az aktuális aktivitás befejezése
                                         finish()
                                     } else {
-                                        Toast.makeText(this, "Hiba történt: ${deleteTask.exception?.message}", Toast.LENGTH_SHORT).show()
+                                        Toast.makeText(
+                                            this,
+                                            "Hiba történt: ${deleteTask.exception?.message}",
+                                            Toast.LENGTH_SHORT
+                                        ).show()
                                     }
                                 }
                             } else {
-                                Toast.makeText(this, "Újrahitelesítés sikertelen: ${reauthTask.exception?.message}", Toast.LENGTH_SHORT).show()
+                                Toast.makeText(
+                                    this,
+                                    "Újrahitelesítés sikertelen: ${reauthTask.exception?.message}",
+                                    Toast.LENGTH_SHORT
+                                ).show()
                             }
                         }
                     } else {
-                        Toast.makeText(this, "Az e-mail cím nem érhető el.", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(this, "Az e-mail cím nem érhető el.", Toast.LENGTH_SHORT)
+                            .show()
                     }
                 } else {
                     Toast.makeText(this, "Nincs bejelentkezve!", Toast.LENGTH_SHORT).show()
@@ -265,6 +297,59 @@ class BeallitasokActivity : AppCompatActivity() {
         }
         builder.setNegativeButton("Mégse") { dialog, _ -> dialog.cancel() }
         builder.create().show()
+    }
+
+    private fun showPenzugyiAdatokTorlesDialog() {
+        val builder = AlertDialog.Builder(this)
+        builder.setTitle("Pénzügyi adatok törlése")
+            .setMessage("Biztosan törölni szeretné az összes pénzügyi adatát? Ez a művelet nem visszavonható.")
+            .setPositiveButton("Igen") { _, _ ->
+                torolPenzugyiAdatokat()
+            }
+            .setNegativeButton("Mégse") { dialog, _ -> dialog.dismiss() }
+        builder.create().show()
+    }
+    private fun torolPenzugyiAdatokat() {
+        val currentUser = FirebaseAuth.getInstance().currentUser
+        val uid = currentUser?.uid
+
+        if (uid != null) {
+            db.collection("users")
+                .document(uid) // Felhasználói dokumentum
+                .collection("nap") // A "nap" al-gyűjtemény
+                .get() // Lekérjük a "nap" al-gyűjteményt
+                .addOnSuccessListener { snapshot ->
+                    if (snapshot.isEmpty) {
+                        Log.d("PenzugyiTorles", "A 'nap' gyűjtemény üres.")
+                        Toast.makeText(this, "A 'nap' gyűjtemény üres.", Toast.LENGTH_SHORT).show()
+                        return@addOnSuccessListener
+                    }
+
+                    // Ha vannak dokumentumok, töröljük őket
+                    val batch = db.batch()
+                    for (document in snapshot) {
+                        batch.delete(document.reference) // Törlés minden dokumentumra
+                    }
+
+                    // Batch művelet végrehajtása
+                    batch.commit()
+                        .addOnSuccessListener {
+                            Log.d("PenzugyiTorles", "'nap' al-gyűjtemény adatai sikeresen törölve.")
+                            Toast.makeText(this, "A 'nap' al-gyűjtemény adatai sikeresen törölve!", Toast.LENGTH_SHORT).show()
+                        }
+                        .addOnFailureListener { e ->
+                            Log.e("PenzugyiTorles", "Hiba történt a 'nap' al-gyűjtemény törlésénél: ${e.message}")
+                            Toast.makeText(this, "Hiba történt a 'nap' al-gyűjtemény törlésénél: ${e.message}", Toast.LENGTH_SHORT).show()
+                        }
+                }
+                .addOnFailureListener { e ->
+                    Log.e("PenzugyiTorles", "Hiba történt a 'nap' al-gyűjtemény lekérésénél: ${e.message}")
+                    Toast.makeText(this, "Hiba történt a 'nap' al-gyűjtemény lekérésénél: ${e.message}", Toast.LENGTH_SHORT).show()
+                }
+        } else {
+            Log.d("PenzugyiTorles", "Felhasználói azonosító nem található!")
+            Toast.makeText(this, "Felhasználói azonosító nem található!", Toast.LENGTH_SHORT).show()
+        }
     }
 
 

@@ -1,10 +1,10 @@
 {
     "logs": [
         {
-            "outputFile": "com.example.szemelyes_penzugyi_menedzser.app-mergeDebugResources-65:/values-v30/values-v30.xml",
+            "outputFile": "com.example.szemelyes_penzugyi_menedzser.app-mergeDebugResources-70:/values-v30/values-v30.xml",
             "map": [
                 {
-                    "source": "C:\\Users\\User\\.gradle\\caches\\transforms-4\\922dc391e643adaa333a55065a62d23b\\transformed\\material3-release\\res\\values-v30\\values-v30.xml",
+                    "source": "C:\\Users\\User\\.gradle\\caches\\transforms-4\\789ee81b2cabf935b41696f9b1a35959\\transformed\\material3-release\\res\\values-v30\\values-v30.xml",
                     "from": {
                         "startLines": "2",
                         "startColumns": "4",

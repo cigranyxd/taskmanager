@@ -6,68 +6,85 @@
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:padding="24dp"
     tools:context=".Telefonszam">
 
     <!-- Lenyíló menü -->
     <Spinner
         android:id="@+id/lenyilo_menu"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_margin="16dp"
+        android:layout_marginTop="24dp"
+        android:background="@drawable/spinner_bg"
         app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         android:spinnerMode="dropdown" />
 
-    <!-- Pénzösszeg szöveg megjelenítése -->
+    <!-- Jelenlegi egyenleg szöveg -->
     <TextView
         android:id="@+id/JelenlegiText"
-        android:layout_width="0dp"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
+        android:layout_marginTop="32dp"
         android:text="Jelenlegi egyenleg:"
-        android:textSize="24sp"
-        android:textAlignment="center"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        android:textColor="@color/black"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/lenyilo_menu" />
+        app:layout_constraintTop_toBottomOf="@id/lenyilo_menu" />
 
     <!-- Aktuális pénz mező -->
     <EditText
         android:id="@+id/Aktualis_penz"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginHorizontal="16dp"
-        android:layout_marginTop="8dp"
-        android:ems="10"
-        android:inputType="numberDecimal"
-        android:textSize="24sp"
-        android:hint="0"
+        android:layout_width="match_parent"
+        android:layout_height="56dp"
+        android:layout_marginTop="12dp"
+        android:background="@drawable/input_bg"
+        android:padding="12dp"
+        android:textSize="22sp"
+        android:hint="0 Ft"
         android:gravity="center"
+        android:inputType="numberDecimal"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/JelenlegiText" />
+        app:layout_constraintTop_toBottomOf="@id/JelenlegiText" />
+
+    <!-- Gombok egy sorban -->
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/guideline"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintGuide_percent="0.5" />
 
     <!-- Hozzáadás gomb -->
     <Button
         android:id="@+id/hozzaadas_gomb"
         android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
+        android:layout_height="56dp"
+        android:layout_marginTop="20dp"
         android:text="Hozzáadás"
+        android:background="@android:color/holo_green_light"
+        android:textColor="@android:color/white"
+        android:textSize="18sp"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toStartOf="@+id/levonas_gomb"
-        app:layout_constraintHorizontal_chainStyle="packed"
-        app:layout_constraintTop_toBottomOf="@+id/Aktualis_penz" />
+        app:layout_constraintEnd_toStartOf="@id/guideline"
+        app:layout_constraintTop_toBottomOf="@id/Aktualis_penz" />
 
     <!-- Levonás gomb -->
     <Button
         android:id="@+id/levonas_gomb"
         android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
+        android:layout_height="56dp"
+        android:layout_marginTop="20dp"
         android:text="Levonás"
+        android:textColor="@android:color/white"
+        android:textSize="18sp"
+        android:background="@drawable/red_button"
+        app:layout_constraintStart_toEndOf="@id/guideline"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/hozzaadas_gomb"
-        app:layout_constraintTop_toBottomOf="@+id/Aktualis_penz" />
+        app:layout_constraintTop_toBottomOf="@id/Aktualis_penz" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

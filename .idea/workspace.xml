@@ -5,12 +5,47 @@
       <config />
     </shared>
     <layouts>
+      <layout url="file://$PROJECT_DIR$/app/src/main/res/layout/activity_beallitasok.xml">
+        <config>
+          <theme>@style/Theme.Szemelyes_penzugyi_menedzser</theme>
+        </config>
+      </layout>
       <layout url="file://$PROJECT_DIR$/app/src/main/res/layout/activity_elemzes.xml">
         <config>
           <theme>@style/Theme.Szemelyes_penzugyi_menedzser</theme>
         </config>
       </layout>
+      <layout url="file://$PROJECT_DIR$/app/src/main/res/layout/activity_fooldal.xml">
+        <config>
+          <theme>@style/Theme.Szemelyes_penzugyi_menedzser</theme>
+        </config>
+      </layout>
       <layout url="file://$PROJECT_DIR$/app/src/main/res/layout/activity_rendszeres_kifizetesek.xml">
+        <config>
+          <theme>@style/Theme.Szemelyes_penzugyi_menedzser</theme>
+        </config>
+      </layout>
+      <layout url="file://$PROJECT_DIR$/app/src/main/res/layout/bejelentkezes.xml">
+        <config>
+          <theme>@style/Theme.Szemelyes_penzugyi_menedzser</theme>
+        </config>
+      </layout>
+      <layout url="file://$PROJECT_DIR$/app/src/main/res/layout/fragment_het.xml">
+        <config>
+          <theme>@style/Theme.Szemelyes_penzugyi_menedzser</theme>
+        </config>
+      </layout>
+      <layout url="file://$PROJECT_DIR$/app/src/main/res/layout/fragment_honap.xml">
+        <config>
+          <theme>@style/Theme.Szemelyes_penzugyi_menedzser</theme>
+        </config>
+      </layout>
+      <layout url="file://$PROJECT_DIR$/app/src/main/res/layout/fragment_idoszak.xml">
+        <config>
+          <theme>@style/Theme.Szemelyes_penzugyi_menedzser</theme>
+        </config>
+      </layout>
+      <layout url="file://$PROJECT_DIR$/app/src/main/res/layout/fragment_nap.xml">
         <config>
           <theme>@style/Theme.Szemelyes_penzugyi_menedzser</theme>
         </config>
@@ -35,7 +70,7 @@
   <component name="ClangdSettings">
     <option name="formatViaClangd" value="false" />
   </component>
-  <component name="ExecutionTargetManager" SELECTED_TARGET="device_and_snapshot_combo_box_target[DeviceId(pluginId=PhysicalDevice, isTemplate=false, identifier=serial=2d3e1400)]" />
+  <component name="ExecutionTargetManager" SELECTED_TARGET="device_and_snapshot_combo_box_target[DeviceId(pluginId=LocalEmulator, isTemplate=false, identifier=path=C:\Users\User\.android\avd\Medium_Phone_API_35.avd)]" />
   <component name="ExternalProjectsData">
     <projectState path="$PROJECT_DIR$">
       <ProjectState />
@@ -108,7 +143,7 @@
     "cf.first.check.clang-format": "false",
     "cidr.known.project.marker": "true",
     "kotlin-language-version-configured": "true",
-    "last_opened_file_path": "D:/szemelyipenzugy"
+    "last_opened_file_path": "C:/Users/User/Desktop/taskmanager-master/app/src/main/res/drawable"
   },
   "keyToStringList": {
     "kotlin-gradle-user-dirs": [
@@ -116,6 +151,11 @@
     ]
   }
 }]]></component>
+  <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="C:\Users\User\Desktop\taskmanager-master\app\src\main\res\drawable" />
+    </key>
+  </component>
   <component name="RunManager">
     <configuration name="app" type="AndroidRunConfigurationType" factoryName="Android App" activateToolWindowBeforeRun="false">
       <module name="Szemelyes_penzugyi_menedzser.app.main" />

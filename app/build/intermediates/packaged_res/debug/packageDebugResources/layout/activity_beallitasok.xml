@@ -29,5 +29,12 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="Profil törlése" />
+    
+    <Button
+        android:id="@+id/penzugyi_adatok_torles_button"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Pénzügyi adatok törlése" />
+
 
 </LinearLayout>

@@ -1389,6 +1389,7 @@ color androidx_core_ripple_material_light
 color androidx_core_secondary_text_default_material_light
 color background_floating_material_dark
 color background_floating_material_light
+color background_light
 color background_material_dark
 color background_material_light
 color black
@@ -1467,8 +1468,12 @@ color error_color_material_dark
 color error_color_material_light
 color foreground_material_dark
 color foreground_material_light
+color gray
+color green
 color highlighted_text_material_dark
 color highlighted_text_material_light
+color light_gray
+color link_blue
 color m3_appbar_overlay_color
 color m3_assist_chip_icon_tint_color
 color m3_assist_chip_stroke_color
@@ -2142,6 +2147,7 @@ color places_text_white_alpha_26
 color places_text_white_alpha_87
 color places_ui_default_primary
 color places_ui_default_primary_dark
+color primary_color
 color primary_dark_material_dark
 color primary_dark_material_light
 color primary_material_dark
@@ -2150,6 +2156,7 @@ color primary_text_default_material_dark
 color primary_text_default_material_light
 color primary_text_disabled_material_dark
 color primary_text_disabled_material_light
+color purple
 color quantum_amber100
 color quantum_amber200
 color quantum_amber300
@@ -2493,6 +2500,7 @@ color quantum_yellowA100
 color quantum_yellowA200
 color quantum_yellowA400
 color quantum_yellowA700
+color red
 color ripple_material_dark
 color ripple_material_light
 color secondary_text_default_material_dark
@@ -3408,6 +3416,7 @@ drawable abc_textfield_search_activated_mtrl_alpha
 drawable abc_textfield_search_default_mtrl_alpha
 drawable abc_textfield_search_material
 drawable abc_vector_test
+drawable ajandekok_icon
 drawable avd_hide_password
 drawable avd_show_password
 drawable btn_checkbox_checked_mtrl
@@ -3418,6 +3427,8 @@ drawable btn_radio_off_mtrl
 drawable btn_radio_off_to_on_mtrl_animation
 drawable btn_radio_on_mtrl
 drawable btn_radio_on_to_off_mtrl_animation
+drawable button_background
+drawable button_secondary_background
 drawable common_full_open_on_phone
 drawable common_google_signin_btn_icon_dark
 drawable common_google_signin_btn_icon_dark_focused
@@ -3437,13 +3448,20 @@ drawable common_google_signin_btn_text_light
 drawable common_google_signin_btn_text_light_focused
 drawable common_google_signin_btn_text_light_normal
 drawable common_google_signin_btn_text_light_normal_background
+drawable csalad_icon
 drawable design_fab_background
 drawable design_ic_visibility
 drawable design_ic_visibility_off
 drawable design_password_eye
 drawable design_snackbar_background
+drawable edzes_icon
+drawable egeszseg_icon
+drawable egyeb_icon
+drawable elelmiszerek_icon
+drawable fo_icon
 drawable googleg_disabled_color_18
 drawable googleg_standard_color_18
+drawable green_button
 drawable ic_arrow_back_black_24
 drawable ic_call_answer
 drawable ic_call_answer_low
@@ -3468,6 +3486,10 @@ drawable ic_passkey
 drawable ic_password
 drawable ic_search_black_24
 drawable indeterminate_static
+drawable input_background
+drawable input_bg
+drawable kavezo_icon
+drawable kozlekedes_icon
 drawable m3_avd_hide_password
 drawable m3_avd_show_password
 drawable m3_bottom_sheet_drag_handle
@@ -3540,6 +3562,9 @@ drawable notification_template_icon_bg
 drawable notification_template_icon_low_bg
 drawable notification_tile_bg
 drawable notify_panel_notification_icon_bg
+drawable oktatas_icon
+drawable otthon_icon
+drawable placeholder_icon
 drawable places_autocomplete_toolbar_shadow
 drawable places_powered_by_google_dark
 drawable places_powered_by_google_light
@@ -3547,6 +3572,9 @@ drawable quantum_ic_arrow_back_grey600_24
 drawable quantum_ic_clear_grey600_24
 drawable quantum_ic_cloud_off_vd_theme_24
 drawable quantum_ic_search_grey600_24
+drawable red_button
+drawable spinner_bg
+drawable szabadido_icon
 drawable test_level_drawable
 drawable tooltip_frame_dark
 drawable tooltip_frame_light
@@ -3663,6 +3691,7 @@ id baseline
 id beginOnFirstDraw
 id beginning
 id bestChoice
+id betumeret_button
 id blocking
 id bottom
 id bounce
@@ -3679,6 +3708,8 @@ id cache_measures
 id callMeasure
 id cancel_button
 id carryVelocity
+id categoryIcon
+id categoryName
 id center
 id centerCrop
 id centerInside
@@ -3789,6 +3820,12 @@ id graph_wrap
 id group_divider
 id grouping
 id groups
+id guideline
+id guideline1
+id guideline2
+id guideline3
+id guideline4
+id guideline5
 id header_title
 id hide_graphics_layer_in_inspector_tag
 id hide_ime_id
@@ -3819,8 +3856,10 @@ id inward
 id is_pooling_container_tag
 id italic
 id item_touch_helper_previous_elevation
+id jelszo_button
 id jumpToEnd
 id jumpToStart
+id kategoriakGridView
 id kategoriakSpinner
 id kifizetesekTextView
 id kilepes
@@ -3923,6 +3962,7 @@ id north
 id notification_background
 id notification_main_column
 id notification_main_column_container
+id nyelv_button
 id off
 id on
 id onInterceptTouchReturnSwipe
@@ -3943,6 +3983,7 @@ id open_search_view_toolbar_container
 id osszegEditText
 id osszegInput
 id osszegTextView
+id oszlopDiagram
 id outline
 id outward
 id overshoot
@@ -3956,6 +3997,7 @@ id password_toggle
 id path
 id pathRelative
 id peekHeight
+id penzugyi_adatok_torles_button
 id percent
 id pin
 id places_autocomplete_back_button
@@ -3980,13 +4022,13 @@ id pooling_container_listener_holder_tag
 id position
 id postLayout
 id pressed
+id profil_torles_button
 id progressBar
 id progress_circular
 id progress_horizontal
 id radio
 id ratio
 id rectangles
-id recyclerView
 id report_drawn
 id reverseSawtooth
 id right
@@ -4107,6 +4149,7 @@ id transition_pause_alpha
 id transition_position
 id transition_scene_layoutid_cache
 id transition_transform
+id tranzakcioTipusSpinner
 id triangle
 id unchecked
 id uniform
@@ -4250,8 +4293,10 @@ layout abc_search_dropdown_item_icons_2line
 layout abc_search_view
 layout abc_select_dialog_material
 layout abc_tooltip
+layout activity_beallitasok
 layout activity_elemzes
 layout activity_fooldal
+layout activity_hozaadas
 layout activity_regisztracio
 layout activity_rendszeres_kifizetesek
 layout bejelentkezes
@@ -4282,6 +4327,7 @@ layout fragment_idoszak
 layout fragment_nap
 layout ime_base_split_test_activity
 layout ime_secondary_split_test_activity
+layout kategoria_item
 layout kifizetes_item
 layout linechart
 layout m3_alert_dialog
@@ -4639,6 +4685,8 @@ string status_bar_notification_info_overflow
 string switch_role
 string tab
 string template_percent
+string title_activity_beallitasok
+string title_activity_hozzaadas
 string tooltip_description
 string tooltip_label
 style AlertDialog_AppCompat

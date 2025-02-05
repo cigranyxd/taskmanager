@@ -4,8 +4,11 @@ import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.util.Patterns
+import android.view.View
+import android.view.ViewGroup
 import android.widget.Button
 import android.widget.EditText
+import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
@@ -78,8 +81,31 @@ class Bejelentkezes : AppCompatActivity() {
             val intent = Intent(this, Regisztracio::class.java)
             startActivity(intent)
         }
+
+        applyFontSizeToCurrentActivity()
     }
 
+    private fun applyFontSizeToCurrentActivity() {
+        val prefs = getSharedPreferences("UserPreferences", Context.MODE_PRIVATE)
+        val fontSize = prefs.getString("betumeret", "Közepes") ?: "Közepes"
+        val size = when (fontSize) {
+            "Kicsi" -> 12f
+            "Nagy" -> 20f
+            else -> 16f
+        }
+        updateTextViewsFontSize(findViewById(android.R.id.content), size)
+    }
 
-
+    private fun updateTextViewsFontSize(view: View, fontSize: Float) {
+        if (view is TextView) {
+            view.textSize = fontSize
+        }
+        if (view is ViewGroup) {
+            for (i in 0 until view.childCount) {
+                updateTextViewsFontSize(view.getChildAt(i), fontSize)
+            }
+        }
+    }
 }
+
+
