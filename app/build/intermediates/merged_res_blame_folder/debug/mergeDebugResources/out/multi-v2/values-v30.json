@@ -4,7 +4,7 @@
             "outputFile": "com.example.szemelyes_penzugyi_menedzser.app-mergeDebugResources-70:/values-v30/values-v30.xml",
             "map": [
                 {
-                    "source": "C:\\Users\\User\\.gradle\\caches\\transforms-4\\789ee81b2cabf935b41696f9b1a35959\\transformed\\material3-release\\res\\values-v30\\values-v30.xml",
+                    "source": "C:\\Users\\User\\.gradle\\caches\\transforms-4\\2ce66181ab8f1862a87f9384ae509f9d\\transformed\\material3-release\\res\\values-v30\\values-v30.xml",
                     "from": {
                         "startLines": "2",
                         "startColumns": "4",

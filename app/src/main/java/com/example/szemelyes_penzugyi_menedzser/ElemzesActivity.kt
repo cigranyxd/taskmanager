@@ -1,59 +1,36 @@
 package com.example.szemelyes_penzugyi_menedzser
 
 import android.annotation.SuppressLint
+import android.app.DatePickerDialog
 import android.content.Context
 import android.content.Intent
 import android.graphics.Color
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
-import android.util.TypedValue
+import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.AdapterView
-import android.widget.ArrayAdapter
-import android.widget.Button
-import android.widget.EditText
-import android.widget.FrameLayout
-import android.widget.ProgressBar
-import android.widget.Spinner
-import android.widget.TextView
-import android.widget.Toast
+import android.widget.*
 import androidx.activity.enableEdgeToEdge
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
-import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.Fragment
 import com.github.mikephil.charting.charts.BarChart
-import com.github.mikephil.charting.charts.LineChart
-import com.github.mikephil.charting.components.XAxis
 import com.github.mikephil.charting.data.BarData
 import com.github.mikephil.charting.data.BarDataSet
 import com.github.mikephil.charting.data.BarEntry
-import com.github.mikephil.charting.data.Entry
-import com.github.mikephil.charting.data.LineData
-import com.github.mikephil.charting.data.LineDataSet
-import com.github.mikephil.charting.formatter.IndexAxisValueFormatter
-import com.github.mikephil.charting.highlight.Highlight
-import com.github.mikephil.charting.listener.OnChartValueSelectedListener
-import com.google.firebase.Timestamp
-import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FieldPath
-import com.google.firebase.firestore.FirebaseFirestore
 import java.time.DayOfWeek
 import java.time.LocalDate
-import java.time.ZoneId
-import java.time.temporal.ChronoUnit
 import java.time.temporal.TemporalAdjusters
+import java.util.Locale
+import com.example.szemelyes_penzugyi_menedzser.FirebaseManager
 
-
-@Suppress("IMPLICIT_CAST_TO_ANY")
 class ElemzesActivity : AppCompatActivity() {
-
-    private lateinit var auth: FirebaseAuth
 
     @SuppressLint("MissingInflatedId")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -61,89 +38,78 @@ class ElemzesActivity : AppCompatActivity() {
         enableEdgeToEdge()
         setContentView(R.layout.activity_elemzes)
 
+        // Ellenőrizzük a bejelentkezést
+        val currentUser = FirebaseManager.auth.currentUser
+        if (currentUser == null) {
+            startActivity(Intent(this, Bejelentkezes::class.java))
+            finish()
+            return
+        }
 
-
-        auth = FirebaseAuth.getInstance()
-
-
-
+        // Navigációs gombok beállítása
         findViewById<TextView>(R.id.NapFelirat).setOnClickListener { SzovegreKattint(it) }
         findViewById<TextView>(R.id.HetFelirat).setOnClickListener { SzovegreKattint(it) }
         findViewById<TextView>(R.id.HonapFelirat).setOnClickListener { SzovegreKattint(it) }
         findViewById<TextView>(R.id.EvFelirat).setOnClickListener { SzovegreKattint(it) }
         findViewById<TextView>(R.id.IdoszakFelirat).setOnClickListener { SzovegreKattint(it) }
 
-        // Az ablak margóinak beállítása a rendszer sávokhoz
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
         }
 
-        // Lenyíló menü inicializálása
+        // Spinner beállítása
         val spinner: Spinner = findViewById(R.id.lenyilo_menu)
-        val lehetosegek = listOf("Főoldal", "Elemzés", "Rendszeres kifizetések", "Kijelentkezés")
-        val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, lehetosegek)
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        spinner.adapter = adapter
+        val lehetosegek = listOf("Főoldal", "Elemzés", "Rendszeres kifizetések", "Beállítások", "Kijelentkezés")
+        val spinnerAdapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, lehetosegek)
+        spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        spinner.adapter = spinnerAdapter
 
-        val currentUser = FirebaseAuth.getInstance().currentUser
-        val uid = currentUser?.uid
-
-        if (currentUser != null) {
-            // Felhasználó bejelentkezve
-        } else {
-            // visszadob a bejelentkezési képernyőre
-            val intent = Intent(this, Bejelentkezes::class.java)
-            startActivity(intent)
-            finish()
+        // A hozzaadasGomb által történik a fő összeg frissítése (külön activity)
+        findViewById<Button>(R.id.hozzaadasGomb).setOnClickListener {
+            startActivity(Intent(this, HozzaadasActivity::class.java))
         }
 
-
-
-        val hozzaadasGomb = findViewById<Button>(R.id.hozzaadasGomb)
-        hozzaadasGomb.setOnClickListener {
-            val intent = Intent(this, HozzaadasActivity::class.java)
-            startActivity(intent)
-        }
-
-
-        // Az "Elemzés" menüpont alapértelmezett kiválasztása
         spinner.setSelection(1)
-
-        // Lenyíló menü kiválasztásának figyelése
         spinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-            override fun onItemSelected(
-                parent: AdapterView<*>?,
-                view: View?,
-                position: Int,
-                id: Long
-            ) {
-                val selectedItem = parent?.getItemAtPosition(position).toString()
-                when (selectedItem) {
-                    "Főoldal" -> {
-                        val intent = Intent(this@ElemzesActivity, Telefonszam::class.java)
-                        startActivity(intent)
-                    }
-                    "Rendszeres kifizetések" -> {
-                        Toast.makeText(
-                            this@ElemzesActivity,
-                            "Rendszeres kifizetések még nem implementáltak",
-                            Toast.LENGTH_SHORT
-                        ).show()
-                    }
-                    "Kijelentkezés" -> {
-                        Kijelentkezes()
-                    }
+            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+                when (parent?.getItemAtPosition(position).toString()) {
+                    "Főoldal" -> startActivity(Intent(this@ElemzesActivity, Telefonszam::class.java))
+                    "Rendszeres kifizetések" -> startActivity(Intent(this@ElemzesActivity, RendszeresKifizetesek::class.java))
+                    "Beállítások" -> startActivity(Intent(this@ElemzesActivity, BeallitasokActivity::class.java))
+                    "Kijelentkezés" -> Kijelentkezes()
                 }
             }
-
-            override fun onNothingSelected(parent: AdapterView<*>?) {
-                // Semmi sem történt
-            }
+            override fun onNothingSelected(parent: AdapterView<*>?) {}
         }
+
         applyFontSizeToCurrentActivity()
+
+        // Alapértelmezettként a NapFragment jelenjen meg a FragmentContainer-ben
+        supportFragmentManager.beginTransaction()
+            .replace(R.id.oszlopDiagram, NapFragment())
+            .commit()
     }
+
+    // Segédfüggvény: A kategória alapján visszaadja a megfelelő ikon erőforrás ID-t.
+    fun getIconResForCategory(category: String): Int {
+        val norm = category.trim().toLowerCase(Locale.getDefault())
+        return when (norm) {
+            "ajándékok" -> R.drawable.ajandekok_icon
+            "család" -> R.drawable.csalad_icon
+            "edzés" -> R.drawable.edzes_icon
+            "egészség" -> R.drawable.egeszseg_icon
+            "élelmiszerek" -> R.drawable.elelmiszerek_icon
+            "kávézó" -> R.drawable.kavezo_icon
+            "közlekedés" -> R.drawable.kozlekedes_icon
+            "oktatás" -> R.drawable.oktatas_icon
+            "otthon" -> R.drawable.otthon_icon
+            "szabadidő", "fizetési csekk" -> R.drawable.szabadido_icon
+            else -> R.drawable.egyeb_icon
+        }
+    }
+
     private fun applyFontSizeToCurrentActivity() {
         val prefs = getSharedPreferences("UserPreferences", Context.MODE_PRIVATE)
         val fontSize = prefs.getString("betumeret", "Közepes") ?: "Közepes"
@@ -156,9 +122,7 @@ class ElemzesActivity : AppCompatActivity() {
     }
 
     private fun updateTextViewsFontSize(view: View, fontSize: Float) {
-        if (view is TextView) {
-            view.textSize = fontSize
-        }
+        if (view is TextView) view.textSize = fontSize
         if (view is ViewGroup) {
             for (i in 0 until view.childCount) {
                 updateTextViewsFontSize(view.getChildAt(i), fontSize)
@@ -166,11 +130,9 @@ class ElemzesActivity : AppCompatActivity() {
         }
     }
 
-
-
     private fun Kijelentkezes() {
-        auth.signOut()
-        getSharedPreferences("UserPreferences", MODE_PRIVATE)
+        FirebaseManager.signOut()
+        getSharedPreferences("UserPreferences", Context.MODE_PRIVATE)
             .edit()
             .putBoolean("isLoggedIn", false)
             .apply()
@@ -190,477 +152,726 @@ class ElemzesActivity : AppCompatActivity() {
             else -> DefaultFragment()
         }
         supportFragmentManager.beginTransaction()
-            .replace(R.id.TartalomFrame, fragment)
+            .replace(R.id.oszlopDiagram, fragment)
             .commit()
     }
 
+    // ------------------- Fragmentek -------------------
 
-
-    class IdoszakFragment : Fragment() {
-        private lateinit var vonalDiagram: LineChart
-        override fun onCreateView(
-            inflater: LayoutInflater, container: ViewGroup?,
-            savedInstanceState: Bundle?
-        ): View? {
-            val gyokerNezet = inflater.inflate(R.layout.fragment_nap, container, false)
-
-          //  vonalDiagram = gyokerNezet.findViewById(R.id.vonalDiagram)
-
-            val bevetelAdatok = listOf(
-                Entry(0f, 1000f),
-                Entry(1f, 1200f),
-                Entry(2f, 800f),
-                Entry(3f, 1500f)
-            )
-            val kiadasAdatok = listOf(
-                Entry(0f, 500f),
-                Entry(1f, 700f),
-                Entry(2f, 600f),
-                Entry(3f, 900f)
-            )
-
-            val bevetelSor = LineDataSet(bevetelAdatok, "Bevételek").apply {
-                color = Color.GREEN
-                lineWidth = 2f
-                setCircleColor(Color.GREEN)
-                circleRadius = 4f
-                valueTextColor = Color.BLACK
-            }
-
-            val kiadasSor = LineDataSet(kiadasAdatok, "Kiadások").apply {
-                color = Color.RED
-                lineWidth = 2f
-                setCircleColor(Color.RED)
-                circleRadius = 4f
-                valueTextColor = Color.BLACK
-            }
-
-            val diagramAdatok = LineData(bevetelSor, kiadasSor)
-            vonalDiagram.data = diagramAdatok
-
-            vonalDiagram.description.isEnabled = false
-            vonalDiagram.animateX(1000)
-            vonalDiagram.invalidate()
-
-            return gyokerNezet
-        }
-    }
-
+    // 1. NapFragment – Egy adott nap (ma) adatai és részletes listája
     class NapFragment : Fragment() {
-        private lateinit var oszlopDiagram: BarChart
-        private val firestore = FirebaseFirestore.getInstance()
-        private val currentUser = FirebaseAuth.getInstance().currentUser
+        private val firestore = FirebaseManager.firestore
+        private val currentUser = FirebaseManager.auth.currentUser
 
         @RequiresApi(Build.VERSION_CODES.O)
-        override fun onCreateView(
-            inflater: LayoutInflater, container: ViewGroup?,
-            savedInstanceState: Bundle?
-        ): View? {
-            val gyokerNezet = inflater.inflate(R.layout.fragment_nap, container, false)
-            oszlopDiagram = gyokerNezet.findViewById(R.id.oszlopDiagram)
-
+        override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+            return inflater.inflate(R.layout.fragment_empty, container, false)
+        }
+        @RequiresApi(Build.VERSION_CODES.O)
+        override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+            super.onViewCreated(view, savedInstanceState)
+            val chart = requireActivity().findViewById<BarChart>(R.id.oszlopDiagram)
+            val categoriesLayout = requireActivity().findViewById<LinearLayout>(R.id.CategoriesLinearLayout)
+            categoriesLayout.removeAllViews()
             if (currentUser == null) {
                 Toast.makeText(context, "Nincs bejelentkezett felhasználó!", Toast.LENGTH_SHORT).show()
-                return gyokerNezet
+                return
             }
-
-            // Az aktuális dátum
-            val maiDatum = LocalDate.now().toString()
             val uid = currentUser.uid
+            val today = LocalDate.now()
+            val todayStr = today.toString()
 
-            firestore.collection("users")
-                .document(uid)
+            firestore.collection("users").document(uid)
                 .collection("nap")
-                .document(maiDatum)
+                .whereGreaterThanOrEqualTo(FieldPath.documentId(), todayStr)
+                .whereLessThanOrEqualTo(FieldPath.documentId(), todayStr)
                 .get()
-                .addOnSuccessListener { document ->
-                    if (document.exists()) {
+                .addOnSuccessListener { querySnapshot ->
+                    if (querySnapshot.documents.isNotEmpty()) {
                         try {
-                            val tranzakciok = document.get("tranzakciok") as? List<Map<String, Any>> ?: emptyList()
-                            var osszBevetel = 0f
-                            var osszKiadas = 0f
+                            val dailyDoc = querySnapshot.documents[0]
+                            val transactions = dailyDoc.get("tranzakciok") as? List<Map<String, Any>> ?: emptyList()
+                            var totalRevenue = 0f
+                            var totalExpense = 0f
 
-                            tranzakciok.forEach { tranzakcio ->
-                                val mennyiseg = when (val mennyisegValue = tranzakcio["mennyiseg"]) {
-                                    is Double -> mennyisegValue.toFloat()
-                                    is Long -> mennyisegValue.toFloat()
-                                    else -> {
-                                        Log.e("FirestoreDebug", "Hibás típusú mennyiseg érték: $mennyisegValue")
-                                        return@forEach
-                                    }
+                            // Iteráljunk a tranzakciókon, és hozzunk létre egy soronkénti elemet
+                            transactions.forEach { trans ->
+                                val amount = when (val a = trans["mennyiseg"]) {
+                                    is Double -> a.toFloat()
+                                    is Long -> a.toFloat()
+                                    else -> 0f
                                 }
+                                // Olvassuk ki a kategória nevét és a tranzakció típusát
+                                val category = (trans["kategoria"] as? String)?.trim() ?: "Egyéb"
+                                val type = (trans["tipus"] as? String)?.trim()?.toLowerCase(Locale.getDefault()) ?: ""
 
-                                val kategoria = tranzakcio["tipus"] as String
-                                if (kategoria == "Bevétel") {
-                                    osszBevetel += mennyiseg
-                                } else if (kategoria == "Kiadás") {
-                                    osszKiadas += mennyiseg
+                                // Hozzunk létre egy vertikális LinearLayout-ot a tranzakcióhoz
+                                val transactionLayout = LinearLayout(requireContext())
+                                transactionLayout.orientation = LinearLayout.VERTICAL
+                                transactionLayout.layoutParams = LinearLayout.LayoutParams(
+                                    LinearLayout.LayoutParams.MATCH_PARENT,
+                                    LinearLayout.LayoutParams.WRAP_CONTENT
+                                )
+
+                                // Első sor: kategória neve
+                                val catTextView = TextView(requireContext())
+                                catTextView.text = category
+                                catTextView.textSize = 16f
+                                catTextView.setTextColor(Color.DKGRAY)
+                                val catLp = LinearLayout.LayoutParams(
+                                    LinearLayout.LayoutParams.WRAP_CONTENT,
+                                    LinearLayout.LayoutParams.WRAP_CONTENT
+                                )
+                                catLp.setMargins(0, 4, 0, 2)
+                                catTextView.layoutParams = catLp
+                                transactionLayout.addView(catTextView)
+
+                                // Második sor: egy vízszintes LinearLayout, amely tartalmazza az összeget és az ikont
+                                val rowLayout = LinearLayout(requireContext())
+                                rowLayout.orientation = LinearLayout.HORIZONTAL
+                                rowLayout.layoutParams = LinearLayout.LayoutParams(
+                                    LinearLayout.LayoutParams.MATCH_PARENT,
+                                    LinearLayout.LayoutParams.WRAP_CONTENT
+                                )
+
+                                val amountTextView = TextView(requireContext())
+                                amountTextView.textSize = 16f
+                                amountTextView.layoutParams = LinearLayout.LayoutParams(
+                                    0,
+                                    LinearLayout.LayoutParams.WRAP_CONTENT, 1f
+                                )
+
+                                // Állapítsuk meg az előjelet és színt
+                                if (type == "bevétel") {
+                                    amountTextView.text = "+ $amount"
+                                    amountTextView.setTextColor(Color.GREEN)
+                                    totalRevenue += amount
+                                } else if (type == "kiadás") {
+                                    amountTextView.text = "- $amount"
+                                    amountTextView.setTextColor(Color.RED)
+                                    totalExpense += amount
                                 }
+                                rowLayout.addView(amountTextView)
+
+                                // Ikon: az adott kategóriához tartozó ikon
+                                val iconRes = (activity as ElemzesActivity).getIconResForCategory(category)
+                                val iv = ImageView(requireContext())
+                                iv.setImageResource(iconRes)
+                                val ivSize = (24 * resources.displayMetrics.density).toInt()
+                                val ivLp = LinearLayout.LayoutParams(ivSize, ivSize)
+                                ivLp.gravity = Gravity.CENTER_VERTICAL
+                                ivLp.setMargins(8, 0, 8, 0)
+                                iv.layoutParams = ivLp
+                                rowLayout.addView(iv)
+
+                                // Adjuk hozzá a vízszintes row-t a vertikális transactionLayout-hoz
+                                transactionLayout.addView(rowLayout)
+
+                                // Adjuk hozzá az egyes tranzakciós elemeket a CategoriesLinearLayout-hoz
+                                categoriesLayout.addView(transactionLayout)
                             }
-
-                            // Oszlopdiagram beállítása
-                            setupChart(osszBevetel, osszKiadas)
+                            // Diagram frissítése: két oszlop: bevétel és kiadás
+                            val revenueEntry = BarEntry(0f, totalRevenue)
+                            val expenseEntry = BarEntry(1f, totalExpense)
+                            val dataSet = BarDataSet(listOf(revenueEntry, expenseEntry), "Napi összesítés")
+                            dataSet.colors = listOf(Color.GREEN, Color.RED)
+                            dataSet.valueTextColor = Color.BLACK
+                            val barData = BarData(dataSet)
+                            chart.data = barData
+                            chart.description.isEnabled = false
+                            chart.setFitBars(true)
+                            chart.invalidate()
                         } catch (e: Exception) {
                             Log.e("FirestoreDebug", "Hiba a tranzakciók feldolgozása során: ${e.message}")
-                            Toast.makeText(context, "Hiba történt az adatok feldolgozása közben.", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(context, "Hiba az adatok feldolgozása közben.", Toast.LENGTH_SHORT).show()
                         }
                     } else {
                         Toast.makeText(context, "Nincs adat a mai napra.", Toast.LENGTH_SHORT).show()
                     }
                 }
                 .addOnFailureListener { e ->
-                    Log.e("FirestoreDebug", "Hiba az adatok lekérdezése során: ${e.message}")
-                    Toast.makeText(context, "Hiba az adatok lekérdezése során: ${e.message}", Toast.LENGTH_SHORT).show()
+                    Log.e("FirestoreDebug", "Hiba a napi adatok lekérdezése során: ${e.message}")
+                    Toast.makeText(context, "Hiba a napi adatok lekérdezése során.", Toast.LENGTH_SHORT).show()
                 }
-
-            return gyokerNezet
-        }
-
-        private fun setupChart(osszBevetel: Float, osszKiadas: Float) {
-            val bevetelOszlop = BarEntry(0f, osszBevetel)
-            val kiadasOszlop = BarEntry(1f, osszKiadas)
-
-            val bevetelSor = BarDataSet(listOf(bevetelOszlop), "Bevételek").apply {
-                color = Color.GREEN
-                valueTextColor = Color.BLACK
-            }
-
-            val kiadasSor = BarDataSet(listOf(kiadasOszlop), "Kiadások").apply {
-                color = Color.RED
-                valueTextColor = Color.BLACK
-            }
-
-            val diagramAdatok = BarData(bevetelSor, kiadasSor)
-            oszlopDiagram.data = diagramAdatok
-            oszlopDiagram.description.isEnabled = false
-            oszlopDiagram.setFitBars(true)
-            oszlopDiagram.animateY(1000)
-            oszlopDiagram.invalidate()
         }
     }
 
+    // 2. HetFragment – Az aktuális hét (hétfőtől vasárnapig) adatai és részletes listája
     class HetFragment : Fragment() {
-        private lateinit var oszlopDiagram: BarChart
-        private lateinit var progressBar: ProgressBar
-        private val firestore = FirebaseFirestore.getInstance()
-        private val currentUser = FirebaseAuth.getInstance().currentUser
+        private val firestore = FirebaseManager.firestore
+        private val currentUser = FirebaseManager.auth.currentUser
 
         @RequiresApi(Build.VERSION_CODES.O)
-        override fun onCreateView(
-            inflater: LayoutInflater, container: ViewGroup?,
-            savedInstanceState: Bundle?
-        ): View? {
-            val gyokerNezet = inflater.inflate(R.layout.fragment_het, container, false)
-
-            oszlopDiagram = gyokerNezet.findViewById(R.id.oszlopDiagram)
-            progressBar = gyokerNezet.findViewById(R.id.progressBar)
-
+        override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+            return inflater.inflate(R.layout.fragment_empty, container, false)
+        }
+        @RequiresApi(Build.VERSION_CODES.O)
+        override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+            super.onViewCreated(view, savedInstanceState)
+            val chart = requireActivity().findViewById<BarChart>(R.id.oszlopDiagram)
+            val categoriesLayout = requireActivity().findViewById<LinearLayout>(R.id.CategoriesLinearLayout)
+            categoriesLayout.removeAllViews()
             if (currentUser == null) {
                 Toast.makeText(context, "Nincs bejelentkezett felhasználó!", Toast.LENGTH_SHORT).show()
-                return gyokerNezet
+                return
             }
-
-            val maiDatum = LocalDate.now()
-            val hetElsoNapja = maiDatum.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY))
-            val hetUtsoNapja = maiDatum.with(TemporalAdjusters.nextOrSame(DayOfWeek.SUNDAY))
-
-            progressBar.visibility = View.VISIBLE
             val uid = currentUser.uid
+            val today = LocalDate.now()
+            val weekStart = today.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY))
+            val weekEnd = today.with(TemporalAdjusters.nextOrSame(DayOfWeek.SUNDAY))
 
-            firestore.collection("users")
-                .document(uid)
+            firestore.collection("users").document(uid)
                 .collection("nap")
-                .whereGreaterThanOrEqualTo(FieldPath.documentId(), hetElsoNapja.toString())
-                .whereLessThanOrEqualTo(FieldPath.documentId(), hetUtsoNapja.toString())
+                .whereGreaterThanOrEqualTo(FieldPath.documentId(), weekStart.toString())
+                .whereLessThanOrEqualTo(FieldPath.documentId(), weekEnd.toString())
+                .orderBy(FieldPath.documentId())
                 .get()
-                .addOnCompleteListener { task ->
-                    progressBar.visibility = View.GONE
-                    if (task.isSuccessful) {
-                        var osszesBevetel = 0f
-                        var osszesKiadas = 0f
+                .addOnSuccessListener { querySnapshot ->
+                    var totalRevenue = 0f
+                    var totalExpense = 0f
 
-                        task.result?.documents?.forEach { document ->
-                            try {
-                                val tranzakciok = document.get("tranzakciok") as? List<Map<String, Any>> ?: emptyList()
-                                tranzakciok.forEach { tranzakcio ->
-                                    val mennyiseg = (tranzakcio["mennyiseg"] as? Number)?.toFloat() ?: 0f
-                                    val kategoria = tranzakcio["tipus"] as? String
+                    querySnapshot.documents.forEach { doc ->
+                        val dateStr = doc.id
+                        // Dátum fejléc
+                        val dateHeader = TextView(requireContext())
+                        dateHeader.text = dateStr
+                        dateHeader.textSize = 16f
+                        dateHeader.setTextColor(Color.DKGRAY)
+                        val headerLp = LinearLayout.LayoutParams(
+                            LinearLayout.LayoutParams.WRAP_CONTENT,
+                            LinearLayout.LayoutParams.WRAP_CONTENT
+                        )
+                        headerLp.setMargins(0, 8, 0, 4)
+                        dateHeader.layoutParams = headerLp
+                        categoriesLayout.addView(dateHeader)
 
-                                    when (kategoria) {
-                                        "Bevétel" -> osszesBevetel += mennyiseg
-                                        "Kiadás" -> osszesKiadas += mennyiseg
-                                    }
+                        try {
+                            val transactions = doc.get("tranzakciok") as? List<Map<String, Any>> ?: emptyList()
+                            transactions.forEach { trans ->
+                                val amount = when (val a = trans["mennyiseg"]) {
+                                    is Double -> a.toFloat()
+                                    is Long -> a.toFloat()
+                                    else -> 0f
                                 }
-                            } catch (e: Exception) {
-                                Log.e("FirestoreDebug", "Hiba a dokumentum feldolgozása során: ${e.message}")
+                                val category = (trans["kategoria"] as? String)?.trim() ?: "Egyéb"
+                                val type = (trans["tipus"] as? String)?.trim()?.toLowerCase(Locale.getDefault()) ?: ""
+                                // Készítsünk egy vertikális layoutot a tranzakcióhoz
+                                val transactionLayout = LinearLayout(requireContext())
+                                transactionLayout.orientation = LinearLayout.VERTICAL
+                                transactionLayout.layoutParams = LinearLayout.LayoutParams(
+                                    LinearLayout.LayoutParams.MATCH_PARENT,
+                                    LinearLayout.LayoutParams.WRAP_CONTENT
+                                )
+                                // Első sor: a kategória neve
+                                val catTV = TextView(requireContext())
+                                catTV.text = category
+                                catTV.textSize = 16f
+                                catTV.setTextColor(Color.DKGRAY)
+                                val catLp = LinearLayout.LayoutParams(
+                                    LinearLayout.LayoutParams.WRAP_CONTENT,
+                                    LinearLayout.LayoutParams.WRAP_CONTENT
+                                )
+                                catLp.setMargins(0, 4, 0, 2)
+                                catTV.layoutParams = catLp
+                                transactionLayout.addView(catTV)
+                                // Második sor: a tranzakció összege és az ikon
+                                val rowLayout = LinearLayout(requireContext())
+                                rowLayout.orientation = LinearLayout.HORIZONTAL
+                                rowLayout.layoutParams = LinearLayout.LayoutParams(
+                                    LinearLayout.LayoutParams.MATCH_PARENT,
+                                    LinearLayout.LayoutParams.WRAP_CONTENT
+                                )
+                                val tv = TextView(requireContext())
+                                tv.textSize = 16f
+                                tv.layoutParams = LinearLayout.LayoutParams(
+                                    0,
+                                    LinearLayout.LayoutParams.WRAP_CONTENT, 1f
+                                )
+                                if (type == "bevétel") {
+                                    tv.text = "+ $amount"
+                                    tv.setTextColor(Color.GREEN)
+                                    totalRevenue += amount
+                                } else if (type == "kiadás") {
+                                    tv.text = "- $amount"
+                                    tv.setTextColor(Color.RED)
+                                    totalExpense += amount
+                                }
+                                rowLayout.addView(tv)
+                                val iconRes = (activity as ElemzesActivity).getIconResForCategory(category)
+                                val iv = ImageView(requireContext())
+                                iv.setImageResource(iconRes)
+                                val ivSize = (24 * resources.displayMetrics.density).toInt()
+                                val ivLp = LinearLayout.LayoutParams(ivSize, ivSize)
+                                ivLp.gravity = Gravity.CENTER_VERTICAL
+                                ivLp.setMargins(8, 0, 8, 0)
+                                iv.layoutParams = ivLp
+                                rowLayout.addView(iv)
+                                transactionLayout.addView(rowLayout)
+                                categoriesLayout.addView(transactionLayout)
                             }
+                        } catch (e: Exception) {
+                            Log.e("FirestoreDebug", "Error processing doc $dateStr: ${e.message}")
                         }
-
-                        if (osszesBevetel == 0f && osszesKiadas == 0f) {
-                            Toast.makeText(context, "Nincs adat az aktuális hétre.", Toast.LENGTH_SHORT).show()
-                            oszlopDiagram.clear()
-                            oszlopDiagram.invalidate()
-                        } else {
-                            setupChart(osszesBevetel, osszesKiadas)
-                        }
-                    } else {
-                        Log.e("FirestoreDebug", "Hiba az adatok lekérdezése során: ${task.exception?.message}")
-                        Toast.makeText(context, "Hiba az adatok lekérdezése során.", Toast.LENGTH_SHORT).show()
                     }
+                    val revenueEntry = BarEntry(0f, totalRevenue)
+                    val expenseEntry = BarEntry(1f, totalExpense)
+                    val dataSet = BarDataSet(listOf(revenueEntry, expenseEntry), "Hét összesítés")
+                    dataSet.colors = listOf(Color.GREEN, Color.RED)
+                    dataSet.valueTextColor = Color.BLACK
+                    val barData = BarData(dataSet)
+                    chart.data = barData
+                    chart.description.isEnabled = false
+                    chart.setFitBars(true)
+                    chart.invalidate()
                 }
-
-            return gyokerNezet
-        }
-
-        private fun setupChart(osszesBevetel: Float, osszesKiadas: Float) {
-            val entries = listOf(
-                BarEntry(0f, osszesBevetel), // 0. oszlop: Bevételek
-                BarEntry(1f, osszesKiadas)  // 1. oszlop: Kiadások
-            )
-
-            val dataSet = BarDataSet(entries, "Heti összegzés").apply {
-                colors = listOf(Color.GREEN, Color.RED) // Zöld a bevétel, piros a kiadás
-                valueTextSize = 14f
-            }
-
-            val data = BarData(dataSet)
-            oszlopDiagram.data = data
-            oszlopDiagram.description.isEnabled = false
-            oszlopDiagram.setFitBars(true)
-            oszlopDiagram.animateY(1000)
-            oszlopDiagram.invalidate()
+                .addOnFailureListener { e ->
+                    Log.e("FirestoreDebug", "Hiba a heti adatok lekérdezése során: ${e.message}")
+                    Toast.makeText(context, "Hiba a heti adatok lekérdezése során.", Toast.LENGTH_SHORT).show()
+                }
         }
     }
 
-
-
-
-
+    // 3. HonapFragment – Az aktuális hónap adatai és részletes listája
     class HonapFragment : Fragment() {
-        private lateinit var oszlopDiagram: BarChart
-        private lateinit var progressBar: ProgressBar
-        private val firestore = FirebaseFirestore.getInstance()
-        private val currentUser = FirebaseAuth.getInstance().currentUser
+        private val firestore = FirebaseManager.firestore
+        private val currentUser = FirebaseManager.auth.currentUser
 
         @RequiresApi(Build.VERSION_CODES.O)
-        override fun onCreateView(
-            inflater: LayoutInflater, container: ViewGroup?,
-            savedInstanceState: Bundle?
-        ): View? {
-            val gyokerNezet = inflater.inflate(R.layout.fragment_honap, container, false)
-
-            oszlopDiagram = gyokerNezet.findViewById(R.id.oszlopDiagram)
-            progressBar = gyokerNezet.findViewById(R.id.progressBar)
-
+        override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+            return inflater.inflate(R.layout.fragment_empty, container, false)
+        }
+        @RequiresApi(Build.VERSION_CODES.O)
+        override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+            super.onViewCreated(view, savedInstanceState)
+            val chart = requireActivity().findViewById<BarChart>(R.id.oszlopDiagram)
+            val categoriesLayout = requireActivity().findViewById<LinearLayout>(R.id.CategoriesLinearLayout)
+            categoriesLayout.removeAllViews()
             if (currentUser == null) {
                 Toast.makeText(context, "Nincs bejelentkezett felhasználó!", Toast.LENGTH_SHORT).show()
-                return gyokerNezet
+                return
             }
-
-            // Az aktuális hónap első és utolsó napjának meghatározása
-            val maiDatum = LocalDate.now()
-            val honapElsoNapja = maiDatum.withDayOfMonth(1)
-            val honapUtsoNapja = maiDatum.withDayOfMonth(maiDatum.lengthOfMonth())
-
-            progressBar.visibility = View.VISIBLE
             val uid = currentUser.uid
+            val today = LocalDate.now()
+            val monthStart = today.withDayOfMonth(1)
+            val monthEnd = today.withDayOfMonth(today.lengthOfMonth())
+
+            firestore.collection("users").document(uid)
+                .collection("nap")
+                .whereGreaterThanOrEqualTo(FieldPath.documentId(), monthStart.toString())
+                .whereLessThanOrEqualTo(FieldPath.documentId(), monthEnd.toString())
+                .orderBy(FieldPath.documentId())
+                .get()
+                .addOnSuccessListener { querySnapshot ->
+                    var totalRevenue = 0f
+                    var totalExpense = 0f
+                    querySnapshot.documents.forEach { doc ->
+                        val dateStr = doc.id
+                        val dateHeader = TextView(requireContext())
+                        dateHeader.text = dateStr
+                        dateHeader.textSize = 16f
+                        dateHeader.setTextColor(Color.DKGRAY)
+                        val headerLp = LinearLayout.LayoutParams(
+                            LinearLayout.LayoutParams.WRAP_CONTENT,
+                            LinearLayout.LayoutParams.WRAP_CONTENT
+                        )
+                        headerLp.setMargins(0, 8, 0, 4)
+                        dateHeader.layoutParams = headerLp
+                        categoriesLayout.addView(dateHeader)
+
+                        try {
+                            val transactions = doc.get("tranzakciok") as? List<Map<String, Any>> ?: emptyList()
+                            transactions.forEach { trans ->
+                                val amount = when (val a = trans["mennyiseg"]) {
+                                    is Double -> a.toFloat()
+                                    is Long -> a.toFloat()
+                                    else -> 0f
+                                }
+                                val category = (trans["kategoria"] as? String)?.trim() ?: "Egyéb"
+                                val type = (trans["tipus"] as? String)?.trim()?.toLowerCase(Locale.getDefault()) ?: ""
+                                val transactionLayout = LinearLayout(requireContext())
+                                transactionLayout.orientation = LinearLayout.VERTICAL
+                                transactionLayout.layoutParams = LinearLayout.LayoutParams(
+                                    LinearLayout.LayoutParams.MATCH_PARENT,
+                                    LinearLayout.LayoutParams.WRAP_CONTENT
+                                )
+                                // Kategória név
+                                val catTV = TextView(requireContext())
+                                catTV.text = category
+                                catTV.textSize = 16f
+                                catTV.setTextColor(Color.DKGRAY)
+                                val catLp = LinearLayout.LayoutParams(
+                                    LinearLayout.LayoutParams.WRAP_CONTENT,
+                                    LinearLayout.LayoutParams.WRAP_CONTENT
+                                )
+                                catLp.setMargins(0, 4, 0, 2)
+                                catTV.layoutParams = catLp
+                                transactionLayout.addView(catTV)
+                                // Összeg + ikon (vízszintes sor)
+                                val rowLayout = LinearLayout(requireContext())
+                                rowLayout.orientation = LinearLayout.HORIZONTAL
+                                rowLayout.layoutParams = LinearLayout.LayoutParams(
+                                    LinearLayout.LayoutParams.MATCH_PARENT,
+                                    LinearLayout.LayoutParams.WRAP_CONTENT
+                                )
+                                val tv = TextView(requireContext())
+                                tv.textSize = 16f
+                                tv.layoutParams = LinearLayout.LayoutParams(
+                                    0,
+                                    LinearLayout.LayoutParams.WRAP_CONTENT, 1f
+                                )
+                                if (type == "bevétel") {
+                                    tv.text = "+ $amount"
+                                    tv.setTextColor(Color.GREEN)
+                                    totalRevenue += amount
+                                } else if (type == "kiadás") {
+                                    tv.text = "- $amount"
+                                    tv.setTextColor(Color.RED)
+                                    totalExpense += amount
+                                }
+                                rowLayout.addView(tv)
+                                val iconRes = (activity as ElemzesActivity).getIconResForCategory(category)
+                                val iv = ImageView(requireContext())
+                                iv.setImageResource(iconRes)
+                                val ivSize = (24 * resources.displayMetrics.density).toInt()
+                                val ivLp = LinearLayout.LayoutParams(ivSize, ivSize)
+                                ivLp.gravity = Gravity.CENTER_VERTICAL
+                                ivLp.setMargins(8, 0, 8, 0)
+                                iv.layoutParams = ivLp
+                                rowLayout.addView(iv)
+                                transactionLayout.addView(rowLayout)
+                                categoriesLayout.addView(transactionLayout)
+                            }
+                        } catch (e: Exception) {
+                            Log.e("FirestoreDebug", "Error processing doc $dateStr: ${e.message}")
+                        }
+                    }
+                    val revenueEntry = BarEntry(0f, totalRevenue)
+                    val expenseEntry = BarEntry(1f, totalExpense)
+                    val dataSet = BarDataSet(listOf(revenueEntry, expenseEntry), "Hónap összesítés")
+                    dataSet.colors = listOf(Color.GREEN, Color.RED)
+                    dataSet.valueTextColor = Color.BLACK
+                    val barData = BarData(dataSet)
+                    chart.data = barData
+                    chart.description.isEnabled = false
+                    chart.setFitBars(true)
+                    chart.invalidate()
+                }
+                .addOnFailureListener { e ->
+                    Log.e("FirestoreDebug", "Hiba a havi adatok lekérdezése során: ${e.message}")
+                    Toast.makeText(context, "Hiba a havi adatok lekérdezése során.", Toast.LENGTH_SHORT).show()
+                }
+        }
+    }
+
+    // 4. EvFragment – Az aktuális év adatai és részletes listája
+    class EvFragment : Fragment() {
+        private val firestore = FirebaseManager.firestore
+        private val currentUser = FirebaseManager.auth.currentUser
+
+        @RequiresApi(Build.VERSION_CODES.O)
+        override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+            return inflater.inflate(R.layout.fragment_empty, container, false)
+        }
+        @RequiresApi(Build.VERSION_CODES.O)
+        override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+            super.onViewCreated(view, savedInstanceState)
+            val chart = requireActivity().findViewById<BarChart>(R.id.oszlopDiagram)
+            val categoriesLayout = requireActivity().findViewById<LinearLayout>(R.id.CategoriesLinearLayout)
+            categoriesLayout.removeAllViews()
+            if (currentUser == null) {
+                Toast.makeText(context, "Nincs bejelentkezett felhasználó!", Toast.LENGTH_SHORT).show()
+                return
+            }
+            val uid = currentUser.uid
+            val today = LocalDate.now()
+            val yearStart = LocalDate.of(today.year, 1, 1)
+            val yearEnd = LocalDate.of(today.year, 12, 31)
+
+            firestore.collection("users").document(uid)
+                .collection("nap")
+                .whereGreaterThanOrEqualTo(FieldPath.documentId(), yearStart.toString())
+                .whereLessThanOrEqualTo(FieldPath.documentId(), yearEnd.toString())
+                .orderBy(FieldPath.documentId())
+                .get()
+                .addOnSuccessListener { querySnapshot ->
+                    var totalRevenue = 0f
+                    var totalExpense = 0f
+                    querySnapshot.documents.forEach { doc ->
+                        val dateStr = doc.id
+                        val dateHeader = TextView(requireContext())
+                        dateHeader.text = dateStr
+                        dateHeader.textSize = 16f
+                        dateHeader.setTextColor(Color.DKGRAY)
+                        val headerLp = LinearLayout.LayoutParams(
+                            LinearLayout.LayoutParams.WRAP_CONTENT,
+                            LinearLayout.LayoutParams.WRAP_CONTENT
+                        )
+                        headerLp.setMargins(0, 8, 0, 4)
+                        dateHeader.layoutParams = headerLp
+                        categoriesLayout.addView(dateHeader)
+                        try {
+                            val transactions = doc.get("tranzakciok") as? List<Map<String, Any>> ?: emptyList()
+                            transactions.forEach { trans ->
+                                val amount = when (val a = trans["mennyiseg"]) {
+                                    is Double -> a.toFloat()
+                                    is Long -> a.toFloat()
+                                    else -> 0f
+                                }
+                                val category = (trans["kategoria"] as? String)?.trim() ?: "Egyéb"
+                                val type = (trans["tipus"] as? String)?.trim()?.toLowerCase(Locale.getDefault()) ?: ""
+                                val transactionLayout = LinearLayout(requireContext())
+                                transactionLayout.orientation = LinearLayout.VERTICAL
+                                transactionLayout.layoutParams = LinearLayout.LayoutParams(
+                                    LinearLayout.LayoutParams.MATCH_PARENT,
+                                    LinearLayout.LayoutParams.WRAP_CONTENT
+                                )
+                                val catTV = TextView(requireContext())
+                                catTV.text = category
+                                catTV.textSize = 16f
+                                catTV.setTextColor(Color.DKGRAY)
+                                val catLp = LinearLayout.LayoutParams(
+                                    LinearLayout.LayoutParams.WRAP_CONTENT,
+                                    LinearLayout.LayoutParams.WRAP_CONTENT
+                                )
+                                catLp.setMargins(0, 4, 0, 2)
+                                catTV.layoutParams = catLp
+                                transactionLayout.addView(catTV)
+                                val rowLayout = LinearLayout(requireContext())
+                                rowLayout.orientation = LinearLayout.HORIZONTAL
+                                rowLayout.layoutParams = LinearLayout.LayoutParams(
+                                    LinearLayout.LayoutParams.MATCH_PARENT,
+                                    LinearLayout.LayoutParams.WRAP_CONTENT
+                                )
+                                val tv = TextView(requireContext())
+                                tv.textSize = 16f
+                                tv.layoutParams = LinearLayout.LayoutParams(
+                                    0,
+                                    LinearLayout.LayoutParams.WRAP_CONTENT, 1f
+                                )
+                                if (type == "bevétel") {
+                                    tv.text = "+ $amount"
+                                    tv.setTextColor(Color.GREEN)
+                                    totalRevenue += amount
+                                } else if (type == "kiadás") {
+                                    tv.text = "- $amount"
+                                    tv.setTextColor(Color.RED)
+                                    totalExpense += amount
+                                }
+                                rowLayout.addView(tv)
+                                val iconRes = (activity as ElemzesActivity).getIconResForCategory(category)
+                                val iv = ImageView(requireContext())
+                                iv.setImageResource(iconRes)
+                                val ivSize = (24 * resources.displayMetrics.density).toInt()
+                                val ivLp = LinearLayout.LayoutParams(ivSize, ivSize)
+                                ivLp.gravity = Gravity.CENTER_VERTICAL
+                                ivLp.setMargins(8, 0, 8, 0)
+                                iv.layoutParams = ivLp
+                                rowLayout.addView(iv)
+                                transactionLayout.addView(rowLayout)
+                                categoriesLayout.addView(transactionLayout)
+                            }
+                        } catch (e: Exception) {
+                            Log.e("FirestoreDebug", "Error processing doc $dateStr: ${e.message}")
+                        }
+                    }
+                    val revenueEntry = BarEntry(0f, totalRevenue)
+                    val expenseEntry = BarEntry(1f, totalExpense)
+                    val dataSet = BarDataSet(listOf(revenueEntry, expenseEntry), "Év összesítés")
+                    dataSet.colors = listOf(Color.GREEN, Color.RED)
+                    dataSet.valueTextColor = Color.BLACK
+                    val barData = BarData(dataSet)
+                    chart.data = barData
+                    chart.description.isEnabled = false
+                    chart.setFitBars(true)
+                    chart.invalidate()
+                }
+                .addOnFailureListener { e ->
+                    Log.e("FirestoreDebug", "Hiba az éves adatok lekérdezése során: ${e.message}")
+                    Toast.makeText(context, "Hiba az éves adatok lekérdezése során.", Toast.LENGTH_SHORT).show()
+                }
+        }
+    }
+
+    // 5. IdoszakFragment – Egy egyedi időszak, melyet a felhasználó DatePickerDialog-okkal választ ki,
+    // majd az adott időszak adatait és tranzakcióit listázza a CategoriesLinearLayout ScrollView-ban.
+    class IdoszakFragment : Fragment() {
+
+        private val firestore = FirebaseManager.firestore
+        private val currentUser = FirebaseManager.auth.currentUser
+
+        // A felhasználó által kiválasztott időszak kezdő- és végdátuma
+        private var customStart: LocalDate? = null
+        private var customEnd: LocalDate? = null
+
+        private lateinit var chart: BarChart
+
+        @RequiresApi(Build.VERSION_CODES.O)
+        override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+            return inflater.inflate(R.layout.fragment_empty, container, false)
+        }
+        @RequiresApi(Build.VERSION_CODES.O)
+        override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+            super.onViewCreated(view, savedInstanceState)
+            chart = requireActivity().findViewById(R.id.oszlopDiagram)
+            showTimePeriodDialog()
+        }
+        @RequiresApi(Build.VERSION_CODES.O)
+        private fun showTimePeriodDialog() {
+            val context = requireContext()
+            val today = LocalDate.now()
+            val startPicker = DatePickerDialog(
+                context,
+                { _, year, month, dayOfMonth ->
+                    customStart = LocalDate.of(year, month + 1, dayOfMonth)
+                    val endPicker = DatePickerDialog(
+                        context,
+                        { _, endYear, endMonth, endDayOfMonth ->
+                            customEnd = LocalDate.of(endYear, endMonth + 1, endDayOfMonth)
+                            if (customStart!! <= customEnd!!) {
+                                val periodString = "${customStart.toString()} - ${customEnd.toString()}"
+                                Toast.makeText(context, "Kiválasztott időszak: $periodString", Toast.LENGTH_LONG).show()
+                                loadPeriodData()
+                            } else {
+                                Toast.makeText(context, "A végdátum nem lehet korábbi a kezdőnél!", Toast.LENGTH_SHORT).show()
+                            }
+                        },
+                        today.year,
+                        today.monthValue - 1,
+                        today.dayOfMonth
+                    )
+                    endPicker.setTitle("Válassza ki a végdátumot")
+                    endPicker.show()
+                },
+                today.year,
+                today.monthValue - 1,
+                today.dayOfMonth
+            )
+            startPicker.setTitle("Válassza ki a kezdő dátumot")
+            startPicker.show()
+        }
+        @RequiresApi(Build.VERSION_CODES.O)
+        private fun loadPeriodData() {
+            if (currentUser == null || customStart == null || customEnd == null) return
+            val uid = currentUser.uid
+            val categoriesLayout = requireActivity().findViewById<LinearLayout>(R.id.CategoriesLinearLayout)
+            categoriesLayout.removeAllViews()
 
             firestore.collection("users")
                 .document(uid)
                 .collection("nap")
-                .whereGreaterThanOrEqualTo(FieldPath.documentId(), honapElsoNapja.toString())
-                .whereLessThanOrEqualTo(FieldPath.documentId(), honapUtsoNapja.toString())
+                .whereGreaterThanOrEqualTo(FieldPath.documentId(), customStart.toString())
+                .whereLessThanOrEqualTo(FieldPath.documentId(), customEnd.toString())
+                .orderBy(FieldPath.documentId())
                 .get()
-                .addOnCompleteListener { task ->
-                    progressBar.visibility = View.GONE
-                    if (task.isSuccessful) {
-                        var osszesBevetel = 0f
-                        var osszesKiadas = 0f
+                .addOnSuccessListener { querySnapshot ->
+                    var totalRevenue = 0f
+                    var totalExpense = 0f
 
-                        task.result?.documents?.forEach { document ->
-                            try {
-                                val tranzakciok = document.get("tranzakciok") as? List<Map<String, Any>> ?: emptyList()
-                                tranzakciok.forEach { tranzakcio ->
-                                    val mennyiseg = (tranzakcio["mennyiseg"] as? Number)?.toFloat() ?: 0f
-                                    val kategoria = tranzakcio["tipus"] as? String
+                    querySnapshot.documents.forEach { doc ->
+                        val dateStr = doc.id
+                        // Dátum fejléc
+                        val dateHeader = TextView(requireContext())
+                        dateHeader.text = dateStr
+                        dateHeader.textSize = 16f
+                        dateHeader.setTextColor(Color.DKGRAY)
+                        val headerLp = LinearLayout.LayoutParams(
+                            LinearLayout.LayoutParams.WRAP_CONTENT,
+                            LinearLayout.LayoutParams.WRAP_CONTENT
+                        )
+                        headerLp.setMargins(0, 8, 0, 4)
+                        dateHeader.layoutParams = headerLp
+                        categoriesLayout.addView(dateHeader)
 
-                                    when (kategoria) {
-                                        "Bevétel" -> osszesBevetel += mennyiseg
-                                        "Kiadás" -> osszesKiadas += mennyiseg
-                                    }
+                        try {
+                            val transactions = doc.get("tranzakciok") as? List<Map<String, Any>> ?: emptyList()
+                            transactions.forEach { trans ->
+                                val amount = when (val a = trans["mennyiseg"]) {
+                                    is Double -> a.toFloat()
+                                    is Long -> a.toFloat()
+                                    else -> 0f
                                 }
-                            } catch (e: Exception) {
-                                Log.e("FirestoreDebug", "Hiba a dokumentum feldolgozása során: ${e.message}")
+                                val category = (trans["kategoria"] as? String)?.trim() ?: "Egyéb"
+                                val type = (trans["tipus"] as? String)?.trim()?.toLowerCase(Locale.getDefault()) ?: ""
+
+                                // Vertikális layout a tranzakcióhoz
+                                val transactionLayout = LinearLayout(requireContext())
+                                transactionLayout.orientation = LinearLayout.VERTICAL
+                                transactionLayout.layoutParams = LinearLayout.LayoutParams(
+                                    LinearLayout.LayoutParams.MATCH_PARENT,
+                                    LinearLayout.LayoutParams.WRAP_CONTENT
+                                )
+                                // Első sor: a kategória neve
+                                val catTV = TextView(requireContext())
+                                catTV.text = category
+                                catTV.textSize = 16f
+                                catTV.setTextColor(Color.DKGRAY)
+                                val catLp = LinearLayout.LayoutParams(
+                                    LinearLayout.LayoutParams.WRAP_CONTENT,
+                                    LinearLayout.LayoutParams.WRAP_CONTENT
+                                )
+                                catLp.setMargins(0, 4, 0, 2)
+                                catTV.layoutParams = catLp
+                                transactionLayout.addView(catTV)
+                                // Második sor: a tranzakció összege és ikon (vízszintes layout)
+                                val rowLayout = LinearLayout(requireContext())
+                                rowLayout.orientation = LinearLayout.HORIZONTAL
+                                rowLayout.layoutParams = LinearLayout.LayoutParams(
+                                    LinearLayout.LayoutParams.MATCH_PARENT,
+                                    LinearLayout.LayoutParams.WRAP_CONTENT
+                                )
+                                val tv = TextView(requireContext())
+                                tv.textSize = 16f
+                                tv.layoutParams = LinearLayout.LayoutParams(
+                                    0,
+                                    LinearLayout.LayoutParams.WRAP_CONTENT, 1f
+                                )
+                                if (type == "bevétel") {
+                                    tv.text = "+ $amount"
+                                    tv.setTextColor(Color.GREEN)
+                                    totalRevenue += amount
+                                } else if (type == "kiadás") {
+                                    tv.text = "- $amount"
+                                    tv.setTextColor(Color.RED)
+                                    totalExpense += amount
+                                }
+                                rowLayout.addView(tv)
+                                val iconRes = (activity as ElemzesActivity).getIconResForCategory(category)
+                                val iv = ImageView(requireContext())
+                                iv.setImageResource(iconRes)
+                                val ivSize = (24 * resources.displayMetrics.density).toInt()
+                                val ivLp = LinearLayout.LayoutParams(ivSize, ivSize)
+                                ivLp.gravity = Gravity.CENTER_VERTICAL
+                                ivLp.setMargins(8, 0, 8, 0)
+                                iv.layoutParams = ivLp
+                                rowLayout.addView(iv)
+                                transactionLayout.addView(rowLayout)
+                                categoriesLayout.addView(transactionLayout)
                             }
+                        } catch (e: Exception) {
+                            Log.e("FirestoreDebug", "Error processing doc $dateStr: ${e.message}")
                         }
-
-                        if (osszesBevetel == 0f && osszesKiadas == 0f) {
-                            Toast.makeText(context, "Nincs adat az aktuális hónapra.", Toast.LENGTH_SHORT).show()
-                            oszlopDiagram.clear()
-                            oszlopDiagram.invalidate()
-                        } else {
-                            setupChart(osszesBevetel, osszesKiadas)
-                        }
-                    } else {
-                        Log.e("FirestoreDebug", "Hiba az adatok lekérdezése során: ${task.exception?.message}")
-                        Toast.makeText(context, "Hiba az adatok lekérdezése során.", Toast.LENGTH_SHORT).show()
                     }
+                    val revenueEntry = BarEntry(0f, totalRevenue)
+                    val expenseEntry = BarEntry(1f, totalExpense)
+                    val dataSet = BarDataSet(listOf(revenueEntry, expenseEntry), "Időszak összesítés")
+                    dataSet.colors = listOf(Color.GREEN, Color.RED)
+                    dataSet.valueTextColor = Color.BLACK
+                    val barData = BarData(dataSet)
+                    chart.data = barData
+                    chart.description.isEnabled = false
+                    chart.setFitBars(true)
+                    chart.invalidate()
                 }
-
-            return gyokerNezet
-        }
-
-        private fun setupChart(osszesBevetel: Float, osszesKiadas: Float) {
-            val entries = listOf(
-                BarEntry(0f, osszesBevetel), // 0. oszlop: Bevételek
-                BarEntry(1f, osszesKiadas)  // 1. oszlop: Kiadások
-            )
-
-            val dataSet = BarDataSet(entries, "Havi összegzés").apply {
-                colors = listOf(Color.GREEN, Color.RED) // Zöld a bevétel, piros a kiadás
-                valueTextSize = 14f
-            }
-
-            val data = BarData(dataSet)
-            oszlopDiagram.data = data
-            oszlopDiagram.description.isEnabled = false
-            oszlopDiagram.setFitBars(true)
-            oszlopDiagram.animateY(1000)
-            oszlopDiagram.invalidate()
+                .addOnFailureListener { e ->
+                    Log.e("FirestoreDebug", "Hiba az időszaki adatok lekérdezése során: ${e.message}")
+                    Toast.makeText(context, "Hiba az időszaki adatok lekérdezése során.", Toast.LENGTH_SHORT).show()
+                }
         }
     }
 
-
-
-    class EvFragment : Fragment() {
-        private lateinit var oszlopDiagram: BarChart
-        private lateinit var progressBar: ProgressBar
-        private val firestore = FirebaseFirestore.getInstance()
-        private val currentUser = FirebaseAuth.getInstance().currentUser
-
-        @RequiresApi(Build.VERSION_CODES.O)
-        override fun onCreateView(
-            inflater: LayoutInflater, container: ViewGroup?,
-            savedInstanceState: Bundle?
-        ): View? {
-            val gyokerNezet = inflater.inflate(R.layout.fragment_ev, container, false)
-
-            oszlopDiagram = gyokerNezet.findViewById(R.id.oszlopDiagram)
-            progressBar = gyokerNezet.findViewById(R.id.progressBar)
-
-            if (currentUser == null) {
-                Toast.makeText(context, "Nincs bejelentkezett felhasználó!", Toast.LENGTH_SHORT).show()
-                return gyokerNezet
-            }
-
-            // Az aktuális év meghatározása
-            val maiDatum = LocalDate.now()
-            val aktualisEv = maiDatum.year
-
-            // Lekérdezés az aktuális év napjaira (dokumentum nevek alapján)
-            progressBar.visibility = View.VISIBLE
-            val uid = currentUser.uid
-
-            firestore.collection("users")
-                .document(uid)  // Felhasználói dokumentum
-                .collection("nap")  // Napi tranzakciók gyűjteménye
-                .whereGreaterThanOrEqualTo(FieldPath.documentId(), "${aktualisEv}-01-01")
-                .whereLessThanOrEqualTo(FieldPath.documentId(), "${aktualisEv}-12-31")
-                .get()
-                .addOnCompleteListener { task ->
-                    progressBar.visibility = View.GONE
-                    if (task.isSuccessful) {
-                        var osszesBevetel = 0f
-                        var osszesKiadas = 0f
-
-                        task.result?.documents?.forEach { document ->
-                            try {
-                                // Dokumentum neve = nap dátum (pl. "2025-01-10")
-                                val datumString = document.id
-                                val datum = LocalDate.parse(datumString)
-
-                                // Ha az év megegyezik az aktuális évvel, folytatjuk
-                                if (datum.year == aktualisEv) {
-                                    // Tranzakciók ellenőrzése
-                                    val tranzakciok = document.get("tranzakciok") as? List<Map<String, Any>> ?: emptyList()
-                                    tranzakciok.forEach { tranzakcio ->
-                                        val mennyisegValue = tranzakcio["mennyiseg"]
-                                        if (mennyisegValue != null) {
-                                            val mennyiseg = when (mennyisegValue) {
-                                                is Double -> mennyisegValue.toFloat() // Ha Double, akkor Float-ra konvertáljuk
-                                                is Long -> mennyisegValue.toFloat()  // Ha Long, akkor Float-ra konvertáljuk
-                                                else -> {
-                                                    Log.e("FirestoreDebug", "Hibás típusú mennyiseg érték: $mennyisegValue")
-                                                    return@forEach // Ha nem Double vagy Long, akkor kilépünk
-                                                }
-                                            }
-
-                                            val kategoria = tranzakcio["tipus"] as? String
-                                            if (kategoria == null) {
-                                                Log.e("FirestoreDebug", "Hiányzó 'kategoria' mező a tranzakcióban: $tranzakcio")
-                                                return@forEach
-                                            }
-
-                                            if (kategoria == "Bevétel") {
-                                                osszesBevetel += mennyiseg
-                                            } else if (kategoria == "Kiadás") {
-                                                osszesKiadas += mennyiseg
-                                            }
-                                        } else {
-                                            Log.w("FirestoreDebug", "Hiányzó 'mennyiseg' mező a tranzakcióban: $tranzakcio")
-                                        }
-                                    }
-                                }
-                            } catch (e: Exception) {
-                                Log.e("FirestoreDebug", "Hiba a dokumentum feldolgozása során: ${e.message}")
-                            }
-                        }
-
-                        // Diagram beállítása az adatok alapján
-                        if (osszesBevetel == 0f && osszesKiadas == 0f) {
-                            Toast.makeText(context, "Nincs adat az aktuális évre.", Toast.LENGTH_SHORT).show()
-                            oszlopDiagram.clear()
-                            oszlopDiagram.invalidate()
-                        } else {
-                            setupChart(osszesBevetel, osszesKiadas)
-                        }
-                    } else {
-                        Log.e("FirestoreDebug", "Hiba az adatok lekérdezése során: ${task.exception?.message}")
-                        Toast.makeText(context, "Hiba az adatok lekérdezése során.", Toast.LENGTH_SHORT).show()
-                    }
-                }
-
-            return gyokerNezet
-        }
-
-        private fun setupChart(osszesBevetel: Float, osszesKiadas: Float) {
-            val entries = listOf(
-                BarEntry(0f, osszesBevetel), // 0. oszlop: Bevételek
-                BarEntry(1f, osszesKiadas)  // 1. oszlop: Kiadások
-            )
-
-            val dataSet = BarDataSet(entries, "Éves összegzés").apply {
-                colors = listOf(Color.GREEN, Color.RED) // Zöld a bevétel, piros a kiadás
-                valueTextSize = 14f
-            }
-
-            val data = BarData(dataSet)
-            oszlopDiagram.data = data
-            oszlopDiagram.description.isEnabled = false
-            oszlopDiagram.setFitBars(true)
-            oszlopDiagram.animateY(1000)
-            oszlopDiagram.invalidate()
-        }
-    }
-
-
-
-
+    // 6. DefaultFragment – fallback elrendezés
     class DefaultFragment : Fragment() {
-        override fun onCreateView(
-            inflater: LayoutInflater, container: ViewGroup?,
-            savedInstanceState: Bundle?
-        ): View? {
+        override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
             return inflater.inflate(R.layout.fragment_alap, container, false)
         }
     }

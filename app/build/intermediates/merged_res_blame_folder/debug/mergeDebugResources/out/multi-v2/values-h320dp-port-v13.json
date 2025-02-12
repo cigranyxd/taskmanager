@@ -4,7 +4,7 @@
             "outputFile": "com.example.szemelyes_penzugyi_menedzser.app-mergeDebugResources-70:/values-h320dp-port-v13/values-h320dp-port-v13.xml",
             "map": [
                 {
-                    "source": "C:\\Users\\User\\.gradle\\caches\\transforms-4\\2a42600edc613e2aef07199ed7bc8f7c\\transformed\\material-1.12.0\\res\\values-h320dp-port-v13\\values-h320dp-port-v13.xml",
+                    "source": "C:\\Users\\User\\.gradle\\caches\\transforms-4\\06789bd50f4b3f46cd2cb64b3d63d297\\transformed\\material-1.12.0\\res\\values-h320dp-port-v13\\values-h320dp-port-v13.xml",
                     "from": {
                         "startLines": "2",
                         "startColumns": "4",

@@ -5,7 +5,8 @@
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".Bejelentkezes">
+    tools:context=".Bejelentkezes"
+    android:background="@color/gray">
 
     <!-- Email mező -->
     <EditText
@@ -14,9 +15,11 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="32dp"
         android:layout_marginEnd="32dp"
-        android:layout_marginTop="100dp"
+        android:layout_marginTop="80dp"
         android:hint="E-mail"
         android:inputType="textEmailAddress"
+        android:background="@color/white"
+        android:padding="16dp"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"/>
@@ -31,9 +34,28 @@
         android:layout_marginEnd="32dp"
         android:hint="Jelszó"
         android:inputType="textPassword"
+        android:background="@color/white"
+        android:padding="16dp"
         app:layout_constraintTop_toBottomOf="@id/Email"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"/>
+
+    <!-- Elfelejtettem a jelszavam link -->
+    <TextView
+        android:id="@+id/elfelejtettemJelszavam"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Elfelejtettem a jelszavam"
+        android:textColor="@color/colorLink"
+        android:textStyle="bold"
+        android:clickable="true"
+        android:focusable="true"
+        android:onClick="onForgotPasswordClick"
+        android:layout_marginTop="8dp"
+        app:layout_constraintTop_toBottomOf="@id/Jelszo"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:gravity="end"
+        android:layout_marginEnd="32dp"/> <!-- Jobb oldali margó növelése -->
 
     <!-- Maradjak bejelentkezve jelölőnégyzet -->
     <CheckBox
@@ -42,7 +64,8 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
         android:text="Maradjak bejelentkezve"
-        app:layout_constraintTop_toBottomOf="@id/Jelszo"
+        android:textColor="@color/black"
+        app:layout_constraintTop_toBottomOf="@id/elfelejtettemJelszavam"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"/>
 
@@ -53,9 +76,15 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="24dp"
         android:text="Bejelentkezés"
+        android:textColor="@color/black"
+        android:backgroundTint="@color/white"
+        android:textSize="16sp"
         app:layout_constraintTop_toBottomOf="@id/Maradjak_bejelentkezve"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"/>
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginStart="32dp"
+        android:layout_marginEnd="32dp"
+        android:padding="16dp"/>
 
     <!-- Regisztráció gomb -->
     <Button
@@ -64,10 +93,15 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
         android:text="Regisztráció"
+        android:textColor="@color/black"
+        android:backgroundTint="@android:color/white"
+        android:textSize="16sp"
         app:layout_constraintTop_toBottomOf="@id/Bejelentkezes_gomb"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"/>
-
-
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginStart="32dp"
+        android:layout_marginEnd="32dp"
+        android:padding="16dp"
+        android:elevation="4dp"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

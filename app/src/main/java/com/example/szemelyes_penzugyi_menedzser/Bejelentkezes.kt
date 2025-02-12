@@ -85,6 +85,25 @@ class Bejelentkezes : AppCompatActivity() {
         applyFontSizeToCurrentActivity()
     }
 
+    // Funkció a jelszó visszaállításához
+    fun onForgotPasswordClick(view: View) {
+        val emailEditText = findViewById<EditText>(R.id.Email)
+        val email = emailEditText.text.toString()
+
+        if (email.isNotEmpty() && Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
+            auth.sendPasswordResetEmail(email)
+                .addOnCompleteListener { task ->
+                    if (task.isSuccessful) {
+                        Toast.makeText(this, "Jelszó visszaállító e-mail elküldve!", Toast.LENGTH_SHORT).show()
+                    } else {
+                        Toast.makeText(this, "Hiba történt: ${task.exception?.message}", Toast.LENGTH_SHORT).show()
+                    }
+                }
+        } else {
+            Toast.makeText(this, "Kérjük, adjon meg egy érvényes e-mail címet!", Toast.LENGTH_SHORT).show()
+        }
+    }
+
     private fun applyFontSizeToCurrentActivity() {
         val prefs = getSharedPreferences("UserPreferences", Context.MODE_PRIVATE)
         val fontSize = prefs.getString("betumeret", "Közepes") ?: "Közepes"
@@ -107,5 +126,4 @@ class Bejelentkezes : AppCompatActivity() {
         }
     }
 }
-
 

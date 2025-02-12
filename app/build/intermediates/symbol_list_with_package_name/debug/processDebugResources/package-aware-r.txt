@@ -1411,6 +1411,7 @@ color cardview_dark_background
 color cardview_light_background
 color cardview_shadow_end_color
 color cardview_shadow_start_color
+color colorLink
 color common_google_signin_btn_text_dark
 color common_google_signin_btn_text_dark_default
 color common_google_signin_btn_text_dark_disabled
@@ -3584,6 +3585,8 @@ id BOTTOM_END
 id BOTTOM_START
 id Bejelentkezes_gomb
 id CTRL
+id CategoriesLinearLayout
+id CategoriesScrollView
 id Email
 id Email_regisztacio
 id EvFelirat
@@ -3609,7 +3612,6 @@ id SHOW_PROGRESS
 id SYM
 id TOP_END
 id TOP_START
-id TartalomFrame
 id accelerate
 id accessibility_action_clickable_span
 id accessibility_custom_action_0
@@ -3718,6 +3720,7 @@ id center_vertical
 id chain
 id chain2
 id chains
+id checkBox
 id checkbox
 id checked
 id chronometer
@@ -3785,6 +3788,7 @@ id edit_query
 id edit_text_id
 id elastic
 id elemzes
+id elfelejtettemJelszavam
 id embed
 id end
 id endToStart
@@ -3796,6 +3800,7 @@ id expand_activities_button
 id expanded_menu
 id fade
 id felhasznalonev
+id feliratokLayout
 id fill
 id fill_horizontal
 id fill_vertical
@@ -3821,11 +3826,6 @@ id group_divider
 id grouping
 id groups
 id guideline
-id guideline1
-id guideline2
-id guideline3
-id guideline4
-id guideline5
 id header_title
 id hide_graphics_layer_in_inspector_tag
 id hide_ime_id
@@ -3861,7 +3861,6 @@ id jumpToEnd
 id jumpToStart
 id kategoriakGridView
 id kategoriakSpinner
-id kifizetesekTextView
 id kilepes
 id labeled
 id layout
@@ -3905,7 +3904,6 @@ id material_timepicker_ok_button
 id material_timepicker_view
 id material_value_index
 id matrix
-id megjelenitButton
 id megseGomb
 id mentesGomb
 id message
@@ -4029,6 +4027,7 @@ id progress_horizontal
 id radio
 id ratio
 id rectangles
+id recyclerView
 id report_drawn
 id reverseSawtooth
 id right
@@ -4320,6 +4319,7 @@ layout design_text_input_end_icon
 layout design_text_input_start_icon
 layout dialog_hozzadas
 layout fragment_alap
+layout fragment_empty
 layout fragment_ev
 layout fragment_het
 layout fragment_honap

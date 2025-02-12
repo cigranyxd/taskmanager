@@ -3,133 +3,116 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:id="@+id/main"
     tools:context=".ElemzesActivity">
 
-    <FrameLayout
-        android:id="@+id/TartalomFrame"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:background="#EEEEEE"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHeight_percent="0.4"
-        app:layout_constraintBottom_toTopOf="@+id/vonalDiagram" />
-
-
-
+    <!-- Spinner a tetején -->
     <Spinner
         android:id="@+id/lenyilo_menu"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:layout_marginEnd="16dp"
-        app:layout_constraintStart_toStartOf="parent"
+        android:layout_margin="16dp"
         app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 
-    <com.github.mikephil.charting.charts.LineChart
-        android:id="@+id/vonalDiagram"
+    <!-- Diagram: BarChart (oszlopDiagram) -->
+    <com.github.mikephil.charting.charts.BarChart
+        android:id="@+id/oszlopDiagram"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        app:layout_constraintTop_toBottomOf="@id/TartalomFrame"
+        app:layout_constraintTop_toBottomOf="@id/lenyilo_menu"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintBottom_toTopOf="@+id/hozzaadasGomb" />
+        app:layout_constraintBottom_toTopOf="@id/feliratokLayout"
+        app:layout_constraintDimensionRatio="H,1:1" />
 
-    <androidx.constraintlayout.widget.Guideline
-        android:id="@+id/guideline1"
+    <!-- Feliratok (gombok) a diagram alatt -->
+    <LinearLayout
+        android:id="@+id/feliratokLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:padding="16dp"
+        android:gravity="center"
+        app:layout_constraintTop_toBottomOf="@id/oszlopDiagram"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <TextView
+            android:id="@+id/NapFelirat"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:clickable="true"
+            android:onClick="SzovegreKattint"
+            android:text="Nap"
+            android:layout_marginEnd="16dp" />
+
+        <TextView
+            android:id="@+id/HetFelirat"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:clickable="true"
+            android:onClick="SzovegreKattint"
+            android:text="Hét"
+            android:layout_marginEnd="16dp" />
+
+        <TextView
+            android:id="@+id/HonapFelirat"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:clickable="true"
+            android:onClick="SzovegreKattint"
+            android:text="Hónap"
+            android:layout_marginEnd="16dp" />
+
+        <TextView
+            android:id="@+id/EvFelirat"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:clickable="true"
+            android:onClick="SzovegreKattint"
+            android:text="Év"
+            android:layout_marginEnd="16dp" />
+
+        <TextView
+            android:id="@+id/IdoszakFelirat"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:clickable="true"
+            android:onClick="SzovegreKattint"
+            android:text="Időszak"
+            android:layout_marginEnd="16dp" />
+    </LinearLayout>
+
+    <!-- FrameLayout a fragmentek számára -->
+
+
+    <!-- ScrollView a kategóriák számára (görgethető lista) -->
+    <android.widget.ScrollView
+        android:id="@+id/CategoriesScrollView"
         android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        app:layout_constraintGuide_percent="0.1" />
+        android:layout_height="0dp"
+        app:layout_constraintTop_toBottomOf="@id/feliratokLayout"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/hozzaadasGomb">
 
-    <androidx.constraintlayout.widget.Guideline
-        android:id="@+id/guideline2"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        app:layout_constraintGuide_percent="0.3" />
+        <LinearLayout
+            android:id="@+id/CategoriesLinearLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="16dp"
+            android:gravity="start">
 
-    <androidx.constraintlayout.widget.Guideline
-        android:id="@+id/guideline3"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        app:layout_constraintGuide_percent="0.5" />
 
-    <androidx.constraintlayout.widget.Guideline
-        android:id="@+id/guideline4"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        app:layout_constraintGuide_percent="0.7" />
+        </LinearLayout>
+    </android.widget.ScrollView>
 
-    <androidx.constraintlayout.widget.Guideline
-        android:id="@+id/guideline5"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        app:layout_constraintGuide_percent="0.9" />
-
-    <TextView
-        android:id="@+id/NapFelirat"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:clickable="true"
-        android:onClick="SzovegreKattint"
-        android:text="Nap"
-        app:layout_constraintBottom_toBottomOf="@id/TartalomFrame"
-        app:layout_constraintStart_toStartOf="@id/guideline1"
-        app:layout_constraintEnd_toEndOf="@id/guideline1" />
-
-    <TextView
-        android:id="@+id/HetFelirat"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:clickable="true"
-        android:onClick="SzovegreKattint"
-        android:text="Hét"
-        app:layout_constraintBottom_toBottomOf="@id/TartalomFrame"
-        app:layout_constraintStart_toStartOf="@id/guideline2"
-        app:layout_constraintEnd_toEndOf="@id/guideline2" />
-
-    <TextView
-        android:id="@+id/HonapFelirat"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:clickable="true"
-        android:onClick="SzovegreKattint"
-        android:text="Hónap"
-        app:layout_constraintBottom_toBottomOf="@id/TartalomFrame"
-        app:layout_constraintStart_toStartOf="@id/guideline3"
-        app:layout_constraintEnd_toEndOf="@id/guideline3" />
-
-    <TextView
-        android:id="@+id/EvFelirat"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:clickable="true"
-        android:onClick="SzovegreKattint"
-        android:text="Év"
-        app:layout_constraintBottom_toBottomOf="@id/TartalomFrame"
-        app:layout_constraintStart_toStartOf="@id/guideline4"
-        app:layout_constraintEnd_toEndOf="@id/guideline4" />
-
-    <TextView
-        android:id="@+id/IdoszakFelirat"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:clickable="true"
-        android:onClick="SzovegreKattint"
-        android:text="Időszak"
-        app:layout_constraintBottom_toBottomOf="@id/TartalomFrame"
-        app:layout_constraintStart_toStartOf="@id/guideline5"
-        app:layout_constraintEnd_toEndOf="@id/guideline5" />
-
+    <!-- Hozzáadás gomb -->
     <Button
         android:id="@+id/hozzaadasGomb"
         android:layout_width="66dp"
