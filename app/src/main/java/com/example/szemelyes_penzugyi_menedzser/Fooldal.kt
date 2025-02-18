@@ -120,7 +120,7 @@ class Telefonszam : AppCompatActivity() {
 
         // Lenyíló menü inicializálása
         val spinner: Spinner = findViewById(R.id.lenyilo_menu)
-        val lehetosegek = listOf("Főoldal", "Elemzés", "Rendszeres kifizetések", "Beállítások", "Kijelentkezés")
+        val lehetosegek = listOf("Főoldal", "Elemzés","Kategóriák", "Rendszeres kifizetések", "Beállítások", "Kijelentkezés")
         val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, lehetosegek)
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         spinner.adapter = adapter
@@ -145,6 +145,10 @@ class Telefonszam : AppCompatActivity() {
                     }
                     "Elemzés" -> {
                         val intent = Intent(this@Telefonszam, ElemzesActivity::class.java)
+                        startActivity(intent)
+                    }
+                    "Kategóriák" -> {
+                        val intent = Intent(this@Telefonszam, Kategoriak::class.java)
                         startActivity(intent)
                     }
 

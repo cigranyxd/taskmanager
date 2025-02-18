@@ -1,7 +1,10 @@
 package com.example.szemelyes_penzugyi_menedzser
 
 import KategoriaAdapter
+import android.graphics.Color
 import android.os.Bundle
+import android.text.Editable
+import android.text.TextWatcher
 import android.view.View
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
@@ -9,17 +12,19 @@ import com.google.firebase.Timestamp
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import java.time.LocalDate
-import android.graphics.Color
 
 class HozzaadasActivity : AppCompatActivity() {
 
-    private var kivalasztottKategoria: String? = null  // Kiválasztott kategória tárolása
-    private var tranzakcioTipus: String? = null  // Bevétel vagy kiadás tárolása
-    private var selectedView: View? = null  // A kijelölt item tárolása
+    private var kivalasztottKategoria: String? = null  // A kiválasztott kategória neve
+    private var tranzakcioTipus: String? = null         // "Bevétel" vagy "Kiadás"
+    private var kijeloltElem: View? = null               // A GridView-ban kijelölt elem
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_hozaadas)
+
+        // Betöltjük az egyedi kategóriákat a SharedPreferences-ből
+        EgyediKategoriak.load(this)
 
         val osszegInput = findViewById<EditText>(R.id.osszegInput)
         val tranzakcioTipusSpinner = findViewById<Spinner>(R.id.tranzakcioTipusSpinner)
@@ -27,120 +32,117 @@ class HozzaadasActivity : AppCompatActivity() {
         val leirasInput = findViewById<EditText>(R.id.leirasInput)
         val kategoriakGridView = findViewById<GridView>(R.id.kategoriakGridView)
 
-        val kategoriakNevek = listOf(
+        // Alapértelmezett kategóriák
+        val alapKategoriakNevek = listOf(
             "Egészség", "Szabadidő", "Otthon", "Kávézó", "Oktatás", "Ajándékok",
             "Élelmiszerek", "Család", "Edzés", "Közlekedés", "Egyéb"
         )
-
-        val kategoriakIkonok = listOf(
+        val alapKategoriakIkonok = listOf(
             R.drawable.egeszseg_icon, R.drawable.szabadido_icon, R.drawable.otthon_icon,
             R.drawable.kavezo_icon, R.drawable.oktatas_icon, R.drawable.ajandekok_icon,
             R.drawable.elelmiszerek_icon, R.drawable.csalad_icon, R.drawable.edzes_icon,
             R.drawable.kozlekedes_icon, R.drawable.egyeb_icon
         )
 
-        val kategoriakAdapter = KategoriaAdapter(this, kategoriakNevek, kategoriakIkonok)
-        kategoriakGridView.adapter = kategoriakAdapter
+        // Kezdeti adapter: alapértelmezett kategóriák
+        var aktualisAdapter = KategoriaAdapter(this, alapKategoriakNevek, alapKategoriakIkonok)
+        kategoriakGridView.adapter = aktualisAdapter
 
-        // Kategória kiválasztása GridView-ban
-        kategoriakGridView.setOnItemClickListener { parent, view, position, _ ->
-            // Ha van előzőleg kijelölt elem, állítsuk vissza az alap háttérszínre
-            selectedView?.setBackgroundColor(Color.TRANSPARENT)
-
-            // Most válasszuk ki az új elemet
-            selectedView = view
-            view.setBackgroundColor(Color.LTGRAY)  // Kijelölés vizuális jele (szürke háttér)
-
-            kivalasztottKategoria = if (tranzakcioTipus == "Bevétel") {
-                // Ha Bevétel van kiválasztva, csak a megfelelő kategóriákat engedjük
-                val ujKategoriak = listOf("Fizetési csekk", "Ajándékok", "Egyéb")
-                if (position in 0..2) ujKategoriak[position] else null
-            } else {
-                // Kiadás esetén minden kategória választható
-                kategoriakNevek[position]
-            }
-
-            if (kivalasztottKategoria != null) {
-                Toast.makeText(this, "Kiválasztott kategória: $kivalasztottKategoria", Toast.LENGTH_SHORT).show()
-            }
+        kategoriakGridView.setOnItemClickListener { _, view, position, _ ->
+            kijeloltElem?.setBackgroundColor(Color.TRANSPARENT)
+            kijeloltElem = view
+            view.setBackgroundColor(Color.LTGRAY)
+            val adapter = kategoriakGridView.adapter as KategoriaAdapter
+            kivalasztottKategoria = adapter.getItem(position).toString()
+            Toast.makeText(this, "Kiválasztott kategória: $kivalasztottKategoria", Toast.LENGTH_SHORT).show()
         }
 
-        // Tranzakció típus kiválasztása Spinner-ből (Bevétel/Kiadás)
+        // Tranzakció típus Spinner
         val tranzakcioTipusNevek = listOf("Bevétel", "Kiadás")
-        val tranzakcioTipusAdapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, tranzakcioTipusNevek)
-        tranzakcioTipusAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        tranzakcioTipusSpinner.adapter = tranzakcioTipusAdapter
+        val spinnerAdapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, tranzakcioTipusNevek)
+        spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        tranzakcioTipusSpinner.adapter = spinnerAdapter
 
         tranzakcioTipusSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(parentView: AdapterView<*>?, view: View?, position: Int, id: Long) {
-                if (position == 0) {  // Ha Jövedelem (Bevétel) van kiválasztva
-                    // Csak "Fizetési csekk", "Ajándékok", "Egyéb" maradjon elérhető
-                    val ujKategoriak = listOf("Fizetési csekk", "Ajándékok", "Egyéb")
-                    val ujKategoriakIkonok = listOf(
+                val valasztottTipus = tranzakcioTipusNevek[position]
+                tranzakcioTipus = valasztottTipus
+                if (valasztottTipus == "Bevétel") {
+                    val defaultBevetelNevek = listOf("Fizetési csekk", "Ajándékok", "Egyéb")
+                    val defaultBevetelIkonok = listOf(
                         R.drawable.szabadido_icon, R.drawable.ajandekok_icon, R.drawable.egyeb_icon
                     )
-                    val ujKategoriakAdapter = KategoriaAdapter(this@HozzaadasActivity, ujKategoriak, ujKategoriakIkonok)
-                    kategoriakGridView.adapter = ujKategoriakAdapter
+                    loadCustomKategoriak("Bevétel") { customKategoriak ->
+                        val vegsoNevek = defaultBevetelNevek.toMutableList()
+                        val vegsoIkonok = defaultBevetelIkonok.toMutableList()
+                        for ((nev, ikon) in customKategoriak) {
+                            vegsoNevek.add(nev)
+                            vegsoIkonok.add(ikon)
+                        }
+                        aktualisAdapter = KategoriaAdapter(this@HozzaadasActivity, vegsoNevek, vegsoIkonok)
+                        kategoriakGridView.adapter = aktualisAdapter
+                    }
                 } else {
-                    // Ha nem Jövedelem (Bevétel) van kiválasztva, visszaállítjuk az összes kategóriát
-                    val kategoriakAdapter = KategoriaAdapter(this@HozzaadasActivity, kategoriakNevek, kategoriakIkonok)
-                    kategoriakGridView.adapter = kategoriakAdapter
+                    loadCustomKategoriak("Kiadás") { customKategoriak ->
+                        val vegsoNevek = alapKategoriakNevek.toMutableList()
+                        val vegsoIkonok = alapKategoriakIkonok.toMutableList()
+                        for ((nev, ikon) in customKategoriak) {
+                            vegsoNevek.add(nev)
+                            vegsoIkonok.add(ikon)
+                        }
+                        aktualisAdapter = KategoriaAdapter(this@HozzaadasActivity, vegsoNevek, vegsoIkonok)
+                        kategoriakGridView.adapter = aktualisAdapter
+                    }
                 }
-                tranzakcioTipus = tranzakcioTipusNevek[position]
             }
-
             override fun onNothingSelected(parentView: AdapterView<*>?) {
-                tranzakcioTipus = null  // Ha nincs kiválasztva tranzakció típusa
+                tranzakcioTipus = null
             }
         }
 
-        // Mentés gomb eseménykezelő
         mentesGomb.setOnClickListener {
             val osszeg = osszegInput.text.toString().toDoubleOrNull()
             val leiras = leirasInput.text.toString()
 
             val firestore = FirebaseFirestore.getInstance()
-            val currentUser = FirebaseAuth.getInstance().currentUser
+            val aktualisFelhasznalo = FirebaseAuth.getInstance().currentUser
 
-            if (currentUser == null) {
+            if (aktualisFelhasznalo == null) {
                 Toast.makeText(this, "Nincs bejelentkezett felhasználó!", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
 
-            val uid = currentUser.uid
+            val felhasznaloId = aktualisFelhasznalo.uid
             val dokNev = LocalDate.now().toString()
 
-            // Ellenőrizni, hogy az összeg, leírás és tranzakció típusa nem null vagy üres
-            if (osszeg == null || leiras.isBlank() || tranzakcioTipus == null || kivalasztottKategoria == null) {
-                Toast.makeText(this, "Érvényes összeget, leírást, tranzakció típust és kategóriát adj meg!", Toast.LENGTH_SHORT).show()
+            if (osszeg == null || leiras.isBlank() || tranzakcioTipus.isNullOrEmpty() || kivalasztottKategoria.isNullOrEmpty()) {
+                Toast.makeText(this, "Adj meg érvényes összeget, leírást, tranzakció típust és kategóriát!", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
 
-            val transaction = hashMapOf<String, Any>(  // Transaction objektum
+            val tranzakcio = hashMapOf<String, Any>(
                 "mennyiseg" to osszeg,
-                "kategoria" to (kivalasztottKategoria ?: "Nincs kategória"),
-
+                "kategoria" to kivalasztottKategoria!!,
                 "datum" to Timestamp.now(),
                 "leiras" to leiras,
-                "tipus" to (tranzakcioTipus ?: "Nincs megadva")
+                "tipus" to tranzakcioTipus!!
             )
 
             firestore.collection("users")
-                .document(uid)
+                .document(felhasznaloId)
                 .collection("nap")
                 .document(dokNev)
                 .get()
                 .addOnSuccessListener { document ->
                     if (document.exists()) {
-                        val existingTransactions = document.get("tranzakciok") as? List<HashMap<String, Any>> ?: mutableListOf()
-                        val mutableTransactions = existingTransactions.toMutableList()
-                        mutableTransactions.add(transaction)
-
+                        val elozoTranzakciok = document.get("tranzakciok") as? List<HashMap<String, Any>> ?: mutableListOf()
+                        val modositottTranzakciok = elozoTranzakciok.toMutableList()
+                        modositottTranzakciok.add(tranzakcio)
                         firestore.collection("users")
-                            .document(uid)
+                            .document(felhasznaloId)
                             .collection("nap")
                             .document(dokNev)
-                            .update("tranzakciok", mutableTransactions)
+                            .update("tranzakciok", modositottTranzakciok)
                             .addOnSuccessListener {
                                 Toast.makeText(this, "Sikeresen mentve: $dokNev", Toast.LENGTH_SHORT).show()
                             }
@@ -148,13 +150,12 @@ class HozzaadasActivity : AppCompatActivity() {
                                 Toast.makeText(this, "Hiba: ${e.message}", Toast.LENGTH_SHORT).show()
                             }
                     } else {
-                        val transactions = mutableListOf(transaction)
-
+                        val tranzakciok = mutableListOf(tranzakcio)
                         firestore.collection("users")
-                            .document(uid)
+                            .document(felhasznaloId)
                             .collection("nap")
                             .document(dokNev)
-                            .set(mapOf("tranzakciok" to transactions))
+                            .set(mapOf("tranzakciok" to tranzakciok))
                             .addOnSuccessListener {
                                 Toast.makeText(this, "Sikeresen mentve: $dokNev", Toast.LENGTH_SHORT).show()
                             }
@@ -167,5 +168,16 @@ class HozzaadasActivity : AppCompatActivity() {
                     Toast.makeText(this, "Hiba: ${e.message}", Toast.LENGTH_SHORT).show()
                 }
         }
+    }
+
+    /**
+     * Mivel a kategóriák nem adatbázisban tárolódnak, hanem a programban (EgyediKategoriak objektumban),
+     * itt ezeket szűrjük a megadott tranzakció típussal ("Bevétel" vagy "Kiadás").
+     * Visszatérünk egy listával, amely párokban tartalmazza a kategória nevét és ikon resource id-t.
+     */
+    private fun loadCustomKategoriak(tipus: String, callback: (List<Pair<String, Int>>) -> Unit) {
+        val customKategoriak = EgyediKategoriak.kategoriak.filter { it.tipus == tipus }
+            .map { Pair(it.nev, it.ikon) }
+        callback(customKategoriak)
     }
 }

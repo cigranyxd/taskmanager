@@ -1,24 +1,100 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="wrap_content"
+    android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="vertical"
-    android:gravity="center"
-    android:padding="8dp">
+    android:orientation="horizontal"
+    android:padding="8dp"
+    android:gravity="center_vertical">
 
+    <!-- Kategória ikon -->
     <ImageView
-        android:id="@+id/categoryIcon"
-        android:layout_width="60dp"
-        android:layout_height="60dp"
-        android:src="@drawable/placeholder_icon" />
+        android:id="@+id/categoryIconImageView"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:src="@drawable/placeholder_icon"
+        android:contentDescription="@null"
+        android:layout_marginEnd="8dp" />
 
-    <TextView
-        android:id="@+id/categoryName"
-        android:layout_width="wrap_content"
+    <!-- Fő konténer -->
+    <LinearLayout
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:text="Kategória"
-        android:textAlignment="center"
-        android:textSize="14sp"
-        android:layout_marginTop="8dp" />
+        android:layout_weight="1"
+        android:orientation="vertical">
+
+        <!-- Kategória neve -->
+        <TextView
+            android:id="@+id/categoryNameTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Kategória neve"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:textColor="@android:color/black" />
+
+        <!-- Kiadás sor: progressbar és összeg -->
+        <LinearLayout
+            android:id="@+id/expenseContainer"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:visibility="gone"
+            android:layout_marginTop="4dp">
+
+            <!-- A progressbar 0dp szélessé tétele és weight=1 biztosítja, hogy a maradék helyet kitöltse -->
+            <ProgressBar
+                android:id="@+id/expenseProgressBar"
+                style="?android:attr/progressBarStyleHorizontal"
+                android:layout_width="0dp"
+                android:layout_height="4dp"
+                android:layout_weight="1"
+                android:max="100"
+                android:progress="0"
+                android:progressTint="@android:color/holo_red_dark"
+                android:background="@android:color/darker_gray"
+                android:layout_marginEnd="4dp" />
+
+            <!-- Fix szélességű összeg TextView, hogy a progressbar helye állandó legyen -->
+            <TextView
+                android:id="@+id/expenseAmountTextView"
+                android:layout_width="60dp"
+                android:layout_height="wrap_content"
+                android:text="0 Ft"
+                android:textSize="12sp"
+                android:gravity="end" />
+        </LinearLayout>
+
+        <!-- Bevétel sor: progressbar és összeg -->
+        <LinearLayout
+            android:id="@+id/incomeContainer"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:visibility="gone"
+            android:layout_marginTop="2dp">
+
+            <ProgressBar
+                android:id="@+id/incomeProgressBar"
+                style="?android:attr/progressBarStyleHorizontal"
+                android:layout_width="0dp"
+                android:layout_height="4dp"
+                android:layout_weight="1"
+                android:max="100"
+                android:progress="0"
+                android:progressTint="@android:color/holo_green_dark"
+                android:background="@android:color/darker_gray"
+                android:layout_marginEnd="4dp" />
+
+            <TextView
+                android:id="@+id/incomeAmountTextView"
+                android:layout_width="60dp"
+                android:layout_height="wrap_content"
+                android:text="0 Ft"
+                android:textSize="12sp"
+                android:gravity="end" />
+        </LinearLayout>
+    </LinearLayout>
 </LinearLayout>

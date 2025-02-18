@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="16dp"
+    tools:context=".Kategoriak">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center">
+
+        <TextView
+            android:id="@+id/NapFelirat"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Nap"
+            android:textSize="18sp"
+            android:gravity="center"
+            android:padding="8dp"
+            android:background="?attr/selectableItemBackground" />
+
+        <TextView
+            android:id="@+id/HetFelirat"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Hét"
+            android:textSize="18sp"
+            android:gravity="center"
+            android:padding="8dp"
+            android:background="?attr/selectableItemBackground" />
+
+        <TextView
+            android:id="@+id/HonapFelirat"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Hónap"
+            android:textSize="18sp"
+            android:gravity="center"
+            android:padding="8dp"
+            android:background="?attr/selectableItemBackground" />
+
+        <TextView
+            android:id="@+id/EvFelirat"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Év"
+            android:textSize="18sp"
+            android:gravity="center"
+            android:padding="8dp"
+            android:background="?attr/selectableItemBackground" />
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/noDataTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="nincs adat a kiválasztott időszakra"
+        android:textSize="16sp"
+        android:gravity="center"
+        android:layout_gravity="center"
+        android:visibility="gone" />
+
+    <TextView
+        android:id="@+id/totalIncomeTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="16sp"
+        android:textColor="@android:color/black"
+        android:visibility="gone" />
+
+    <!-- Összkiadás -->
+    <TextView
+        android:id="@+id/totalExpenseTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="16sp"
+        android:textColor="@android:color/black"
+        android:visibility="gone" />
+
+    <ListView
+        android:id="@+id/kategoriakListView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:divider="@android:color/darker_gray"
+        android:dividerHeight="1dp"/>
+
+    <Button
+        android:id="@+id/addCustomCategoryButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Új kategória hozzáadása" />
+</LinearLayout>

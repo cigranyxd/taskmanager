@@ -30,7 +30,7 @@ class KategoriaAdapter(
     override fun getView(position: Int, convertView: View?, parent: ViewGroup?): View {
         var view = convertView
         if (view == null) {
-            view = inflater.inflate(R.layout.kategoria_item, parent, false)
+            view = inflater.inflate(R.layout.kategoria_item_elemzeshez, parent, false)
         }
 
         val categoryImage = view?.findViewById<ImageView>(R.id.categoryIcon)
