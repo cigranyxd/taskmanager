@@ -58,16 +58,6 @@ class Telefonszam : AppCompatActivity() {
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
         })
 
-        // Gombok beállítása
-        val hozzaadasButton = findViewById<Button>(R.id.hozzaadas_gomb)
-        hozzaadasButton.setOnClickListener {
-            showAmountInputDialog("Hozzáadás", true)
-        }
-
-        val levonasButton = findViewById<Button>(R.id.levonas_gomb)
-        levonasButton.setOnClickListener {
-            showAmountInputDialog("Levonás", false)
-        }
     }
 
     private fun checkAndLoadBalance() {

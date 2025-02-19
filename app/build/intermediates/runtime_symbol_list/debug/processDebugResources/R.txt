@@ -3419,6 +3419,7 @@ int drawable abc_vector_test 0x7f070077
 int drawable ajandekok_icon 0x7f070078
 int drawable avd_hide_password 0x7f070079
 int drawable avd_show_password 0x7f07007a
+int drawable bin_icon 0x7f07011b
 int drawable btn_checkbox_checked_mtrl 0x7f07007b
 int drawable btn_checkbox_checked_to_unchecked_mtrl_animation 0x7f07007c
 int drawable btn_checkbox_unchecked_mtrl 0x7f07007d
@@ -3549,6 +3550,7 @@ int drawable mtrl_switch_track 0x7f0700f9
 int drawable mtrl_switch_track_decoration 0x7f0700fa
 int drawable mtrl_tabs_default_indicator 0x7f0700fb
 int drawable navigation_empty_icon 0x7f0700fc
+int drawable no_data_icon 0x7f07011a
 int drawable notification_action_background 0x7f0700fd
 int drawable notification_bg 0x7f0700fe
 int drawable notification_bg_low 0x7f0700ff
@@ -3836,7 +3838,6 @@ int id honorRequest 0x7f08010b
 int id horizontal_only 0x7f08010c
 int id hozzaadButton 0x7f08010d
 int id hozzaadasGomb 0x7f08010e
-int id hozzaadas_gomb 0x7f08010f
 int id hybrid 0x7f080110
 int id icon 0x7f080111
 int id icon_group 0x7f080112
@@ -3868,7 +3869,6 @@ int id leftToRight 0x7f08012b
 int id legacy 0x7f08012c
 int id leirasInput 0x7f08012d
 int id lenyilo_menu 0x7f08012e
-int id levonas_gomb 0x7f08012f
 int id light 0x7f080130
 int id line1 0x7f080131
 int id line3 0x7f080132

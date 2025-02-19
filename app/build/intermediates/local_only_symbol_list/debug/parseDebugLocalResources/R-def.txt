@@ -12,6 +12,7 @@ color purple
 color red
 color white
 drawable ajandekok_icon
+drawable bin_icon
 drawable button_background
 drawable button_secondary_background
 drawable csalad_icon
@@ -27,6 +28,7 @@ drawable input_background
 drawable input_bg
 drawable kavezo_icon
 drawable kozlekedes_icon
+drawable no_data_icon
 drawable oktatas_icon
 drawable otthon_icon
 drawable placeholder_icon
@@ -63,14 +65,12 @@ id feliratokLayout
 id guideline
 id hozzaadButton
 id hozzaadasGomb
-id hozzaadas_gomb
 id jelszo_button
 id kategoriakGridView
 id kategoriakSpinner
 id kilepes
 id leirasInput
 id lenyilo_menu
-id levonas_gomb
 id lineChart
 id main
 id megseGomb

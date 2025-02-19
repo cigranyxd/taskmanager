@@ -3420,6 +3420,7 @@ drawable abc_vector_test
 drawable ajandekok_icon
 drawable avd_hide_password
 drawable avd_show_password
+drawable bin_icon
 drawable btn_checkbox_checked_mtrl
 drawable btn_checkbox_checked_to_unchecked_mtrl_animation
 drawable btn_checkbox_unchecked_mtrl
@@ -3550,6 +3551,7 @@ drawable mtrl_switch_track
 drawable mtrl_switch_track_decoration
 drawable mtrl_tabs_default_indicator
 drawable navigation_empty_icon
+drawable no_data_icon
 drawable notification_action_background
 drawable notification_bg
 drawable notification_bg_low
@@ -3837,7 +3839,6 @@ id honorRequest
 id horizontal_only
 id hozzaadButton
 id hozzaadasGomb
-id hozzaadas_gomb
 id hybrid
 id icon
 id icon_group
@@ -3869,7 +3870,6 @@ id leftToRight
 id legacy
 id leirasInput
 id lenyilo_menu
-id levonas_gomb
 id light
 id line1
 id line3

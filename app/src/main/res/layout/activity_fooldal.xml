@@ -59,32 +59,6 @@
         android:orientation="vertical"
         app:layout_constraintGuide_percent="0.5" />
 
-    <!-- Hozzáadás gomb -->
-    <Button
-        android:id="@+id/hozzaadas_gomb"
-        android:layout_width="0dp"
-        android:layout_height="56dp"
-        android:layout_marginTop="20dp"
-        android:text="Hozzáadás"
-        android:background="@android:color/holo_green_light"
-        android:textColor="@android:color/white"
-        android:textSize="18sp"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toStartOf="@id/guideline"
-        app:layout_constraintTop_toBottomOf="@id/Aktualis_penz" />
 
-    <!-- Levonás gomb -->
-    <Button
-        android:id="@+id/levonas_gomb"
-        android:layout_width="0dp"
-        android:layout_height="56dp"
-        android:layout_marginTop="20dp"
-        android:text="Levonás"
-        android:textColor="@android:color/white"
-        android:textSize="18sp"
-        android:background="@drawable/red_button"
-        app:layout_constraintStart_toEndOf="@id/guideline"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/Aktualis_penz" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
