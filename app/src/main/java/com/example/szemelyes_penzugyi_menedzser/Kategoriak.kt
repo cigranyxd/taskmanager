@@ -125,6 +125,14 @@ class Kategoriak : AppCompatActivity() {
         // Ha visszatérünk, állítsuk be a spinner értékét úgy, hogy az aktuális oldal legyen kiválasztva (index 2)
         spinner.setSelection(2)
     }
+    @Suppress("MissingSuperCall")
+    override fun onBackPressed(){
+        // Vissza gomb: mindig a Főoldalra navigálunk
+        val intent = Intent(this, Telefonszam::class.java)
+        intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK
+        startActivity(intent)
+        finish()
+    }
 
     private fun kijelentkezes() {
         auth.signOut()

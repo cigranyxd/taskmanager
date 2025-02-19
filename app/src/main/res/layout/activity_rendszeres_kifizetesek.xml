@@ -2,11 +2,14 @@
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:padding="16dp"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical">
+    android:padding="16dp"
+    android:orientation="vertical"
+    tools:context=".RendszeresKifizetesek">
+
     <!-- Fő összeg megjelenítése -->
     <TextView
         android:id="@+id/osszegTextView"
@@ -16,7 +19,15 @@
         android:textSize="18sp"
         android:textStyle="bold"
         android:gravity="center"
-        android:layout_marginBottom="16dp"/>
+        android:layout_marginBottom="16dp" />
+
+    <!-- Lenyíló menü (spinner) a navigációhoz -->
+    <Spinner
+        android:id="@+id/lenyilo_menu"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:spinnerMode="dropdown"
+        android:layout_marginBottom="16dp" />
 
     <!-- Név bevitel mező -->
     <EditText
@@ -25,7 +36,7 @@
         android:layout_height="wrap_content"
         android:hint="Kifizetés neve"
         android:inputType="text"
-        android:layout_marginBottom="8dp"/>
+        android:layout_marginBottom="8dp" />
 
     <!-- Összeg bevitel mező -->
     <EditText
@@ -34,7 +45,7 @@
         android:layout_height="wrap_content"
         android:hint="Kifizetés összege"
         android:inputType="numberDecimal"
-        android:layout_marginBottom="16dp"/>
+        android:layout_marginBottom="16dp" />
 
     <!-- Kifizetés hozzáadása gomb -->
     <Button
@@ -42,7 +53,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="Hozzáadás"
-        android:layout_marginBottom="8dp"/>
+        android:layout_marginBottom="8dp" />
 
     <!-- Kifizetések megjelenítése gomb -->
     <Button
@@ -50,7 +61,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="Kifizetések megjelenítése"
-        android:layout_marginBottom="16dp"/>
+        android:layout_marginBottom="16dp" />
 
     <!-- Kifizetések lista -->
     <TextView
@@ -59,12 +70,14 @@
         android:layout_height="wrap_content"
         android:text="Nincsenek megjeleníthető kifizetések"
         android:textSize="16sp"
-        android:layout_marginBottom="8dp"/>
+        android:layout_marginBottom="8dp" />
+
+    <!-- Kifizetés törlése gomb -->
     <Button
         android:id="@+id/torlesButton"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="Kifizetés törlése"
-        android:layout_marginBottom="16dp"/>
+        android:layout_marginBottom="16dp" />
 
 </LinearLayout>

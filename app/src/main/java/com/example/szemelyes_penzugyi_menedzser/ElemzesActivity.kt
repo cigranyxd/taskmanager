@@ -1,6 +1,6 @@
 package com.example.szemelyes_penzugyi_menedzser
 
-import android.annotation.SuppressLint
+import KategoriaAdapter
 import android.content.Context
 import android.content.Intent
 import android.graphics.Color
@@ -14,22 +14,17 @@ import android.view.ViewGroup
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.Button
-import android.widget.EditText
-import android.widget.FrameLayout
 import android.widget.ProgressBar
 import android.widget.Spinner
 import android.widget.TextView
 import android.widget.Toast
-import androidx.activity.enableEdgeToEdge
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
-import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.Fragment
 import com.github.mikephil.charting.charts.BarChart
 import com.github.mikephil.charting.charts.LineChart
-import com.github.mikephil.charting.components.XAxis
 import com.github.mikephil.charting.data.BarData
 import com.github.mikephil.charting.data.BarDataSet
 import com.github.mikephil.charting.data.BarEntry
@@ -45,33 +40,31 @@ import com.google.firebase.firestore.FieldPath
 import com.google.firebase.firestore.FirebaseFirestore
 import java.time.DayOfWeek
 import java.time.LocalDate
-import java.time.ZoneId
 import java.time.temporal.ChronoUnit
 import java.time.temporal.TemporalAdjusters
 
-
-@Suppress("IMPLICIT_CAST_TO_ANY")
 class ElemzesActivity : AppCompatActivity() {
 
     private lateinit var auth: FirebaseAuth
+    private lateinit var spinner: Spinner
 
-    @SuppressLint("MissingInflatedId")
+    // Az aktuális oldal neve az Elemzés Activity-ben
+    private val aktualisOldal = "Elemzés"
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
         setContentView(R.layout.activity_elemzes)
-
-
 
         auth = FirebaseAuth.getInstance()
 
-
-
-        findViewById<TextView>(R.id.NapFelirat).setOnClickListener { SzovegreKattint(it) }
-        findViewById<TextView>(R.id.HetFelirat).setOnClickListener { SzovegreKattint(it) }
-        findViewById<TextView>(R.id.HonapFelirat).setOnClickListener { SzovegreKattint(it) }
-        findViewById<TextView>(R.id.EvFelirat).setOnClickListener { SzovegreKattint(it) }
-        findViewById<TextView>(R.id.IdoszakFelirat).setOnClickListener { SzovegreKattint(it) }
+        // Ha nincs bejelentkezett felhasználó, visszadobjuk a bejelentkezési képernyőre.
+        val currentUser = auth.currentUser
+        if (currentUser == null) {
+            val intent = Intent(this, Bejelentkezes::class.java)
+            startActivity(intent)
+            finish()
+            return
+        }
 
         // Az ablak margóinak beállítása a rendszer sávokhoz
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
@@ -80,70 +73,92 @@ class ElemzesActivity : AppCompatActivity() {
             insets
         }
 
-        // Lenyíló menü inicializálása
-        val spinner: Spinner = findViewById(R.id.lenyilo_menu)
-        val lehetosegek = listOf("Főoldal", "Elemzés", "Rendszeres kifizetések", "Kijelentkezés")
-        val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, lehetosegek)
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        spinner.adapter = adapter
-
-        val currentUser = FirebaseAuth.getInstance().currentUser
-        val uid = currentUser?.uid
-
-        if (currentUser != null) {
-            // Felhasználó bejelentkezve
-        } else {
-            // visszadob a bejelentkezési képernyőre
-            val intent = Intent(this, Bejelentkezes::class.java)
-            startActivity(intent)
-            finish()
+        // Időszak választó szövegek beállítása (clickable és focusable)
+        findViewById<TextView>(R.id.NapFelirat).apply {
+            isClickable = true
+            isFocusable = true
+            setOnClickListener { SzovegreKattint(it) }
+        }
+        findViewById<TextView>(R.id.HetFelirat).apply {
+            isClickable = true
+            isFocusable = true
+            setOnClickListener { SzovegreKattint(it) }
+        }
+        findViewById<TextView>(R.id.HonapFelirat).apply {
+            isClickable = true
+            isFocusable = true
+            setOnClickListener { SzovegreKattint(it) }
+        }
+        findViewById<TextView>(R.id.EvFelirat).apply {
+            isClickable = true
+            isFocusable = true
+            setOnClickListener { SzovegreKattint(it) }
+        }
+        findViewById<TextView>(R.id.IdoszakFelirat).apply {
+            isClickable = true
+            isFocusable = true
+            setOnClickListener { SzovegreKattint(it) }
         }
 
+        // Spinner inicializálása
+        spinner = findViewById(R.id.lenyilo_menu)
+        val lehetosegek = listOf("Főoldal", "Elemzés", "Kategóriák", "Rendszeres kifizetések", "Beállítások", "Kijelentkezés")
+        val spinnerAdapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, lehetosegek)
+        spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        spinner.adapter = spinnerAdapter
 
-
-        val hozzaadasGomb = findViewById<Button>(R.id.hozzaadasGomb)
-        hozzaadasGomb.setOnClickListener {
-            val intent = Intent(this, HozzaadasActivity::class.java)
-            startActivity(intent)
-        }
-
-
-        // Az "Elemzés" menüpont alapértelmezett kiválasztása
+        // Mivel ez az Activity az "Elemzés" oldal, állítsuk be a spinner kiválasztását index 1-re
         spinner.setSelection(1)
-
-        // Lenyíló menü kiválasztásának figyelése
+        var elsoFutas = true
         spinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-            override fun onItemSelected(
-                parent: AdapterView<*>?,
-                view: View?,
-                position: Int,
-                id: Long
-            ) {
-                val selectedItem = parent?.getItemAtPosition(position).toString()
-                when (selectedItem) {
+            override fun onItemSelected(parent: AdapterView<*>, view: View?, position: Int, id: Long) {
+                if (elsoFutas) {
+                    elsoFutas = false
+                    return
+                }
+                val kiválasztottElem = parent.getItemAtPosition(position).toString()
+                // Ha a kiválasztott elem megegyezik az aktuális oldallal, ne navigáljunk
+                if (kiválasztottElem == aktualisOldal) return
+                when (kiválasztottElem) {
                     "Főoldal" -> {
                         val intent = Intent(this@ElemzesActivity, Telefonszam::class.java)
                         startActivity(intent)
                     }
+                    "Kategóriák" -> {
+                        val intent = Intent(this@ElemzesActivity, Kategoriak::class.java)
+                        startActivity(intent)
+                    }
                     "Rendszeres kifizetések" -> {
-                        Toast.makeText(
-                            this@ElemzesActivity,
-                            "Rendszeres kifizetések még nem implementáltak",
-                            Toast.LENGTH_SHORT
-                        ).show()
+                        val intent = Intent(this@ElemzesActivity, RendszeresKifizetesek::class.java)
+                        startActivity(intent)
+                    }
+                    "Beállítások" -> {
+                        val intent = Intent(this@ElemzesActivity, BeallitasokActivity::class.java)
+                        startActivity(intent)
                     }
                     "Kijelentkezés" -> {
-                        Kijelentkezes()
+                        kijelentkezes()
                     }
                 }
             }
-
-            override fun onNothingSelected(parent: AdapterView<*>?) {
-                // Semmi sem történt
-            }
+            override fun onNothingSelected(parent: AdapterView<*>) { }
         }
+
+        // Hozzáadás gomb az Elemzés oldalon
+        findViewById<Button>(R.id.hozzaadasGomb).setOnClickListener {
+            val intent = Intent(this, HozzaadasActivity::class.java)
+            startActivity(intent)
+        }
+
         applyFontSizeToCurrentActivity()
     }
+
+    override fun onResume() {
+        super.onResume()
+        // Visszatéréskor állítsuk be a spinner kiválasztását úgy, hogy az aktuális oldal ("Elemzés") legyen kiválasztva (index 1)
+        spinner.setSelection(1)
+    }
+
     private fun applyFontSizeToCurrentActivity() {
         val prefs = getSharedPreferences("UserPreferences", Context.MODE_PRIVATE)
         val fontSize = prefs.getString("betumeret", "Közepes") ?: "Közepes"
@@ -157,7 +172,7 @@ class ElemzesActivity : AppCompatActivity() {
 
     private fun updateTextViewsFontSize(view: View, fontSize: Float) {
         if (view is TextView) {
-            view.textSize = fontSize
+            view.setTextSize(TypedValue.COMPLEX_UNIT_SP, fontSize)
         }
         if (view is ViewGroup) {
             for (i in 0 until view.childCount) {
@@ -166,16 +181,22 @@ class ElemzesActivity : AppCompatActivity() {
         }
     }
 
-
-
-    private fun Kijelentkezes() {
+    private fun kijelentkezes() {
         auth.signOut()
-        getSharedPreferences("UserPreferences", MODE_PRIVATE)
+        getSharedPreferences("UserPreferences", Context.MODE_PRIVATE)
             .edit()
             .putBoolean("isLoggedIn", false)
             .apply()
         val intent = Intent(this, Bejelentkezes::class.java)
         intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+        startActivity(intent)
+        finish()
+    }
+    @Suppress("MissingSuperCall")
+    override fun onBackPressed() {
+        // Vissza gomb: mindig a Főoldalra navigálunk
+        val intent = Intent(this, Telefonszam::class.java)
+        intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK
         startActivity(intent)
         finish()
     }
