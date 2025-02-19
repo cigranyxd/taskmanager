@@ -1,10 +1,15 @@
 package com.example.szemelyes_penzugyi_menedzser
 
 import KategoriaAdapter
+import android.content.Context
+import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import android.view.View
+import android.widget.AdapterView
+import android.widget.ArrayAdapter
+import android.widget.Button
 import android.widget.ListView
+import android.widget.Spinner
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import com.google.firebase.auth.FirebaseAuth
@@ -29,35 +34,107 @@ class Kategoriak : AppCompatActivity() {
         "fizetési csekk" to R.drawable.szabadido_icon
     )
 
+    // Az aktuális oldal neve (ez az Activity célja)
+    private val aktualisOldal = "Kategóriák"
+
+    private lateinit var spinner: Spinner
+    private lateinit var auth: FirebaseAuth
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        // activity_kategoriak.xml tartalmazza az időszakválasztó elemeket, a ListView-t stb.
+        // Az activity_kategoriak.xml tartalmazza az időszakválasztó elemeket, ListView-t és a spinner-t
         setContentView(R.layout.activity_kategoriak)
 
-        // Betöltjük az egyedi kategóriákat (SharedPreferences-ből)
+        auth = FirebaseAuth.getInstance()
+        // Betöltjük az egyedi kategóriákat SharedPreferences-ből
         EgyediKategoriak.load(this)
 
-        val auth = FirebaseAuth.getInstance()
         val firestore = FirebaseFirestore.getInstance()
         val aktualisFelhasznalo = auth.currentUser
         val felhasznaloId = aktualisFelhasznalo?.uid ?: return
 
-        // Időszak választó elemek
-        findViewById<TextView>(R.id.NapFelirat).setOnClickListener {
-            tranzakciokBetoltese(felhasznaloId, "Nap")
+        // Időszak választó elemek (Győződj meg róla, hogy ezek a TextView-k clickable/focusable)
+        val napFelirat = findViewById<TextView>(R.id.NapFelirat)
+        val hetFelirat = findViewById<TextView>(R.id.HetFelirat)
+        val honapFelirat = findViewById<TextView>(R.id.HonapFelirat)
+        val evFelirat = findViewById<TextView>(R.id.EvFelirat)
+
+        // OnClickListener-ek az időszak elemekhez
+        napFelirat.setOnClickListener { tranzakciokBetoltese(felhasznaloId, "Nap") }
+        hetFelirat.setOnClickListener { tranzakciokBetoltese(felhasznaloId, "Het") }
+        honapFelirat.setOnClickListener { tranzakciokBetoltese(felhasznaloId, "Honap") }
+        evFelirat.setOnClickListener { tranzakciokBetoltese(felhasznaloId, "Ev") }
+
+        // Gomb az új kategória hozzáadásához
+        findViewById<Button>(R.id.ujKategoriaHozzaadasa).setOnClickListener {
+            val intent = Intent(this, KategoriaHozzaadasActivity::class.java)
+            startActivity(intent)
         }
-        findViewById<TextView>(R.id.HetFelirat).setOnClickListener {
-            tranzakciokBetoltese(felhasznaloId, "Het")
-        }
-        findViewById<TextView>(R.id.HonapFelirat).setOnClickListener {
-            tranzakciokBetoltese(felhasznaloId, "Honap")
-        }
-        findViewById<TextView>(R.id.EvFelirat).setOnClickListener {
-            tranzakciokBetoltese(felhasznaloId, "Ev")
+
+        // Spinner inicializálása
+        spinner = findViewById(R.id.lenyilo_menu)
+        val lehetosegek = listOf("Főoldal", "Elemzés", "Kategóriák", "Rendszeres kifizetések", "Beállítások", "Kijelentkezés")
+        val spinnerAdapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, lehetosegek)
+        spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        spinner.adapter = spinnerAdapter
+
+        // Mivel ebben az Activity-ben a "Kategóriák" oldal az aktuális, állítsuk be a spinner kiválasztását index 2-re
+        spinner.setSelection(2)
+
+        var elsoFutas = true
+        spinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(parent: AdapterView<*>, view: View?, position: Int, id: Long) {
+                if (elsoFutas) {
+                    elsoFutas = false
+                    return
+                }
+                val kiválasztottElem = parent.getItemAtPosition(position).toString()
+                // Ha a kiválasztott elem megegyezik az aktuális oldallal, ne navigáljunk
+                if (kiválasztottElem == aktualisOldal) return
+                when (kiválasztottElem) {
+                    "Főoldal" -> {
+                        val intent = Intent(this@Kategoriak, Telefonszam::class.java)
+                        startActivity(intent)
+                    }
+                    "Elemzés" -> {
+                        val intent = Intent(this@Kategoriak, ElemzesActivity::class.java)
+                        startActivity(intent)
+                    }
+                    "Rendszeres kifizetések" -> {
+                        val intent = Intent(this@Kategoriak, RendszeresKifizetesek::class.java)
+                        startActivity(intent)
+                    }
+                    "Beállítások" -> {
+                        val intent = Intent(this@Kategoriak, BeallitasokActivity::class.java)
+                        startActivity(intent)
+                    }
+                    "Kijelentkezés" -> {
+                        kijelentkezes()
+                    }
+                }
+            }
+            override fun onNothingSelected(parent: AdapterView<*>) { }
         }
 
         // Alapértelmezetten a "Nap" időszak legyen kiválasztva
         tranzakciokBetoltese(felhasznaloId, "Nap")
+    }
+
+    override fun onResume() {
+        super.onResume()
+        // Ha visszatérünk, állítsuk be a spinner értékét úgy, hogy az aktuális oldal legyen kiválasztva (index 2)
+        spinner.setSelection(2)
+    }
+
+    private fun kijelentkezes() {
+        auth.signOut()
+        getSharedPreferences("UserPreferences", Context.MODE_PRIVATE)
+            .edit()
+            .putBoolean("isLoggedIn", false)
+            .apply()
+        val intent = Intent(this, Bejelentkezes::class.java)
+        startActivity(intent)
+        finish()
     }
 
     /**
@@ -66,7 +143,7 @@ class Kategoriak : AppCompatActivity() {
     private fun tranzakciokBetoltese(felhasznaloId: String, period: String) {
         tranzakciokLekerdezese(felhasznaloId, period) { tranzakciok ->
             val (bevetelMap, kiadasMap) = tranzakciokOsszegzese(tranzakciok)
-            osszegzettAdatokMegjelenitese(bevetelMap, kiadasMap)
+            osszegzettAdatokMegjelenitese(period, bevetelMap, kiadasMap)
         }
     }
 
@@ -194,15 +271,21 @@ class Kategoriak : AppCompatActivity() {
         return R.drawable.placeholder_icon
     }
 
-    fun osszegzettAdatokMegjelenitese(bevetelMap: Map<String, Float>, kiadasMap: Map<String, Float>) {
+    /**
+     * Megjeleníti az összegzett adatokat.
+     * @param period Az aktuális időszak ("Nap", "Het", stb.)
+     */
+    fun osszegzettAdatokMegjelenitese(period: String, bevetelMap: Map<String, Float>, kiadasMap: Map<String, Float>) {
         val teljesBevetel = bevetelMap.values.sum()
         val teljesKiadas = kiadasMap.values.sum()
 
         // Gyűjtsük össze a normalizált kulcsokat az adatbázisból érkező tranzakciókból
         val normKulcsok = (bevetelMap.keys + kiadasMap.keys).toMutableSet()
-        // Adjuk hozzá a custom kategóriák normalizált neveit is
-        EgyediKategoriak.kategoriak.forEach { customKategoria ->
-            normKulcsok.add(customKategoria.nev.trim().toLowerCase())
+        // Csak akkor adjuk hozzá a custom kategóriák normalizált neveit, ha nem a "Nap" időszak van
+        if (period != "Nap") {
+            EgyediKategoriak.kategoriak.forEach { customKategoria ->
+                normKulcsok.add(customKategoria.nev.trim().toLowerCase())
+            }
         }
         val vegsoNormKulcsok = normKulcsok.toList()
 

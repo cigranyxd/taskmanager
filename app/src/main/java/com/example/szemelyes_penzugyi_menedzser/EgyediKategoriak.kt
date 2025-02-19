@@ -4,9 +4,12 @@ import android.content.Context
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 
+
+// Singleton objektum a custom kategóriák tárolására
 object EgyediKategoriak {
     val kategoriak: MutableList<EgyediKategoria> = mutableListOf()
 
+    // Betölti a kategóriákat SharedPreferences-ből
     fun load(context: Context) {
         val prefs = context.getSharedPreferences("custom_categories", Context.MODE_PRIVATE)
         val json = prefs.getString("kategoriak", null)
@@ -18,6 +21,7 @@ object EgyediKategoriak {
         }
     }
 
+    // Elmenti a kategóriákat SharedPreferences-be
     fun save(context: Context) {
         val prefs = context.getSharedPreferences("custom_categories", Context.MODE_PRIVATE)
         val editor = prefs.edit()
