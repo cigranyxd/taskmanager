@@ -100,7 +100,7 @@ class Telefonszam : AppCompatActivity() {
 
         var elsoFutas = true
         spinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-            override fun onItemSelected(parent: AdapterView<*>, view: View, position: Int, id: Long) {
+            override fun onItemSelected(parent: AdapterView<*>, view: View?, position: Int, id: Long) {
                 // Ha az inicializálás során kiválasztás történt, ne indítsunk navigációt
                 if (elsoFutas) {
                     elsoFutas = false
@@ -257,3 +257,4 @@ class Telefonszam : AppCompatActivity() {
         builder.show()
     }
 }
+

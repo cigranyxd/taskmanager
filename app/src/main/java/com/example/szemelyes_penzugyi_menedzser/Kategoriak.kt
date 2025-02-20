@@ -15,6 +15,8 @@ import androidx.appcompat.app.AppCompatActivity
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import java.time.LocalDate
+import java.time.DayOfWeek
+import java.time.temporal.TemporalAdjusters
 
 class Kategoriak : AppCompatActivity() {
 
@@ -40,6 +42,9 @@ class Kategoriak : AppCompatActivity() {
     private lateinit var spinner: Spinner
     private lateinit var auth: FirebaseAuth
 
+    // Változó, mely tárolja az aktuálisan kiválasztott időszakot
+    private var currentPeriod: String = "Nap"
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         // Az activity_kategoriak.xml tartalmazza az időszakválasztó elemeket, ListView-t és a spinner-t
@@ -53,17 +58,29 @@ class Kategoriak : AppCompatActivity() {
         val aktualisFelhasznalo = auth.currentUser
         val felhasznaloId = aktualisFelhasznalo?.uid ?: return
 
-        // Időszak választó elemek (Győződj meg róla, hogy ezek a TextView-k clickable/focusable)
+        // Időszak választó elemek
         val napFelirat = findViewById<TextView>(R.id.NapFelirat)
         val hetFelirat = findViewById<TextView>(R.id.HetFelirat)
         val honapFelirat = findViewById<TextView>(R.id.HonapFelirat)
         val evFelirat = findViewById<TextView>(R.id.EvFelirat)
 
-        // OnClickListener-ek az időszak elemekhez
-        napFelirat.setOnClickListener { tranzakciokBetoltese(felhasznaloId, "Nap") }
-        hetFelirat.setOnClickListener { tranzakciokBetoltese(felhasznaloId, "Het") }
-        honapFelirat.setOnClickListener { tranzakciokBetoltese(felhasznaloId, "Honap") }
-        evFelirat.setOnClickListener { tranzakciokBetoltese(felhasznaloId, "Ev") }
+        // OnClickListener-ek az időszak elemekhez, itt frissítjük a currentPeriod változót
+        napFelirat.setOnClickListener {
+            currentPeriod = "Nap"
+            tranzakciokBetoltese(felhasznaloId, "Nap")
+        }
+        hetFelirat.setOnClickListener {
+            currentPeriod = "Het"
+            tranzakciokBetoltese(felhasznaloId, "Het")
+        }
+        honapFelirat.setOnClickListener {
+            currentPeriod = "Honap"
+            tranzakciokBetoltese(felhasznaloId, "Honap")
+        }
+        evFelirat.setOnClickListener {
+            currentPeriod = "Ev"
+            tranzakciokBetoltese(felhasznaloId, "Ev")
+        }
 
         // Gomb az új kategória hozzáadásához
         findViewById<Button>(R.id.ujKategoriaHozzaadasa).setOnClickListener {
@@ -78,7 +95,7 @@ class Kategoriak : AppCompatActivity() {
         spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         spinner.adapter = spinnerAdapter
 
-        // Mivel ebben az Activity-ben a "Kategóriák" oldal az aktuális, állítsuk be a spinner kiválasztását index 2-re
+        // Az aktuális oldal beállítása
         spinner.setSelection(2)
 
         var elsoFutas = true
@@ -89,28 +106,13 @@ class Kategoriak : AppCompatActivity() {
                     return
                 }
                 val kiválasztottElem = parent.getItemAtPosition(position).toString()
-                // Ha a kiválasztott elem megegyezik az aktuális oldallal, ne navigáljunk
                 if (kiválasztottElem == aktualisOldal) return
                 when (kiválasztottElem) {
-                    "Főoldal" -> {
-                        val intent = Intent(this@Kategoriak, Telefonszam::class.java)
-                        startActivity(intent)
-                    }
-                    "Elemzés" -> {
-                        val intent = Intent(this@Kategoriak, ElemzesActivity::class.java)
-                        startActivity(intent)
-                    }
-                    "Rendszeres kifizetések" -> {
-                        val intent = Intent(this@Kategoriak, RendszeresKifizetesek::class.java)
-                        startActivity(intent)
-                    }
-                    "Beállítások" -> {
-                        val intent = Intent(this@Kategoriak, BeallitasokActivity::class.java)
-                        startActivity(intent)
-                    }
-                    "Kijelentkezés" -> {
-                        kijelentkezes()
-                    }
+                    "Főoldal" -> startActivity(Intent(this@Kategoriak, Telefonszam::class.java))
+                    "Elemzés" -> startActivity(Intent(this@Kategoriak, ElemzesActivity::class.java))
+                    "Rendszeres kifizetések" -> startActivity(Intent(this@Kategoriak, RendszeresKifizetesek::class.java))
+                    "Beállítások" -> startActivity(Intent(this@Kategoriak, BeallitasokActivity::class.java))
+                    "Kijelentkezés" -> kijelentkezes()
                 }
             }
             override fun onNothingSelected(parent: AdapterView<*>) { }
@@ -122,9 +124,10 @@ class Kategoriak : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
-        // Ha visszatérünk, állítsuk be a spinner értékét úgy, hogy az aktuális oldal legyen kiválasztva (index 2)
+        // Visszatéréskor állítsuk be a spinner értékét az aktuális oldalnak megfelelően
         spinner.setSelection(2)
     }
+
     @Suppress("MissingSuperCall")
     override fun onBackPressed(){
         // Vissza gomb: mindig a Főoldalra navigálunk
@@ -197,7 +200,6 @@ class Kategoriak : AppCompatActivity() {
                         trxLista.forEach { trx ->
                             val mennyiseg = (trx["mennyiseg"] as? Number)?.toFloat() ?: 0f
                             val tipus = trx["tipus"] as? String ?: ""
-                            // Normalizáljuk a kategória nevet
                             val kategoria = (trx["kategoria"] as? String ?: "").trim().toLowerCase()
                             val leiras = trx["leiras"] as? String ?: ""
                             tranzakciok.add(Tranzakcio(kategoria, leiras, mennyiseg, tipus))
@@ -260,10 +262,8 @@ class Kategoriak : AppCompatActivity() {
     }
 
     private fun megjelenitoNev(normalizaltNev: String): String {
-        // Ha custom kategória létezik ezzel a normalizált névvel, visszaadjuk az eredeti nevet
         val custom = EgyediKategoriak.kategoriak.find { it.nev.trim().toLowerCase() == normalizaltNev }
         if (custom != null) return custom.nev
-        // Ellenőrizzük az alapértelmezett kulcsokat is
         for (orig in kategoriaIkonTerkep.keys) {
             if (orig.trim().toLowerCase() == normalizaltNev) return orig.capitalize()
         }
@@ -287,21 +287,16 @@ class Kategoriak : AppCompatActivity() {
         val teljesBevetel = bevetelMap.values.sum()
         val teljesKiadas = kiadasMap.values.sum()
 
-        // Gyűjtsük össze a normalizált kulcsokat az adatbázisból érkező tranzakciókból
         val normKulcsok = (bevetelMap.keys + kiadasMap.keys).toMutableSet()
-        // Csak akkor adjuk hozzá a custom kategóriák normalizált neveit, ha nem a "Nap" időszak van
         if (period != "Nap") {
             EgyediKategoriak.kategoriak.forEach { customKategoria ->
                 normKulcsok.add(customKategoria.nev.trim().toLowerCase())
             }
         }
         val vegsoNormKulcsok = normKulcsok.toList()
-
-        // Alakítsuk át a normalizált kulcsokat megjelenítendő névvé és ikonná
         val vegsoKategoriaNevek = vegsoNormKulcsok.map { megjelenitoNev(it) }
         val vegsoKategoriaIkonok = vegsoNormKulcsok.map { ikonForKey(it) }
 
-        // Számoljuk ki a progress értékeket és a konkrét összegeket
         val vegsoExpenseProgress = vegsoNormKulcsok.map { key ->
             val kiadas = kiadasMap[key] ?: 0f
             if (teljesKiadas > 0) {
@@ -354,6 +349,15 @@ class Kategoriak : AppCompatActivity() {
             )
             listaNezet.adapter = vegsoAdapter
             vegsoAdapter.notifyDataSetChanged()
+
+            // Kattinthatóság hozzáadása: kattintáskor elküldjük a kiválasztott kategória nevét és az aktuális időszakot
+            listaNezet.setOnItemClickListener { parent, view, position, id ->
+                val selectedCategory = vegsoKategoriaNevek[position]
+                val intent = Intent(this, KategoriaTranzakciokActivity::class.java)
+                intent.putExtra("categoryName", selectedCategory)
+                intent.putExtra("period", currentPeriod)
+                startActivity(intent)
+            }
         }
     }
 }

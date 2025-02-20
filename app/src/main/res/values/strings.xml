@@ -3,4 +3,5 @@
     <string name="title_activity_beallitasok">BeallitasokActivity</string>
     <string name="title_activity_hozzaadas">HozzaadasActivity</string>
     <string name="title_activity_kategoria_hozzaadas">KategoriaHozzaadasActivity</string>
+    <string name="title_activity_kategoria_tranzakcio">KategoriaTranzakcioActivity</string>
 </resources>

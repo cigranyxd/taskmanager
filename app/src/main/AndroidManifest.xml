@@ -15,6 +15,11 @@
         android:label="@string/app_name"
         android:theme="@style/Theme.Szemelyes_penzugyi_menedzser">
         <activity
+            android:name=".KategoriaTranzakciokActivity"
+            android:exported="false"
+            android:label="@string/title_activity_kategoria_tranzakcio"
+            android:theme="@style/Theme.Szemelyes_penzugyi_menedzser" />
+        <activity
             android:name=".KategoriaHozzaadasActivity"
             android:exported="false"
             android:label="@string/title_activity_kategoria_hozzaadas"
@@ -32,6 +37,7 @@
         <activity
             android:name=".RendszeresKifizetesek"
             android:exported="false" />
+
         <activity
             android:name=".ElemzesActivity"
             android:exported="true"
