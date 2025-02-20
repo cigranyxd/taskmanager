@@ -48,6 +48,16 @@
         android:testOnly="true"
         android:theme="@style/Theme.Szemelyes_penzugyi_menedzser" >
         <activity
+            android:name="com.example.szemelyes_penzugyi_menedzser.KategoriaTranzakciokActivity"
+            android:exported="false"
+            android:label="@string/title_activity_kategoria_tranzakcio"
+            android:theme="@style/Theme.Szemelyes_penzugyi_menedzser" />
+        <activity
+            android:name="com.example.szemelyes_penzugyi_menedzser.KategoriaHozzaadasActivity"
+            android:exported="false"
+            android:label="@string/title_activity_kategoria_hozzaadas"
+            android:theme="@style/Theme.Szemelyes_penzugyi_menedzser" />
+        <activity
             android:name="com.example.szemelyes_penzugyi_menedzser.HozzaadasActivity"
             android:exported="false"
             android:label="@string/title_activity_hozzaadas"
@@ -62,6 +72,10 @@
             android:exported="false" />
         <activity
             android:name="com.example.szemelyes_penzugyi_menedzser.ElemzesActivity"
+            android:exported="true"
+            android:parentActivityName="com.example.szemelyes_penzugyi_menedzser.Telefonszam" />
+        <activity
+            android:name="com.example.szemelyes_penzugyi_menedzser.Kategoriak"
             android:exported="true"
             android:parentActivityName="com.example.szemelyes_penzugyi_menedzser.Telefonszam" />
         <activity

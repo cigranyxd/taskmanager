@@ -18,6 +18,10 @@ import java.text.DecimalFormatSymbols
 
 class Telefonszam : AppCompatActivity() {
 
+    companion object {
+        var aktualisOldalIndex = 0
+    }
+    private val aktualisOldal = "Főoldal"
     private lateinit var aktualisPenzTextView: TextView
     private lateinit var AktualisPenzEditText: EditText
     private lateinit var spinner: Spinner
@@ -126,23 +130,50 @@ class Telefonszam : AppCompatActivity() {
     }
 
     private fun setupSpinner() {
-        val lehetosegek = listOf("Főoldal", "Elemzés", "Rendszeres kifizetések", "Beállítások", "Kijelentkezés")
+        val spinner: Spinner = findViewById(R.id.lenyilo_menu)
+        val lehetosegek = listOf("Főoldal", "Elemzés", "Kategóriák", "Rendszeres kifizetések", "Beállítások", "Kijelentkezés")
         val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, lehetosegek)
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         spinner.adapter = adapter
 
+        var elsoFutas = true
         spinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(parent: AdapterView<*>, view: View?, position: Int, id: Long) {
-                val selectedItem = parent.getItemAtPosition(position).toString()
-                when (selectedItem) {
-                    "Elemzés" -> startActivity(Intent(this@Telefonszam, ElemzesActivity::class.java))
-                    "Rendszeres kifizetések" -> startActivity(Intent(this@Telefonszam, RendszeresKifizetesek::class.java))
-                    "Beállítások" -> startActivity(Intent(this@Telefonszam, BeallitasokActivity::class.java))
-                    "Kijelentkezés" -> Kijelentkezes()
+                // Ha az inicializálás során kiválasztás történt, ne indítsunk navigációt
+                if (elsoFutas) {
+                    elsoFutas = false
+                    return
+                }
+                val kiválasztottElem = parent.getItemAtPosition(position).toString()
+                // Ha a kiválasztott elem megegyezik az aktuális oldalcímmel, akkor semmit sem teszünk
+                if (kiválasztottElem == aktualisOldal) {
+                    return
+                }
+                when (kiválasztottElem) {
+                    "Elemzés" -> {
+                        val intent = Intent(this@Telefonszam, ElemzesActivity::class.java)
+                        startActivity(intent)
+                    }
+                    "Kategóriák" -> {
+                        val intent = Intent(this@Telefonszam, Kategoriak::class.java)
+                        startActivity(intent)
+                    }
+                    "Rendszeres kifizetések" -> {
+                        val intent = Intent(this@Telefonszam, RendszeresKifizetesek::class.java)
+                        startActivity(intent)
+                    }
+                    "Beállítások" -> {
+                        val intent = Intent(this@Telefonszam, BeallitasokActivity::class.java)
+                        startActivity(intent)
+                    }
+                    "Kijelentkezés" -> {
+                        Kijelentkezes()
+                    }
                 }
             }
             override fun onNothingSelected(parent: AdapterView<*>) {}
         }
+
     }
 
     private fun Kijelentkezes() {

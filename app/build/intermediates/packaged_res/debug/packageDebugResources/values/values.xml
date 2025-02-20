@@ -2,6 +2,7 @@
 <resources>
     <color name="background_light">#F9F9F9</color>
     <color name="black">#FF000000</color>
+    <color name="colorAccent">#FF4081</color>
     <color name="colorLink">#2196F3</color>
     <color name="gray">#B0BEC5</color>
     <color name="green">#4CAF50</color>
@@ -10,7 +11,7 @@
     <color name="primary_color">#6200EE</color>
     <color name="purple">#6200EE</color>
     <color name="red">#F44336</color>
-    <color name="white">#FFFFFF</color>
+    <color name="white">#FFFFFFFF</color>
     <string name="app_name">Szemelyes_penzugyi_menedzser</string>
     <string name="gcm_defaultSenderId" translatable="false">946296509338</string>
     <string name="google_api_key" translatable="false">AIzaSyA60tuwgxRf9RtzLbsuORqI9a7LGIjVfTc</string>
@@ -20,6 +21,8 @@
     <string name="project_id" translatable="false">personalfinancialmanager-2153e</string>
     <string name="title_activity_beallitasok">BeallitasokActivity</string>
     <string name="title_activity_hozzaadas">HozzaadasActivity</string>
+    <string name="title_activity_kategoria_hozzaadas">KategoriaHozzaadasActivity</string>
+    <string name="title_activity_kategoria_tranzakcio">KategoriaTranzakcioActivity</string>
     <style name="Base.Theme.Szemelyes_penzugyi_menedzser" parent="Theme.Material3.DayNight.NoActionBar">
         
         

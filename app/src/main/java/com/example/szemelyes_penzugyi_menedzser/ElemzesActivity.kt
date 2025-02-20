@@ -1,6 +1,5 @@
 package com.example.szemelyes_penzugyi_menedzser
 
-import android.annotation.SuppressLint
 import android.app.DatePickerDialog
 import android.content.Context
 import android.content.Intent
@@ -32,10 +31,15 @@ import com.example.szemelyes_penzugyi_menedzser.FirebaseManager
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.auth.FirebaseAuth
+import android.annotation.SuppressLint as SuppressLint1
 
 class ElemzesActivity : AppCompatActivity() {
 
-    @SuppressLint("MissingInflatedId")
+    private lateinit var spinner: Spinner
+
+    private val aktualisOldal = "Elemzés"
+
+    @SuppressLint1("MissingInflatedId")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_elemzes)
@@ -61,8 +65,8 @@ class ElemzesActivity : AppCompatActivity() {
         }
 
         // Spinner
-        val spinner: Spinner = findViewById(R.id.lenyilo_menu)
-        val lehetosegek = listOf("Főoldal", "Elemzés", "Rendszeres kifizetések", "Beállítások", "Kijelentkezés")
+        spinner = findViewById(R.id.lenyilo_menu)
+        val lehetosegek = listOf("Főoldal", "Elemzés", "Kategóriák", "Rendszeres kifizetések", "Beállítások", "Kijelentkezés")
         val spinnerAdapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, lehetosegek)
         spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         spinner.adapter = spinnerAdapter
@@ -72,16 +76,39 @@ class ElemzesActivity : AppCompatActivity() {
         }
 
         spinner.setSelection(1)
+        var elsoFutas = true
         spinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
-                when (parent?.getItemAtPosition(position).toString()) {
-                    "Főoldal" -> startActivity(Intent(this@ElemzesActivity, Telefonszam::class.java))
-                    "Rendszeres kifizetések" -> startActivity(Intent(this@ElemzesActivity, RendszeresKifizetesek::class.java))
-                    "Beállítások" -> startActivity(Intent(this@ElemzesActivity, BeallitasokActivity::class.java))
-                    "Kijelentkezés" -> Kijelentkezes()
+            override fun onItemSelected(parent: AdapterView<*>, view: View?, position: Int, id: Long) {
+                if (elsoFutas) {
+                    elsoFutas = false
+                    return
+                }
+                val kiválasztottElem = parent.getItemAtPosition(position).toString()
+                // Ha a kiválasztott elem megegyezik az aktuális oldallal, ne navigáljunk
+                if (kiválasztottElem == aktualisOldal) return
+                when (kiválasztottElem) {
+                    "Főoldal" -> {
+                        val intent = Intent(this@ElemzesActivity, Telefonszam::class.java)
+                        startActivity(intent)
+                    }
+                    "Kategóriák" -> {
+                        val intent = Intent(this@ElemzesActivity, Kategoriak::class.java)
+                        startActivity(intent)
+                    }
+                    "Rendszeres kifizetések" -> {
+                        val intent = Intent(this@ElemzesActivity, RendszeresKifizetesek::class.java)
+                        startActivity(intent)
+                    }
+                    "Beállítások" -> {
+                        val intent = Intent(this@ElemzesActivity, BeallitasokActivity::class.java)
+                        startActivity(intent)
+                    }
+                    "Kijelentkezés" -> {
+                        Kijelentkezes()
+                    }
                 }
             }
-            override fun onNothingSelected(parent: AdapterView<*>?) {}
+            override fun onNothingSelected(parent: AdapterView<*>) { }
         }
 
         applyFontSizeToCurrentActivity()
@@ -91,7 +118,11 @@ class ElemzesActivity : AppCompatActivity() {
             .replace(R.id.oszlopDiagram, NapFragment())
             .commit()
     }
-
+    override fun onResume() {
+        super.onResume()
+        // Visszatéréskor állítsuk be a spinner kiválasztását úgy, hogy az aktuális oldal ("Elemzés") legyen kiválasztva (index 1)
+        spinner.setSelection(1)
+    }
     // Overlay eltávolítása a BarChart szülőjéből, ha létezik
     fun removeNoDataOverlay(chart: BarChart) {
         val parent = chart.parent as? ViewGroup ?: return
@@ -130,9 +161,9 @@ class ElemzesActivity : AppCompatActivity() {
             "Nagy" -> 20f
             else -> 16f
         }
-        updateTextViewsFontSize(findViewById(android.R.id.content), size)
+        //updateTextViewsFontSize(findViewById(android.R.id.content), size)
     }
-
+    /*
     private fun updateTextViewsFontSize(view: View, fontSize: Float) {
         if (view is TextView) view.textSize = fontSize
         if (view is ViewGroup) {
@@ -143,7 +174,7 @@ class ElemzesActivity : AppCompatActivity() {
 
         applyFontSizeToCurrentActivity()
     }
-
+    */
     private fun Kijelentkezes() {
         FirebaseManager.signOut()
         getSharedPreferences("UserPreferences", Context.MODE_PRIVATE)

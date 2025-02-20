@@ -1411,6 +1411,7 @@ color cardview_dark_background
 color cardview_light_background
 color cardview_shadow_end_color
 color cardview_shadow_start_color
+color colorAccent
 color colorLink
 color common_google_signin_btn_text_dark
 color common_google_signin_btn_text_dark_default
@@ -3487,6 +3488,27 @@ drawable ic_other_sign_in
 drawable ic_passkey
 drawable ic_password
 drawable ic_search_black_24
+drawable ikon1
+drawable ikon10
+drawable ikon11
+drawable ikon12
+drawable ikon13
+drawable ikon14
+drawable ikon15
+drawable ikon16
+drawable ikon17
+drawable ikon18
+drawable ikon19
+drawable ikon2
+drawable ikon20
+drawable ikon21
+drawable ikon3
+drawable ikon4
+drawable ikon5
+drawable ikon6
+drawable ikon7
+drawable ikon8
+drawable ikon9
 drawable indeterminate_static
 drawable input_background
 drawable input_bg
@@ -3671,6 +3693,8 @@ id action_text
 id actions
 id activity_chooser_view_content
 id add
+id addCategoryButton
+id addCategoryContainer
 id adjust_height
 id adjust_width
 id alertTitle
@@ -3713,7 +3737,10 @@ id callMeasure
 id cancel_button
 id carryVelocity
 id categoryIcon
+id categoryIconImageView
 id categoryName
+id categoryNameEditText
+id categoryNameTextView
 id center
 id centerCrop
 id centerInside
@@ -3800,6 +3827,10 @@ id escape
 id exitUntilCollapsed
 id expand_activities_button
 id expanded_menu
+id expenseAmountTextView
+id expenseContainer
+id expenseProgressBar
+id expenseRadioButton
 id fade
 id felhasznalonev
 id feliratokLayout
@@ -3841,6 +3872,7 @@ id hozzaadButton
 id hozzaadasGomb
 id hybrid
 id icon
+id iconGridView
 id icon_group
 id icon_only
 id ifRoom
@@ -3849,6 +3881,10 @@ id ignoreRequest
 id image
 id immediateStop
 id included
+id incomeAmountTextView
+id incomeContainer
+id incomeProgressBar
+id incomeRadioButton
 id indeterminate
 id info
 id inspection_slot_table_set
@@ -3861,6 +3897,7 @@ id jelszo_button
 id jumpToEnd
 id jumpToStart
 id kategoriakGridView
+id kategoriakListView
 id kategoriakSpinner
 id kilepes
 id labeled
@@ -3952,6 +3989,7 @@ id nevTextView
 id never
 id neverCompleteToEnd
 id neverCompleteToStart
+id noDataTextView
 id noScroll
 id noState
 id none
@@ -4057,6 +4095,7 @@ id search_mag_icon
 id search_plate
 id search_src_text
 id search_voice_btn
+id selectIconLabel
 id select_dialog_listview
 id selected
 id selection_type
@@ -4137,6 +4176,8 @@ id toggle
 id top
 id topPanel
 id torlesButton
+id totalExpenseTextView
+id totalIncomeTextView
 id touch_outside
 id transitionToEnd
 id transitionToStart
@@ -4149,7 +4190,10 @@ id transition_position
 id transition_scene_layoutid_cache
 id transition_transform
 id tranzakcioTipusSpinner
+id tranzakciokListView
 id triangle
+id typeRadioGroup
+id ujKategoriaHozzaadasa
 id unchecked
 id uniform
 id unlabeled
@@ -4296,6 +4340,9 @@ layout activity_beallitasok
 layout activity_elemzes
 layout activity_fooldal
 layout activity_hozaadas
+layout activity_kategoria_tranzakciok
+layout activity_kategoriahozzadas
+layout activity_kategoriak
 layout activity_regisztracio
 layout activity_rendszeres_kifizetesek
 layout bejelentkezes
@@ -4328,6 +4375,7 @@ layout fragment_nap
 layout ime_base_split_test_activity
 layout ime_secondary_split_test_activity
 layout kategoria_item
+layout kategoria_item_elemzeshez
 layout kifizetes_item
 layout linechart
 layout m3_alert_dialog
@@ -4687,6 +4735,8 @@ string tab
 string template_percent
 string title_activity_beallitasok
 string title_activity_hozzaadas
+string title_activity_kategoria_hozzaadas
+string title_activity_kategoria_tranzakcio
 string tooltip_description
 string tooltip_label
 style AlertDialog_AppCompat

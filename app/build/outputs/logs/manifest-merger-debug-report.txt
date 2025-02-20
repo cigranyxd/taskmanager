@@ -1,9 +1,9 @@
 -- Merging decision tree log ---
 manifest
-ADDED from D:\szemelyipenzugy\app\src\main\AndroidManifest.xml:2:1-55:12
-INJECTED from D:\szemelyipenzugy\app\src\main\AndroidManifest.xml:2:1-55:12
-INJECTED from D:\szemelyipenzugy\app\src\main\AndroidManifest.xml:2:1-55:12
-INJECTED from D:\szemelyipenzugy\app\src\main\AndroidManifest.xml:2:1-55:12
+ADDED from D:\szemelyipenzugy\app\src\main\AndroidManifest.xml:2:1-70:12
+INJECTED from D:\szemelyipenzugy\app\src\main\AndroidManifest.xml:2:1-70:12
+INJECTED from D:\szemelyipenzugy\app\src\main\AndroidManifest.xml:2:1-70:12
+INJECTED from D:\szemelyipenzugy\app\src\main\AndroidManifest.xml:2:1-70:12
 MERGED from [com.google.firebase:firebase-database-ktx:21.0.0] C:\Users\User\.gradle\caches\transforms-4\f1080e78c5e37bb654867c70afbc8f39\transformed\firebase-database-ktx-21.0.0\AndroidManifest.xml:2:1-18:12
 MERGED from [com.google.firebase:firebase-firestore-ktx:25.1.1] C:\Users\User\.gradle\caches\transforms-4\46e90d22a4c0436f1ae9c16830d6bb3b\transformed\firebase-firestore-ktx-25.1.1\AndroidManifest.xml:2:1-18:12
 MERGED from [com.google.android.material:material:1.12.0] C:\Users\User\.gradle\caches\transforms-4\06789bd50f4b3f46cd2cb64b3d63d297\transformed\material-1.12.0\AndroidManifest.xml:17:1-24:12
@@ -202,14 +202,14 @@ ADDED from D:\szemelyipenzugy\app\src\main\AndroidManifest.xml:8:5-81
 	android:name
 		ADDED from D:\szemelyipenzugy\app\src\main\AndroidManifest.xml:8:22-78
 meta-data#com.google.android.gms:play-services-identity-credentials:16.0.0-alpha05
-ADDED from D:\szemelyipenzugy\app\src\main\AndroidManifest.xml:10:5-12:65
+ADDED from D:\szemelyipenzugy\app\src\main\AndroidManifest.xml:10:5-13:12
 	android:value
 		ADDED from D:\szemelyipenzugy\app\src\main\AndroidManifest.xml:12:9-62
 	android:name
 		ADDED from D:\szemelyipenzugy\app\src\main\AndroidManifest.xml:11:9-96
 application
-ADDED from D:\szemelyipenzugy\app\src\main\AndroidManifest.xml:15:5-53:19
-INJECTED from D:\szemelyipenzugy\app\src\main\AndroidManifest.xml:15:5-53:19
+ADDED from D:\szemelyipenzugy\app\src\main\AndroidManifest.xml:15:5-68:19
+INJECTED from D:\szemelyipenzugy\app\src\main\AndroidManifest.xml:15:5-68:19
 MERGED from [com.google.firebase:firebase-database-ktx:21.0.0] C:\Users\User\.gradle\caches\transforms-4\f1080e78c5e37bb654867c70afbc8f39\transformed\firebase-database-ktx-21.0.0\AndroidManifest.xml:8:5-16:19
 MERGED from [com.google.firebase:firebase-database-ktx:21.0.0] C:\Users\User\.gradle\caches\transforms-4\f1080e78c5e37bb654867c70afbc8f39\transformed\firebase-database-ktx-21.0.0\AndroidManifest.xml:8:5-16:19
 MERGED from [com.google.firebase:firebase-firestore-ktx:25.1.1] C:\Users\User\.gradle\caches\transforms-4\46e90d22a4c0436f1ae9c16830d6bb3b\transformed\firebase-firestore-ktx-25.1.1\AndroidManifest.xml:8:5-16:19
@@ -310,68 +310,96 @@ MERGED from [com.google.android.play:core-common:2.0.3] C:\Users\User\.gradle\ca
 		ADDED from D:\szemelyipenzugy\app\src\main\AndroidManifest.xml:19:9-66
 	android:name
 		ADDED from D:\szemelyipenzugy\app\src\main\AndroidManifest.xml:16:9-28
-activity#com.example.szemelyes_penzugyi_menedzser.HozzaadasActivity
+activity#com.example.szemelyes_penzugyi_menedzser.KategoriaTranzakciokActivity
 ADDED from D:\szemelyipenzugy\app\src\main\AndroidManifest.xml:21:9-25:73
 	android:label
-		ADDED from D:\szemelyipenzugy\app\src\main\AndroidManifest.xml:24:13-61
+		ADDED from D:\szemelyipenzugy\app\src\main\AndroidManifest.xml:24:13-72
 	android:exported
 		ADDED from D:\szemelyipenzugy\app\src\main\AndroidManifest.xml:23:13-37
 	android:theme
 		ADDED from D:\szemelyipenzugy\app\src\main\AndroidManifest.xml:25:13-70
 	android:name
-		ADDED from D:\szemelyipenzugy\app\src\main\AndroidManifest.xml:22:13-46
-activity#com.example.szemelyes_penzugyi_menedzser.BeallitasokActivity
+		ADDED from D:\szemelyipenzugy\app\src\main\AndroidManifest.xml:22:13-57
+activity#com.example.szemelyes_penzugyi_menedzser.KategoriaHozzaadasActivity
 ADDED from D:\szemelyipenzugy\app\src\main\AndroidManifest.xml:26:9-30:73
 	android:label
-		ADDED from D:\szemelyipenzugy\app\src\main\AndroidManifest.xml:29:13-63
+		ADDED from D:\szemelyipenzugy\app\src\main\AndroidManifest.xml:29:13-71
 	android:exported
 		ADDED from D:\szemelyipenzugy\app\src\main\AndroidManifest.xml:28:13-37
 	android:theme
 		ADDED from D:\szemelyipenzugy\app\src\main\AndroidManifest.xml:30:13-70
 	android:name
-		ADDED from D:\szemelyipenzugy\app\src\main\AndroidManifest.xml:27:13-48
-activity#com.example.szemelyes_penzugyi_menedzser.RendszeresKifizetesek
-ADDED from D:\szemelyipenzugy\app\src\main\AndroidManifest.xml:31:9-33:40
+		ADDED from D:\szemelyipenzugy\app\src\main\AndroidManifest.xml:27:13-55
+activity#com.example.szemelyes_penzugyi_menedzser.HozzaadasActivity
+ADDED from D:\szemelyipenzugy\app\src\main\AndroidManifest.xml:31:9-35:73
+	android:label
+		ADDED from D:\szemelyipenzugy\app\src\main\AndroidManifest.xml:34:13-61
 	android:exported
 		ADDED from D:\szemelyipenzugy\app\src\main\AndroidManifest.xml:33:13-37
+	android:theme
+		ADDED from D:\szemelyipenzugy\app\src\main\AndroidManifest.xml:35:13-70
 	android:name
-		ADDED from D:\szemelyipenzugy\app\src\main\AndroidManifest.xml:32:13-50
-activity#com.example.szemelyes_penzugyi_menedzser.ElemzesActivity
-ADDED from D:\szemelyipenzugy\app\src\main\AndroidManifest.xml:34:9-37:56
-	android:parentActivityName
-		ADDED from D:\szemelyipenzugy\app\src\main\AndroidManifest.xml:37:13-54
+		ADDED from D:\szemelyipenzugy\app\src\main\AndroidManifest.xml:32:13-46
+activity#com.example.szemelyes_penzugyi_menedzser.BeallitasokActivity
+ADDED from D:\szemelyipenzugy\app\src\main\AndroidManifest.xml:36:9-40:73
+	android:label
+		ADDED from D:\szemelyipenzugy\app\src\main\AndroidManifest.xml:39:13-63
 	android:exported
-		ADDED from D:\szemelyipenzugy\app\src\main\AndroidManifest.xml:36:13-36
+		ADDED from D:\szemelyipenzugy\app\src\main\AndroidManifest.xml:38:13-37
+	android:theme
+		ADDED from D:\szemelyipenzugy\app\src\main\AndroidManifest.xml:40:13-70
 	android:name
-		ADDED from D:\szemelyipenzugy\app\src\main\AndroidManifest.xml:35:13-44
-activity#com.example.szemelyes_penzugyi_menedzser.Regisztracio
-ADDED from D:\szemelyipenzugy\app\src\main\AndroidManifest.xml:38:9-40:40
-	android:exported
-		ADDED from D:\szemelyipenzugy\app\src\main\AndroidManifest.xml:40:13-37
-	android:name
-		ADDED from D:\szemelyipenzugy\app\src\main\AndroidManifest.xml:39:13-41
-activity#com.example.szemelyes_penzugyi_menedzser.Telefonszam
+		ADDED from D:\szemelyipenzugy\app\src\main\AndroidManifest.xml:37:13-48
+activity#com.example.szemelyes_penzugyi_menedzser.RendszeresKifizetesek
 ADDED from D:\szemelyipenzugy\app\src\main\AndroidManifest.xml:41:9-43:40
 	android:exported
 		ADDED from D:\szemelyipenzugy\app\src\main\AndroidManifest.xml:43:13-37
 	android:name
-		ADDED from D:\szemelyipenzugy\app\src\main\AndroidManifest.xml:42:13-40
-activity#com.example.szemelyes_penzugyi_menedzser.Bejelentkezes
-ADDED from D:\szemelyipenzugy\app\src\main\AndroidManifest.xml:44:9-52:20
+		ADDED from D:\szemelyipenzugy\app\src\main\AndroidManifest.xml:42:13-50
+activity#com.example.szemelyes_penzugyi_menedzser.ElemzesActivity
+ADDED from D:\szemelyipenzugy\app\src\main\AndroidManifest.xml:45:9-48:56
+	android:parentActivityName
+		ADDED from D:\szemelyipenzugy\app\src\main\AndroidManifest.xml:48:13-54
 	android:exported
-		ADDED from D:\szemelyipenzugy\app\src\main\AndroidManifest.xml:46:13-36
+		ADDED from D:\szemelyipenzugy\app\src\main\AndroidManifest.xml:47:13-36
 	android:name
-		ADDED from D:\szemelyipenzugy\app\src\main\AndroidManifest.xml:45:13-42
+		ADDED from D:\szemelyipenzugy\app\src\main\AndroidManifest.xml:46:13-44
+activity#com.example.szemelyes_penzugyi_menedzser.Kategoriak
+ADDED from D:\szemelyipenzugy\app\src\main\AndroidManifest.xml:49:9-52:57
+	android:parentActivityName
+		ADDED from D:\szemelyipenzugy\app\src\main\AndroidManifest.xml:52:13-54
+	android:exported
+		ADDED from D:\szemelyipenzugy\app\src\main\AndroidManifest.xml:51:13-36
+	android:name
+		ADDED from D:\szemelyipenzugy\app\src\main\AndroidManifest.xml:50:13-39
+activity#com.example.szemelyes_penzugyi_menedzser.Regisztracio
+ADDED from D:\szemelyipenzugy\app\src\main\AndroidManifest.xml:53:9-55:40
+	android:exported
+		ADDED from D:\szemelyipenzugy\app\src\main\AndroidManifest.xml:55:13-37
+	android:name
+		ADDED from D:\szemelyipenzugy\app\src\main\AndroidManifest.xml:54:13-41
+activity#com.example.szemelyes_penzugyi_menedzser.Telefonszam
+ADDED from D:\szemelyipenzugy\app\src\main\AndroidManifest.xml:56:9-58:40
+	android:exported
+		ADDED from D:\szemelyipenzugy\app\src\main\AndroidManifest.xml:58:13-37
+	android:name
+		ADDED from D:\szemelyipenzugy\app\src\main\AndroidManifest.xml:57:13-40
+activity#com.example.szemelyes_penzugyi_menedzser.Bejelentkezes
+ADDED from D:\szemelyipenzugy\app\src\main\AndroidManifest.xml:59:9-67:20
+	android:exported
+		ADDED from D:\szemelyipenzugy\app\src\main\AndroidManifest.xml:61:13-36
+	android:name
+		ADDED from D:\szemelyipenzugy\app\src\main\AndroidManifest.xml:60:13-42
 intent-filter#action:name:android.intent.action.MAIN+category:name:android.intent.category.LAUNCHER
-ADDED from D:\szemelyipenzugy\app\src\main\AndroidManifest.xml:47:13-51:29
+ADDED from D:\szemelyipenzugy\app\src\main\AndroidManifest.xml:62:13-66:29
 action#android.intent.action.MAIN
-ADDED from D:\szemelyipenzugy\app\src\main\AndroidManifest.xml:48:17-69
+ADDED from D:\szemelyipenzugy\app\src\main\AndroidManifest.xml:63:17-69
 	android:name
-		ADDED from D:\szemelyipenzugy\app\src\main\AndroidManifest.xml:48:25-66
+		ADDED from D:\szemelyipenzugy\app\src\main\AndroidManifest.xml:63:25-66
 category#android.intent.category.LAUNCHER
-ADDED from D:\szemelyipenzugy\app\src\main\AndroidManifest.xml:50:17-77
+ADDED from D:\szemelyipenzugy\app\src\main\AndroidManifest.xml:65:17-77
 	android:name
-		ADDED from D:\szemelyipenzugy\app\src\main\AndroidManifest.xml:50:27-74
+		ADDED from D:\szemelyipenzugy\app\src\main\AndroidManifest.xml:65:27-74
 uses-sdk
 INJECTED from D:\szemelyipenzugy\app\src\main\AndroidManifest.xml reason: use-sdk injection requested
 INJECTED from D:\szemelyipenzugy\app\src\main\AndroidManifest.xml
