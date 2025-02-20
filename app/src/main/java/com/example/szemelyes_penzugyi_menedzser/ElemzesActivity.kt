@@ -38,7 +38,6 @@ class ElemzesActivity : AppCompatActivity() {
     @SuppressLint("MissingInflatedId")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
         setContentView(R.layout.activity_elemzes)
 
         val currentUser = FirebaseManager.auth.currentUser
@@ -141,6 +140,8 @@ class ElemzesActivity : AppCompatActivity() {
                 updateTextViewsFontSize(view.getChildAt(i), fontSize)
             }
         }
+
+        applyFontSizeToCurrentActivity()
     }
 
     private fun Kijelentkezes() {
@@ -151,6 +152,14 @@ class ElemzesActivity : AppCompatActivity() {
             .apply()
         val intent = Intent(this, Bejelentkezes::class.java)
         intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+        startActivity(intent)
+        finish()
+    }
+    @Suppress("MissingSuperCall")
+    override fun onBackPressed() {
+        // Vissza gomb: mindig a Főoldalra navigálunk
+        val intent = Intent(this, Telefonszam::class.java)
+        intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK
         startActivity(intent)
         finish()
     }

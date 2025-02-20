@@ -1,30 +1,40 @@
 package com.example.szemelyes_penzugyi_menedzser
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
 import android.content.res.Configuration
 import android.os.Bundle
 import android.text.InputType
 import android.util.Log
+import android.util.TypedValue
 import android.view.View
 import android.view.ViewGroup
+import android.widget.AdapterView
+import android.widget.ArrayAdapter
 import android.widget.Button
 import android.widget.EditText
 import android.widget.LinearLayout
+import android.widget.Spinner
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 import com.google.firebase.auth.EmailAuthProvider
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FieldValue
+import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.FirebaseFirestore
 import java.util.Locale
 
 @Suppress("DEPRECATION")
 class BeallitasokActivity : AppCompatActivity() {
+
     private lateinit var auth: FirebaseAuth
     private lateinit var db: FirebaseFirestore
+    private lateinit var spinner: Spinner
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -33,20 +43,99 @@ class BeallitasokActivity : AppCompatActivity() {
         auth = FirebaseAuth.getInstance()
         db = FirebaseFirestore.getInstance()
 
+        // UI elemek
         val betumeretButton = findViewById<Button>(R.id.betumeret_button)
         val nyelvButton = findViewById<Button>(R.id.nyelv_button)
         val jelszoButton = findViewById<Button>(R.id.jelszo_button)
         val profilTorlesButton = findViewById<Button>(R.id.profil_torles_button)
-        val penzugyiTorlesButton = findViewById<Button>(R.id.penzugyi_adatok_torles_button) // ÚJ!!
+        val penzugyiTorlesButton = findViewById<Button>(R.id.penzugyi_adatok_torles_button)
 
         betumeretButton.setOnClickListener { showBetumeretDialog() }
         nyelvButton.setOnClickListener { showNyelvDialog() }
         jelszoButton.setOnClickListener { showJelszoDialog() }
         profilTorlesButton.setOnClickListener { showProfilTorlesDialog() }
-        penzugyiTorlesButton.setOnClickListener { showPenzugyiAdatokTorlesDialog() } // ÚJ!!
+        penzugyiTorlesButton.setOnClickListener { showPenzugyiAdatokTorlesDialog() }
+
+        // Spinner inicializálása
+        spinner = findViewById(R.id.lenyilo_menu)
+        val lehetosegek = listOf("Főoldal", "Elemzés", "Kategóriák", "Rendszeres kifizetések", "Beállítások", "Kijelentkezés")
+        val spinnerAdapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, lehetosegek)
+        spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        spinner.adapter = spinnerAdapter
+
+        // Ebben az Activity-ben az aktuális oldal "Beállítások", tehát index 4
+        spinner.setSelection(4)
+        var elsoFutas = true
+        spinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(
+                parent: AdapterView<*>, view: View?, position: Int, id: Long
+            ) {
+                if (elsoFutas) {
+                    elsoFutas = false
+                    return
+                }
+                val kiválasztottElem = parent.getItemAtPosition(position).toString()
+                // Ha az aktuális oldal ("Beállítások") van kiválasztva, ne navigáljunk
+                if (kiválasztottElem == "Beállítások") return
+                when (kiválasztottElem) {
+                    "Főoldal" -> {
+                        val intent = Intent(this@BeallitasokActivity, Telefonszam::class.java)
+                        startActivity(intent)
+                    }
+                    "Elemzés" -> {
+                        val intent = Intent(this@BeallitasokActivity, ElemzesActivity::class.java)
+                        startActivity(intent)
+                    }
+                    "Kategóriák" -> {
+                        val intent = Intent(this@BeallitasokActivity, Kategoriak::class.java)
+                        startActivity(intent)
+                    }
+                    "Rendszeres kifizetések" -> {
+                        val intent = Intent(this@BeallitasokActivity, RendszeresKifizetesek::class.java)
+                        startActivity(intent)
+                    }
+                    "Kijelentkezés" -> {
+                        kijelentkezes()
+                    }
+                }
+            }
+            override fun onNothingSelected(parent: AdapterView<*>) { }
+        }
+
+        // Ablak insets kezelése: használd a gyökérnézetet (android.R.id.content)
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(android.R.id.content)) { v, insets ->
+            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
+            insets
+        }
+
 
         // Betűméret frissítése
         applyFontSizeToCurrentActivity()
+    }
+    private fun kijelentkezes() {
+        auth.signOut()
+        getSharedPreferences("UserPreferences", Context.MODE_PRIVATE)
+            .edit()
+            .putBoolean("isLoggedIn", false)
+            .apply()
+        val intent = Intent(this, Bejelentkezes::class.java)
+        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+        startActivity(intent)
+        finish()
+    }
+    override fun onResume() {
+        super.onResume()
+        // Visszatéréskor állítsuk be a spinner értékét az aktuális oldalnak megfelelően (index 4)
+        spinner.setSelection(4)
+    }
+    @Suppress("MissingSuperCall")
+    override fun onBackPressed() {
+        // Vissza gomb: mindig a Főoldalra navigálunk
+        val intent = Intent(this, Telefonszam::class.java)
+        intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK
+        startActivity(intent)
+        finish()
     }
 
     private fun applyFontSizeToCurrentActivity() {
@@ -62,7 +151,7 @@ class BeallitasokActivity : AppCompatActivity() {
 
     private fun updateTextViewsFontSize(view: View, fontSize: Float) {
         if (view is TextView) {
-            view.textSize = fontSize
+            view.setTextSize(TypedValue.COMPLEX_UNIT_SP, fontSize)
         }
         if (view is ViewGroup) {
             for (i in 0 until view.childCount) {
@@ -80,7 +169,7 @@ class BeallitasokActivity : AppCompatActivity() {
                 val prefs = getSharedPreferences("UserPreferences", Context.MODE_PRIVATE)
                 prefs.edit().putString("betumeret", selectedSize).apply()
 
-                // Az aktivitás újraindítása a betűméret frissítése érdekében
+                // Az Activity újraindítása a betűméret frissítése érdekében
                 val intent = Intent(this, BeallitasokActivity::class.java)
                 finish()
                 startActivity(intent)
@@ -100,7 +189,7 @@ class BeallitasokActivity : AppCompatActivity() {
                 // Nyelv beállítása és mentése
                 setLocale(selectedLangCode)
 
-                // Újraindítja az activity-t
+                // Újraindítja az Activity-t
                 val intent = Intent(this, BeallitasokActivity::class.java)
                 finish()
                 startActivity(intent)
@@ -118,8 +207,6 @@ class BeallitasokActivity : AppCompatActivity() {
 
         // Nyelv frissítése
         resources.updateConfiguration(config, resources.displayMetrics)
-
-        // Nyelv mentése a SharedPreferences-be
         val prefs = getSharedPreferences("UserPreferences", Context.MODE_PRIVATE)
         prefs.edit().putString("nyelv", languageCode).apply()
     }
@@ -134,19 +221,16 @@ class BeallitasokActivity : AppCompatActivity() {
         val builder = AlertDialog.Builder(this)
         builder.setTitle("Jelszó változtatás")
 
-        // LinearLayout a két input mezőhöz
         val layout = LinearLayout(this)
         layout.orientation = LinearLayout.VERTICAL
         layout.setPadding(50, 40, 50, 10)
 
-        // Jelenlegi jelszó input mező
         val currentPasswordInput = EditText(this)
         currentPasswordInput.inputType =
             InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_PASSWORD
         currentPasswordInput.hint = "Jelenlegi jelszó"
         layout.addView(currentPasswordInput)
 
-        // Új jelszó input mező
         val newPasswordInput = EditText(this)
         newPasswordInput.inputType =
             InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_PASSWORD
@@ -154,7 +238,6 @@ class BeallitasokActivity : AppCompatActivity() {
         layout.addView(newPasswordInput)
 
         builder.setView(layout)
-
         builder.setPositiveButton("Mentés") { _, _ ->
             val currentPassword = currentPasswordInput.text.toString()
             val newPassword = newPasswordInput.text.toString()
@@ -165,40 +248,22 @@ class BeallitasokActivity : AppCompatActivity() {
                     val email = user.email
                     if (email != null) {
                         val credential = EmailAuthProvider.getCredential(email, currentPassword)
-
-                        // Újrahitelesítés
                         user.reauthenticate(credential).addOnCompleteListener { reauthTask ->
                             if (reauthTask.isSuccessful) {
                                 user.updatePassword(newPassword)
                                     .addOnCompleteListener { updateTask ->
                                         if (updateTask.isSuccessful) {
-                                            Toast.makeText(
-                                                this,
-                                                "Jelszó frissítve!",
-                                                Toast.LENGTH_SHORT
-                                            ).show()
+                                            Toast.makeText(this, "Jelszó frissítve!", Toast.LENGTH_SHORT).show()
                                         } else {
-                                            Toast.makeText(
-                                                this,
-                                                "Hiba történt: ${updateTask.exception?.message}",
-                                                Toast.LENGTH_SHORT
-                                            ).show()
+                                            Toast.makeText(this, "Hiba: ${updateTask.exception?.message}", Toast.LENGTH_SHORT).show()
                                         }
                                     }
                             } else {
-                                Toast.makeText(
-                                    this,
-                                    "Újrahitelesítés sikertelen: ${reauthTask.exception?.message}",
-                                    Toast.LENGTH_SHORT
-                                ).show()
+                                Toast.makeText(this, "Újrahitelesítés sikertelen: ${reauthTask.exception?.message}", Toast.LENGTH_SHORT).show()
                             }
                         }
                     } else {
-                        Toast.makeText(
-                            this,
-                            "Hiba: Az e-mail cím nem érhető el.",
-                            Toast.LENGTH_SHORT
-                        ).show()
+                        Toast.makeText(this, "Hiba: Az e-mail cím nem érhető el.", Toast.LENGTH_SHORT).show()
                     }
                 } else {
                     Toast.makeText(this, "Nincs bejelentkezve!", Toast.LENGTH_SHORT).show()
@@ -212,16 +277,11 @@ class BeallitasokActivity : AppCompatActivity() {
     }
 
     private fun Kijelentkezes() {
-        // Kijelentkeztetjük a felhasználót
         FirebaseAuth.getInstance().signOut()
-
-        // Töröljük a belépési állapotot a SharedPreferences-ben
         getSharedPreferences("UserPreferences", Context.MODE_PRIVATE)
             .edit()
             .putBoolean("isLoggedIn", false)
             .apply()
-
-        // Toast üzenet a kijelentkezés sikerességéről
         Toast.makeText(this, "Kijelentkezve!", Toast.LENGTH_SHORT).show()
     }
 
@@ -229,13 +289,11 @@ class BeallitasokActivity : AppCompatActivity() {
         val builder = AlertDialog.Builder(this)
         builder.setTitle("Profil törlése")
             .setMessage("Biztosan törölni szeretné a profilját?")
-
         val passwordInput = EditText(this)
         passwordInput.inputType =
             InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_PASSWORD
         passwordInput.hint = "Jelenlegi jelszó"
         builder.setView(passwordInput)
-
         builder.setPositiveButton("Igen") { _, _ ->
             val currentPassword = passwordInput.text.toString()
             if (currentPassword.isNotBlank()) {
@@ -244,29 +302,15 @@ class BeallitasokActivity : AppCompatActivity() {
                     val email = user.email
                     if (email != null) {
                         val credential = EmailAuthProvider.getCredential(email, currentPassword)
-
-                        // Újrahitelesítés
                         user.reauthenticate(credential).addOnCompleteListener { reauthTask ->
                             if (reauthTask.isSuccessful) {
-                                // Profil törlése
                                 user.delete().addOnCompleteListener { deleteTask ->
                                     if (deleteTask.isSuccessful) {
-                                        // Kijelentkezés
                                         Kijelentkezes()
-
-                                        // Toast üzenet
-                                        Toast.makeText(
-                                            this,
-                                            "Profil törölve. Kijelentkeztetve.",
-                                            Toast.LENGTH_SHORT
-                                        ).show()
-
-                                        // Újraindítjuk az alkalmazást a Bejelentkezési oldallal
-                                        val intent =
-                                            Intent(applicationContext, Bejelentkezes::class.java)
+                                        Toast.makeText(this, "Profil törölve. Kijelentkeztetve.", Toast.LENGTH_SHORT).show()
+                                        val intent = Intent(applicationContext, Bejelentkezes::class.java)
                                         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
                                         startActivity(intent)
-                                        // Az aktuális aktivitás befejezése
                                         finish()
                                     } else {
                                         Toast.makeText(
@@ -309,51 +353,43 @@ class BeallitasokActivity : AppCompatActivity() {
             .setNegativeButton("Mégse") { dialog, _ -> dialog.dismiss() }
         builder.create().show()
     }
+
     private fun torolPenzugyiAdatokat() {
         val currentUser = FirebaseAuth.getInstance().currentUser
         val uid = currentUser?.uid
 
         if (uid != null) {
             db.collection("users")
-                .document(uid) // Felhasználói dokumentum
-                .collection("nap") // A "nap" al-gyűjtemény
-                .get() // Lekérjük a "nap" al-gyűjteményt
+                .document(uid)
+                .collection("nap")
+                .get()
                 .addOnSuccessListener { snapshot ->
                     if (snapshot.isEmpty) {
                         Log.d("PenzugyiTorles", "A 'nap' gyűjtemény üres.")
                         Toast.makeText(this, "A 'nap' gyűjtemény üres.", Toast.LENGTH_SHORT).show()
                         return@addOnSuccessListener
                     }
-
-                    // Ha vannak dokumentumok, töröljük őket
                     val batch = db.batch()
                     for (document in snapshot) {
-                        batch.delete(document.reference) // Törlés minden dokumentumra
+                        batch.delete(document.reference)
                     }
-
-                    // Batch művelet végrehajtása
                     batch.commit()
                         .addOnSuccessListener {
-                            Log.d("PenzugyiTorles", "'nap' al-gyűjtemény adatai sikeresen törölve.")
-                            Toast.makeText(this, "A 'nap' al-gyűjtemény adatai sikeresen törölve!", Toast.LENGTH_SHORT).show()
+                            Log.d("PenzugyiTorles", "'nap' adatai sikeresen törölve.")
+                            Toast.makeText(this, "A 'nap' adatai sikeresen törölve!", Toast.LENGTH_SHORT).show()
                         }
                         .addOnFailureListener { e ->
-                            Log.e("PenzugyiTorles", "Hiba történt a 'nap' al-gyűjtemény törlésénél: ${e.message}")
-                            Toast.makeText(this, "Hiba történt a 'nap' al-gyűjtemény törlésénél: ${e.message}", Toast.LENGTH_SHORT).show()
+                            Log.e("PenzugyiTorles", "Hiba a törlésnél: ${e.message}")
+                            Toast.makeText(this, "Hiba a törlésnél: ${e.message}", Toast.LENGTH_SHORT).show()
                         }
                 }
                 .addOnFailureListener { e ->
-                    Log.e("PenzugyiTorles", "Hiba történt a 'nap' al-gyűjtemény lekérésénél: ${e.message}")
-                    Toast.makeText(this, "Hiba történt a 'nap' al-gyűjtemény lekérésénél: ${e.message}", Toast.LENGTH_SHORT).show()
+                    Log.e("PenzugyiTorles", "Hiba a lekérésnél: ${e.message}")
+                    Toast.makeText(this, "Hiba a lekérésnél: ${e.message}", Toast.LENGTH_SHORT).show()
                 }
         } else {
             Log.d("PenzugyiTorles", "Felhasználói azonosító nem található!")
             Toast.makeText(this, "Felhasználói azonosító nem található!", Toast.LENGTH_SHORT).show()
         }
     }
-
-
-
 }
-
-

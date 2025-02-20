@@ -1,40 +1,61 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:padding="16dp">
+    android:padding="16dp"
+    tools:context=".BeallitasokActivity">
 
+    <!-- Lenyíló menü (spinner) a navigációhoz -->
+    <Spinner
+        android:id="@+id/lenyilo_menu"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:spinnerMode="dropdown"
+        android:layout_marginBottom="16dp" />
+
+    <!-- Betűméret gomb -->
     <Button
         android:id="@+id/betumeret_button"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Betűméret" />
+        android:text="Betűméret"
+        android:layout_marginBottom="8dp" />
 
+    <!-- Nyelv gomb -->
     <Button
         android:id="@+id/nyelv_button"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Nyelv" />
+        android:text="Nyelv"
+        android:layout_marginBottom="8dp" />
 
+    <!-- Jelszó változtatás gomb -->
     <Button
         android:id="@+id/jelszo_button"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Jelszó változtatás" />
+        android:text="Jelszó változtatás"
+        android:layout_marginBottom="8dp" />
 
+    <!-- Profil törlése gomb -->
     <Button
         android:id="@+id/profil_torles_button"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Profil törlése" />
-    
+        android:text="Profil törlése"
+        android:layout_marginBottom="8dp" />
+
+    <!-- Pénzügyi adatok törlése gomb -->
     <Button
         android:id="@+id/penzugyi_adatok_torles_button"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Pénzügyi adatok törlése" />
-
+        android:text="Pénzügyi adatok törlése"
+        android:layout_marginBottom="8dp" />
 
 </LinearLayout>

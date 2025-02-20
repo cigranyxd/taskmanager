@@ -11,4 +11,6 @@
     <color name="gray">#B0BEC5</color>
     <color name="light_gray">#CFD8DC</color>
     <color name="colorLink">#2196F3</color>
+    <color name="white">#FFFFFFFF</color>
+    <color name="colorAccent">#FF4081</color>
 </resources>
