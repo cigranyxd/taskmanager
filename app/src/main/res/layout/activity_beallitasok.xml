@@ -1,61 +1,216 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
+<androidx.constraintlayout.widget.ConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/main"
+    android:id="@+id/settings_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:padding="16dp"
-    tools:context=".BeallitasokActivity">
+    android:background="?android:colorBackground">
 
-    <!-- Lenyíló menü (spinner) a navigációhoz -->
-    <Spinner
-        android:id="@+id/lenyilo_menu"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:spinnerMode="dropdown"
-        android:layout_marginBottom="16dp" />
+    <!-- Felső sáv: Toolbar -->
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/toolbar"
+        android:layout_width="0dp"
+        android:layout_height="?attr/actionBarSize"
+        android:background="#B0B0B0"
+        app:navigationIcon="@android:drawable/ic_menu_preferences"
+        app:title="Beállítások"
+        app:titleTextColor="@android:color/black"
+        app:titleTextAppearance="@style/TextAppearance.AppCompat.Widget.ActionBar.Title"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
 
-    <!-- Betűméret gomb -->
-    <Button
-        android:id="@+id/betumeret_button"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Betűméret"
-        android:layout_marginBottom="8dp" />
+    <!-- Tartalom: gombok egy ScrollView-n belül -->
+    <ScrollView
+        android:id="@+id/scrollView"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:fillViewport="true"
+        app:layout_constraintTop_toBottomOf="@id/toolbar"
+        app:layout_constraintBottom_toTopOf="@id/bottom_bar"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
 
-    <!-- Nyelv gomb -->
-    <Button
-        android:id="@+id/nyelv_button"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Nyelv"
-        android:layout_marginBottom="8dp" />
+        <LinearLayout
+            android:id="@+id/linearLayout_buttons"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="16dp">
 
-    <!-- Jelszó változtatás gomb -->
-    <Button
-        android:id="@+id/jelszo_button"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Jelszó változtatás"
-        android:layout_marginBottom="8dp" />
+            <!-- Gomb: Betűméret -->
+            <FrameLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp">
 
-    <!-- Profil törlése gomb -->
-    <Button
-        android:id="@+id/profil_torles_button"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Profil törlése"
-        android:layout_marginBottom="8dp" />
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/betumeret_button"
+                    style="@style/Widget.MaterialComponents.Button"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:backgroundTint="#009bff"
+                    android:text="Betűméret"
+                    android:gravity="center_vertical|start"
+                    android:fontFamily="sans-serif"
+                    android:paddingStart="32dp"
+                    app:cornerRadius="16dp" />
+            </FrameLayout>
 
-    <!-- Pénzügyi adatok törlése gomb -->
-    <Button
-        android:id="@+id/penzugyi_adatok_torles_button"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Pénzügyi adatok törlése"
-        android:layout_marginBottom="8dp" />
+            <!-- Gomb: Nyelv -->
+            <FrameLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp">
 
-</LinearLayout>
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/nyelv_button"
+                    style="@style/Widget.MaterialComponents.Button"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:backgroundTint="#009bff"
+                    android:text="Nyelv"
+                    android:gravity="center_vertical|start"
+                    android:fontFamily="sans-serif"
+                    android:paddingStart="32dp"
+                    app:cornerRadius="16dp" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="‹"
+                    android:textColor="@android:color/white"
+                    android:textSize="16sp"
+                    android:layout_gravity="start|center_vertical"
+                    android:paddingStart="8dp"
+                    android:clickable="false" />
+            </FrameLayout>
+
+            <!-- Gomb: Jelszó változtatás -->
+            <FrameLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp">
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/jelszo_button"
+                    style="@style/Widget.MaterialComponents.Button"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:backgroundTint="#009bff"
+                    android:text="Jelszó változtatás"
+                    android:gravity="center_vertical|start"
+                    android:fontFamily="sans-serif"
+                    android:paddingStart="32dp"
+                    app:cornerRadius="16dp" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="‹"
+                    android:textColor="@android:color/white"
+                    android:textSize="16sp"
+                    android:layout_gravity="start|center_vertical"
+                    android:paddingStart="8dp"
+                    android:clickable="false" />
+            </FrameLayout>
+
+            <!-- Gomb: Profil törlése -->
+            <FrameLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp">
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/profil_torles_button"
+                    style="@style/Widget.MaterialComponents.Button"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:backgroundTint="#009bff"
+                    android:text="Profil törlése"
+                    android:gravity="center_vertical|start"
+                    android:fontFamily="sans-serif"
+                    android:paddingStart="32dp"
+                    app:cornerRadius="16dp" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="‹"
+                    android:textColor="@android:color/white"
+                    android:textSize="16sp"
+                    android:layout_gravity="start|center_vertical"
+                    android:paddingStart="8dp"
+                    android:clickable="false" />
+            </FrameLayout>
+
+            <!-- Gomb: Pénzügyi adatok törlése -->
+            <FrameLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp">
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/penzugyi_adatok_torles_button"
+                    style="@style/Widget.MaterialComponents.Button"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:backgroundTint="#009bff"
+                    android:text="Pénzügyi adatok törlése"
+                    android:gravity="center_vertical|start"
+                    android:fontFamily="sans-serif"
+                    android:paddingStart="32dp"
+                    app:cornerRadius="16dp" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="‹"
+                    android:textColor="@android:color/white"
+                    android:textSize="16sp"
+                    android:layout_gravity="start|center_vertical"
+                    android:paddingStart="8dp"
+                    android:clickable="false" />
+            </FrameLayout>
+
+        </LinearLayout>
+    </ScrollView>
+
+    <!-- Alsó sáv: Alkalmazás Verzió -->
+    <LinearLayout
+        android:id="@+id/bottom_bar"
+        android:layout_width="0dp"
+        android:layout_height="?attr/actionBarSize"
+        android:background="#B0B0B0"
+        android:orientation="vertical"
+        android:padding="8dp"
+        android:gravity="center"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <TextView
+            android:id="@+id/app_version_label"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Alkalmazás Verzió"
+            android:textColor="@android:color/black"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:fontFamily="sans-serif-medium"
+            android:gravity="center" />
+
+        <TextView
+            android:id="@+id/app_version_value"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="1.0.0."
+            android:textColor="@android:color/black"
+            android:textSize="14sp"
+            android:fontFamily="sans-serif"
+            android:layout_marginTop="4dp"
+            android:gravity="center" />
+    </LinearLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

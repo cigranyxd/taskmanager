@@ -88,8 +88,6 @@ dependencies {
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
     implementation(libs.mpandroidchart.vv310)
-    implementation("com.google.code.gson:gson:2.8.9")
-
 
 
 

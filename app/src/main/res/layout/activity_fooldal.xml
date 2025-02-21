@@ -6,68 +6,82 @@
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="#ECEFF1"
     tools:context=".Telefonszam">
 
-    <!-- Lenyíló menü -->
+    <!-- Modernizált legördülő menü (Spinner) -->
+
+    <!-- Pénzösszeg szöveg középen, nagyobb távolsággal -->
+
     <Spinner
         android:id="@+id/lenyilo_menu"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_margin="16dp"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        android:spinnerMode="dropdown" />
-
-    <!-- Pénzösszeg szöveg megjelenítése -->
-    <TextView
-        android:id="@+id/JelenlegiText"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
+        android:layout_marginHorizontal="32dp"
+        android:background="@drawable/spinner_background"
+        android:padding="12dp"
+        android:popupBackground="#FFFFFF"
+        tools:layout_editor_absoluteX="32dp"
+        tools:layout_editor_absoluteY="16dp" />
+
+    <TextView
+        android:id="@+id/JelenlegiText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="32dp"
         android:text="Jelenlegi egyenleg:"
-        android:textSize="24sp"
-        android:textAlignment="center"
+        android:textSize="26sp"
+        android:textColor="#000000"
+        android:textStyle="bold"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/lenyilo_menu" />
+        app:layout_constraintTop_toBottomOf="@id/lenyilo_menu"/>
 
-    <!-- Aktuális pénz mező -->
+    <!-- Egyenleg mező (Lekerekített, kiemelkedő) -->
     <EditText
         android:id="@+id/Aktualis_penz"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginHorizontal="16dp"
-        android:layout_marginTop="8dp"
-        android:ems="10"
+        android:layout_marginHorizontal="32dp"
+        android:layout_marginTop="16dp"
         android:inputType="numberDecimal"
         android:textSize="24sp"
-        android:hint="0"
+        android:textColor="#009bff"
         android:gravity="center"
+        android:background="@android:drawable/editbox_background"
+        android:padding="16dp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/JelenlegiText" />
+        app:layout_constraintTop_toBottomOf="@id/JelenlegiText"/>
 
-    <!-- Hozzáadás gomb -->
+    <!-- Gombok (külön-külön, nem zsúfoltan) -->
     <Button
         android:id="@+id/hozzaadas_gomb"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
+        android:layout_marginTop="40dp"
+        android:layout_marginHorizontal="32dp"
         android:text="Hozzáadás"
+        android:backgroundTint="#009bff"
+        android:textColor="#FFFFFF"
+        android:textSize="16sp"
+        android:padding="14dp"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toStartOf="@+id/levonas_gomb"
-        app:layout_constraintHorizontal_chainStyle="packed"
-        app:layout_constraintTop_toBottomOf="@+id/Aktualis_penz" />
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/Aktualis_penz"/>
 
-    <!-- Levonás gomb -->
     <Button
         android:id="@+id/levonas_gomb"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
+        android:layout_marginHorizontal="32dp"
         android:text="Levonás"
+        android:backgroundTint="#009bff"
+        android:textColor="#FFFFFF"
+        android:textSize="16sp"
+        android:padding="14dp"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/hozzaadas_gomb"
-        app:layout_constraintTop_toBottomOf="@+id/Aktualis_penz" />
-
+        app:layout_constraintTop_toBottomOf="@id/hozzaadas_gomb"/>
 </androidx.constraintlayout.widget.ConstraintLayout>

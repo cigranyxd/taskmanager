@@ -3,47 +3,46 @@ package com.example.szemelyes_penzugyi_menedzser
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.text.InputType
 import android.util.Patterns
 import android.view.View
-import android.view.ViewGroup
-import android.widget.Button
-import android.widget.EditText
-import android.widget.TextView
-import android.widget.Toast
-import androidx.activity.enableEdgeToEdge
+import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import com.google.firebase.auth.FirebaseAuth
 
 class Bejelentkezes : AppCompatActivity() {
 
     private lateinit var auth: FirebaseAuth
+    private var isPasswordVisible = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
         setContentView(R.layout.bejelentkezes)
 
         auth = FirebaseAuth.getInstance()
 
-        // Ellenőrizzük, hogy a felhasználó már be van-e jelentkezve
-        val sharedPreferences = getSharedPreferences("UserPreferences", Context.MODE_PRIVATE)
-        val isLoggedIn = sharedPreferences.getBoolean("isLoggedIn", false)
-
-        if (isLoggedIn) {
-            val intent = Intent(this, Telefonszam::class.java)
-            startActivity(intent)
-            finish()
-        }
-
         val email = findViewById<EditText>(R.id.Email)
         val jelszo = findViewById<EditText>(R.id.Jelszo)
         val loginButton = findViewById<Button>(R.id.Bejelentkezes_gomb)
+        val regisztracioGomb = findViewById<TextView>(R.id.SignUpText)
+        val passwordToggle = findViewById<ImageButton>(R.id.PasswordToggle)
+
+        passwordToggle.setOnClickListener {
+            isPasswordVisible = !isPasswordVisible
+            if (isPasswordVisible) {
+                jelszo.inputType = InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD
+                passwordToggle.setImageResource(android.R.drawable.ic_menu_close_clear_cancel)
+            } else {
+                jelszo.inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_PASSWORD
+                passwordToggle.setImageResource(android.R.drawable.ic_menu_view)
+            }
+            jelszo.setSelection(jelszo.text.length)
+        }
 
         loginButton.setOnClickListener {
             val emailText = email.text.toString()
             val jelszoText = jelszo.text.toString()
 
-            // E-mail formátum ellenőrzése
             if (!Patterns.EMAIL_ADDRESS.matcher(emailText).matches()) {
                 Toast.makeText(this, "Kérjük, adjon meg egy érvényes e-mail címet.", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
@@ -53,14 +52,9 @@ class Bejelentkezes : AppCompatActivity() {
                 auth.signInWithEmailAndPassword(emailText, jelszoText)
                     .addOnCompleteListener { task ->
                         if (task.isSuccessful) {
-                            // Ellenőrizzük, hogy az e-mail cím hitelesítve van-e
                             val user = auth.currentUser
                             if (user != null && user.isEmailVerified) {
-                                // Ha hitelesített, mentjük az állapotot
-                                sharedPreferences.edit().putBoolean("isLoggedIn", true).apply()
-
-                                val intent = Intent(this, Telefonszam::class.java)
-                                startActivity(intent)
+                                startActivity(Intent(this, Telefonszam::class.java))
                                 finish()
                             } else {
                                 Toast.makeText(this, "Kérjük, erősítse meg az e-mail címét.", Toast.LENGTH_SHORT).show()
@@ -75,37 +69,8 @@ class Bejelentkezes : AppCompatActivity() {
             }
         }
 
-        val regisztracio_gomb = findViewById<Button>(R.id.Regisztracio_gomb_atvezeto)
-
-        regisztracio_gomb.setOnClickListener {
-            val intent = Intent(this, Regisztracio::class.java)
-            startActivity(intent)
-        }
-
-        applyFontSizeToCurrentActivity()
-    }
-
-    private fun applyFontSizeToCurrentActivity() {
-        val prefs = getSharedPreferences("UserPreferences", Context.MODE_PRIVATE)
-        val fontSize = prefs.getString("betumeret", "Közepes") ?: "Közepes"
-        val size = when (fontSize) {
-            "Kicsi" -> 12f
-            "Nagy" -> 20f
-            else -> 16f
-        }
-        updateTextViewsFontSize(findViewById(android.R.id.content), size)
-    }
-
-    private fun updateTextViewsFontSize(view: View, fontSize: Float) {
-        if (view is TextView) {
-            view.textSize = fontSize
-        }
-        if (view is ViewGroup) {
-            for (i in 0 until view.childCount) {
-                updateTextViewsFontSize(view.getChildAt(i), fontSize)
-            }
+        regisztracioGomb.setOnClickListener {
+            startActivity(Intent(this, Regisztracio::class.java))
         }
     }
 }
-
-
