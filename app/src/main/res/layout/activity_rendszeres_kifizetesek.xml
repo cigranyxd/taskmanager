@@ -3,12 +3,30 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:padding="16dp"
-    android:id="@+id/main"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:padding="16dp"
+    android:background="#E1F5FE"
+    tools:context=".YourActivity">
 
-    <!-- Fő összeg megjelenítése -->
+    <!-- Modern legördülő menü (Exposed Dropdown) a képernyő tetején -->
+    <com.google.android.material.textfield.TextInputLayout
+        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+        android:id="@+id/lenyilo_menu_layout"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="16dp"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+        <com.google.android.material.textfield.MaterialAutoCompleteTextView
+            android:id="@+id/lenyilo_menu"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Navigáció" />
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <!-- Fő összeg kijelzése, a navigáció alatt -->
     <TextView
         android:id="@+id/osszegTextView"
         android:layout_width="wrap_content"
@@ -16,97 +34,96 @@
         android:text="Fő összeg: 100000 Ft"
         android:textSize="18sp"
         android:textStyle="bold"
-        android:gravity="center"
-        android:layout_marginBottom="24dp"
-        app:layout_constraintBottom_toTopOf="@id/nevEditText"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"/>
+        android:layout_marginBottom="16dp"
+        app:layout_constraintTop_toBottomOf="@id/lenyilo_menu_layout"
+        app:layout_constraintStart_toStartOf="parent" />
 
-    <!-- Név bevitel mező -->
-    <EditText
-        android:id="@+id/nevEditText"
+    <!-- Név beviteli mező (MaterialTextInputLayout) -->
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/nevInputLayout"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:hint="Kifizetés neve"
-        android:inputType="text"
-        android:background="@android:drawable/editbox_background"
-        android:padding="12dp"
-        android:textColor="#333333"
-        android:hintTextColor="#888888"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
+        app:boxBackgroundMode="outline"
+        app:boxCornerRadiusTopStart="8dp"
+        app:boxCornerRadiusTopEnd="8dp"
+        app:boxCornerRadiusBottomStart="8dp"
+        app:boxCornerRadiusBottomEnd="8dp"
+        android:layout_marginBottom="8dp"
         app:layout_constraintTop_toBottomOf="@id/osszegTextView"
-        app:layout_constraintBottom_toTopOf="@id/osszegEditText"/>
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/nevEditText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Kifizetés neve"
+            android:inputType="text" />
+    </com.google.android.material.textfield.TextInputLayout>
 
-    <!-- Összeg bevitel mező -->
-    <EditText
-        android:id="@+id/osszegEditText"
+    <!-- Összeg beviteli mező (MaterialTextInputLayout) -->
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/osszegInputLayout"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:hint="Kifizetés összege"
-        android:inputType="numberDecimal"
-        android:background="@android:drawable/editbox_background"
-        android:padding="12dp"
-        android:textColor="#333333"
-        android:hintTextColor="#888888"
+        app:boxBackgroundMode="outline"
+        app:boxCornerRadiusTopStart="8dp"
+        app:boxCornerRadiusTopEnd="8dp"
+        app:boxCornerRadiusBottomStart="8dp"
+        app:boxCornerRadiusBottomEnd="8dp"
+        android:layout_marginBottom="16dp"
+        app:layout_constraintTop_toBottomOf="@id/nevInputLayout"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/nevEditText"
-        app:layout_constraintBottom_toTopOf="@id/hozzaadButton"/>
+        app:layout_constraintEnd_toEndOf="parent">
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/osszegEditText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Összeg (Ft)"
+            android:inputType="numberDecimal" />
+    </com.google.android.material.textfield.TextInputLayout>
 
-    <!-- Kifizetés hozzáadása gomb -->
-    <Button
+    <!-- Hozzáadás gomb (MaterialButton) -->
+    <com.google.android.material.button.MaterialButton
         android:id="@+id/hozzaadButton"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:text="Hozzáadás"
-        android:backgroundTint="#009bff"
-        android:textColor="#FFFFFF"
-        android:padding="12dp"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/osszegEditText"
-        app:layout_constraintBottom_toTopOf="@id/megjelenitButton"/>
-
-    <!-- Kifizetések megjelenítése gomb -->
-    <Button
-        android:id="@+id/megjelenitButton"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:text="Kifizetések megjelenítése"
-        android:backgroundTint="#009bff"
-        android:textColor="#FFFFFF"
-        android:padding="12dp"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/hozzaadButton"
-        app:layout_constraintBottom_toTopOf="@id/kifizetesekTextView"/>
-
-    <!-- Kifizetések lista -->
-    <TextView
-        android:id="@+id/kifizetesekTextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Nincsenek megjeleníthető kifizetések"
-        android:textSize="16sp"
-        android:gravity="center"
+        android:text="Hozzáadás"
         android:layout_marginBottom="16dp"
-        app:layout_constraintTop_toBottomOf="@id/megjelenitButton"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"/>
-
-    <!-- Kifizetés törlése gomb -->
-    <Button
-        android:id="@+id/torlesButton"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:text="Kifizetés törlése"
-        android:backgroundTint="#009bff"
+        app:backgroundTint="#4FC3F7"
         android:textColor="#FFFFFF"
-        android:padding="12dp"
+        app:cornerRadius="8dp"
+        app:layout_constraintTop_toBottomOf="@id/osszegInputLayout"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <!-- Kijelöltek törlése gomb (MaterialButton, igazi piros stílussal) -->
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/torlesButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Kijelöltek törlése"
+        android:layout_marginBottom="16dp"
+        app:backgroundTint="#D32F2F"
+        android:textColor="#FFFFFF"
+        app:icon="@android:drawable/ic_menu_delete"
+        app:iconTint="#FFFFFF"
+        app:iconGravity="textStart"
+        app:iconPadding="8dp"
+        app:cornerRadius="16dp"
+        android:elevation="6dp"
+        app:layout_constraintTop_toBottomOf="@id/hozzaadButton"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <!-- Kifizetések lista (RecyclerView) -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recyclerView"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginTop="8dp"
+        app:layout_constraintTop_toBottomOf="@id/torlesButton"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/kifizetesekTextView"/>
+        app:layout_constraintBottom_toBottomOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

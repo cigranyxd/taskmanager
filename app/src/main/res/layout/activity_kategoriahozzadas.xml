@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/scrollView"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fillViewport="true"
+    android:background="#E1F5FE">
+
+    <LinearLayout
+        android:id="@+id/addCategoryContainer"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="24dp">
+
+        <!-- Kategória név (modern TextInputLayout) -->
+        <com.google.android.material.textfield.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:boxBackgroundMode="outline"
+            app:boxCornerRadiusTopStart="8dp"
+            app:boxCornerRadiusTopEnd="8dp"
+            app:boxCornerRadiusBottomStart="8dp"
+            app:boxCornerRadiusBottomEnd="8dp"
+            android:layout_marginBottom="24dp">
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/categoryNameEditText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Kategória név"
+                android:inputType="text"
+                android:textColor="#212121"
+                android:textColorHint="#757575" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <!-- Típus választó (Bevétel / Kiadás) -->
+        <RadioGroup
+            android:id="@+id/typeRadioGroup"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginTop="16dp"
+            android:layout_marginBottom="24dp">
+
+            <com.google.android.material.radiobutton.MaterialRadioButton
+                android:id="@+id/incomeRadioButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Bevétel"
+                android:checked="true"
+                android:textColor="#212121" />
+
+            <com.google.android.material.radiobutton.MaterialRadioButton
+                android:id="@+id/expenseRadioButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Kiadás"
+                android:layout_marginStart="16dp"
+                android:textColor="#212121" />
+        </RadioGroup>
+
+        <!-- Ikon kiválasztás címke -->
+        <TextView
+            android:id="@+id/selectIconLabel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Válassz egy ikont:"
+            android:textSize="16sp"
+            android:textColor="#212121"
+            android:layout_marginBottom="16dp" />
+
+        <!-- GridView az ikonokhoz (kb. 30 ikon) -->
+        <GridView
+            android:id="@+id/iconGridView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:numColumns="5"
+            android:verticalSpacing="12dp"
+            android:horizontalSpacing="12dp"
+            android:stretchMode="columnWidth"
+            android:layout_marginBottom="24dp" />
+
+        <!-- Hozzáadás gomb (modern MaterialButton) -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/addCategoryButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Hozzáadás"
+            android:layout_marginTop="24dp"
+            android:enabled="false"
+            app:backgroundTint="@android:color/darker_gray"
+            android:textColor="#FFFFFF" />
+    </LinearLayout>
+</ScrollView>

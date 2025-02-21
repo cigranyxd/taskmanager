@@ -83,14 +83,13 @@ dependencies {
     implementation (libs.play.services.auth)
     implementation (libs.play.services.base)
     implementation (libs.play.services.auth)
+    implementation("com.google.code.gson:gson:2.8.9")
     androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.androidx.ui.test.junit4)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
     implementation(libs.mpandroidchart.vv310)
-
-
-
+    implementation ("com.github.PhilJay:MPAndroidChart:v3.1.0")
 
 }
 

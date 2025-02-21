@@ -91,6 +91,7 @@
         android:background="@android:color/holo_blue_dark"
         app:layout_constraintTop_toBottomOf="@id/Jelszo"
         app:layout_constraintStart_toStartOf="parent"
+        app:backgroundTint="#4FC3F7"
         app:layout_constraintEnd_toEndOf="parent"/>
 
     <!-- Regisztráció szöveg -->

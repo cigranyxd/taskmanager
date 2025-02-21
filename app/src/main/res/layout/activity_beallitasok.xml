@@ -5,212 +5,258 @@
     android:id="@+id/settings_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="?android:colorBackground">
+    android:background="#E1F5FE">
 
-    <!-- Felső sáv: Toolbar -->
-    <androidx.appcompat.widget.Toolbar
+    <!-- Toolbar -->
+    <com.google.android.material.appbar.MaterialToolbar
         android:id="@+id/toolbar"
         android:layout_width="0dp"
         android:layout_height="?attr/actionBarSize"
-        android:background="#B0B0B0"
-        app:navigationIcon="@android:drawable/ic_menu_preferences"
+        android:background="#4FC3F7"
         app:title="Beállítások"
-        app:titleTextColor="@android:color/black"
-        app:titleTextAppearance="@style/TextAppearance.AppCompat.Widget.ActionBar.Title"
+        app:titleTextColor="@android:color/white"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
+        app:layout_constraintEnd_toEndOf="parent"
+        android:fontFamily="sans-serif-medium">
 
-    <!-- Tartalom: gombok egy ScrollView-n belül -->
+        <!-- Fogaskerék -->
+        <ImageView
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:adjustViewBounds="true"
+            android:scaleType="fitCenter"
+            android:layout_gravity="start|center_vertical"
+            android:padding="8dp"
+            android:src="@android:drawable/ic_menu_manage" />
+    </com.google.android.material.appbar.MaterialToolbar>
+
+    <!-- Görgethető beállítási lehetőségek -->
     <ScrollView
-        android:id="@+id/scrollView"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:fillViewport="true"
         app:layout_constraintTop_toBottomOf="@id/toolbar"
-        app:layout_constraintBottom_toTopOf="@id/bottom_bar"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent">
+        app:layout_constraintEnd_toEndOf="parent"
+        android:padding="16dp">
 
         <LinearLayout
-            android:id="@+id/linearLayout_buttons"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:padding="16dp">
+            android:orientation="vertical">
 
-            <!-- Gomb: Betűméret -->
-            <FrameLayout
+            <!-- Betűméret beállítás -->
+            <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="16dp">
+                android:layout_marginBottom="16dp"
+                app:cardCornerRadius="16dp"
+                app:cardElevation="4dp"
+                android:backgroundTint="@android:color/white"
+                android:clickable="true"
+                android:foreground="?attr/selectableItemBackground">
 
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/betumeret_button"
-                    style="@style/Widget.MaterialComponents.Button"
+                <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:backgroundTint="#009bff"
-                    android:text="Betűméret"
-                    android:gravity="center_vertical|start"
-                    android:fontFamily="sans-serif"
-                    android:paddingStart="32dp"
-                    app:cornerRadius="16dp" />
-            </FrameLayout>
+                    android:orientation="horizontal"
+                    android:padding="16dp"
+                    android:gravity="center_vertical">
 
-            <!-- Gomb: Nyelv -->
-            <FrameLayout
+                    <ImageView
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:src="@android:drawable/ic_menu_sort_alphabetically"
+                        android:tint="#4FC3F7"/>
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="Betűméret"
+                        android:textSize="16sp"
+                        android:textColor="#212121"
+                        android:paddingStart="16dp"
+                        android:fontFamily="sans-serif-medium"/>
+
+                    <ImageView
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:src="@android:drawable/ic_menu_forward"
+                        android:tint="#4FC3F7"/>
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- Nyelv beállítás -->
+            <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="16dp">
+                android:layout_marginBottom="16dp"
+                app:cardCornerRadius="16dp"
+                app:cardElevation="4dp"
+                android:backgroundTint="@android:color/white"
+                android:clickable="true"
+                android:foreground="?attr/selectableItemBackground">
 
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/nyelv_button"
-                    style="@style/Widget.MaterialComponents.Button"
+                <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:backgroundTint="#009bff"
-                    android:text="Nyelv"
-                    android:gravity="center_vertical|start"
-                    android:fontFamily="sans-serif"
-                    android:paddingStart="32dp"
-                    app:cornerRadius="16dp" />
+                    android:orientation="horizontal"
+                    android:padding="16dp"
+                    android:gravity="center_vertical">
 
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="‹"
-                    android:textColor="@android:color/white"
-                    android:textSize="16sp"
-                    android:layout_gravity="start|center_vertical"
-                    android:paddingStart="8dp"
-                    android:clickable="false" />
-            </FrameLayout>
+                    <ImageView
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:src="@android:drawable/ic_menu_info_details"
+                        android:tint="#4FC3F7"/>
 
-            <!-- Gomb: Jelszó változtatás -->
-            <FrameLayout
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="Nyelv"
+                        android:textSize="16sp"
+                        android:textColor="#212121"
+                        android:paddingStart="16dp"
+                        android:fontFamily="sans-serif-medium"/>
+
+                    <ImageView
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:src="@android:drawable/ic_menu_forward"
+                        android:tint="#4FC3F7"/>
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- Jelszó változtatás -->
+            <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="16dp">
+                android:layout_marginBottom="16dp"
+                app:cardCornerRadius="16dp"
+                app:cardElevation="4dp"
+                android:backgroundTint="@android:color/white"
+                android:clickable="true"
+                android:foreground="?attr/selectableItemBackground">
 
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/jelszo_button"
-                    style="@style/Widget.MaterialComponents.Button"
+                <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:backgroundTint="#009bff"
-                    android:text="Jelszó változtatás"
-                    android:gravity="center_vertical|start"
-                    android:fontFamily="sans-serif"
-                    android:paddingStart="32dp"
-                    app:cornerRadius="16dp" />
+                    android:orientation="horizontal"
+                    android:padding="16dp"
+                    android:gravity="center_vertical">
 
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="‹"
-                    android:textColor="@android:color/white"
-                    android:textSize="16sp"
-                    android:layout_gravity="start|center_vertical"
-                    android:paddingStart="8dp"
-                    android:clickable="false" />
-            </FrameLayout>
+                    <ImageView
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:src="@android:drawable/ic_lock_lock"
+                        android:tint="#4FC3F7"/>
 
-            <!-- Gomb: Profil törlése -->
-            <FrameLayout
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="Jelszó változtatás"
+                        android:textSize="16sp"
+                        android:textColor="#212121"
+                        android:paddingStart="16dp"
+                        android:fontFamily="sans-serif-medium"/>
+
+                    <ImageView
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:src="@android:drawable/ic_menu_forward"
+                        android:tint="#4FC3F7"/>
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- Profil törlés -->
+            <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="16dp">
+                android:layout_marginBottom="16dp"
+                app:cardCornerRadius="16dp"
+                app:cardElevation="4dp"
+                android:backgroundTint="@android:color/white"
+                android:clickable="true"
+                android:foreground="?attr/selectableItemBackground">
 
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/profil_torles_button"
-                    style="@style/Widget.MaterialComponents.Button"
+                <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:backgroundTint="#009bff"
-                    android:text="Profil törlése"
-                    android:gravity="center_vertical|start"
-                    android:fontFamily="sans-serif"
-                    android:paddingStart="32dp"
-                    app:cornerRadius="16dp" />
+                    android:orientation="horizontal"
+                    android:padding="16dp"
+                    android:gravity="center_vertical">
 
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="‹"
-                    android:textColor="@android:color/white"
-                    android:textSize="16sp"
-                    android:layout_gravity="start|center_vertical"
-                    android:paddingStart="8dp"
-                    android:clickable="false" />
-            </FrameLayout>
+                    <ImageView
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:src="@android:drawable/ic_menu_delete"
+                        android:tint="#4FC3F7"/>
 
-            <!-- Gomb: Pénzügyi adatok törlése -->
-            <FrameLayout
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="Profil törlése"
+                        android:textSize="16sp"
+                        android:textColor="#212121"
+                        android:paddingStart="16dp"
+                        android:fontFamily="sans-serif-medium"/>
+
+                    <ImageView
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:src="@android:drawable/ic_menu_forward"
+                        android:tint="#4FC3F7"/>
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- Pénzügyi adatok törlése -->
+            <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="16dp">
+                android:layout_marginBottom="16dp"
+                app:cardCornerRadius="16dp"
+                app:cardElevation="4dp"
+                android:backgroundTint="@android:color/white"
+                android:clickable="true"
+                android:foreground="?attr/selectableItemBackground">
 
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/penzugyi_adatok_torles_button"
-                    style="@style/Widget.MaterialComponents.Button"
+                <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:backgroundTint="#009bff"
-                    android:text="Pénzügyi adatok törlése"
-                    android:gravity="center_vertical|start"
-                    android:fontFamily="sans-serif"
-                    android:paddingStart="32dp"
-                    app:cornerRadius="16dp" />
+                    android:orientation="horizontal"
+                    android:padding="16dp"
+                    android:gravity="center_vertical">
 
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="‹"
-                    android:textColor="@android:color/white"
-                    android:textSize="16sp"
-                    android:layout_gravity="start|center_vertical"
-                    android:paddingStart="8dp"
-                    android:clickable="false" />
-            </FrameLayout>
+                    <ImageView
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:src="@android:drawable/ic_menu_agenda"
+                        android:tint="#4FC3F7"/>
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="Pénzügyi adatok törlése"
+                        android:textSize="16sp"
+                        android:textColor="#212121"
+                        android:paddingStart="16dp"
+                        android:fontFamily="sans-serif-medium"/>
+
+                    <ImageView
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:src="@android:drawable/ic_menu_forward"
+                        android:tint="#4FC3F7"/>
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
 
         </LinearLayout>
     </ScrollView>
-
-    <!-- Alsó sáv: Alkalmazás Verzió -->
-    <LinearLayout
-        android:id="@+id/bottom_bar"
-        android:layout_width="0dp"
-        android:layout_height="?attr/actionBarSize"
-        android:background="#B0B0B0"
-        android:orientation="vertical"
-        android:padding="8dp"
-        android:gravity="center"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent">
-
-        <TextView
-            android:id="@+id/app_version_label"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Alkalmazás Verzió"
-            android:textColor="@android:color/black"
-            android:textSize="16sp"
-            android:textStyle="bold"
-            android:fontFamily="sans-serif-medium"
-            android:gravity="center" />
-
-        <TextView
-            android:id="@+id/app_version_value"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="1.0.0."
-            android:textColor="@android:color/black"
-            android:textSize="14sp"
-            android:fontFamily="sans-serif"
-            android:layout_marginTop="4dp"
-            android:gravity="center" />
-    </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
