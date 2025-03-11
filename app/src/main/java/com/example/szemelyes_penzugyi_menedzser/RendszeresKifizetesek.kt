@@ -1,5 +1,6 @@
 package com.example.szemelyes_penzugyi_menedzser
 
+import Kifizetesitem
 import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
@@ -25,8 +26,10 @@ class RendszeresKifizetesek : AppCompatActivity() {
     private var osszeg: Double = 0.0 // Az oldalra betöltött összeg, amit csökkenteni fogunk
     private lateinit var recyclerView: RecyclerView
     private lateinit var adapter: KifizetesAdapter
-    private val kifizetesekLista = mutableListOf<KifizetesItem>()
+    private val kifizetesekLista = mutableListOf<Kifizetesitem>()
     private lateinit var spinner: Spinner
+    // Új: időszakválasztó spinner, amely megadja, milyen időközönként vonja le az összeget
+    private lateinit var periodSpinner: Spinner
 
     @SuppressLint("MissingInflatedId")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -95,8 +98,16 @@ class RendszeresKifizetesek : AppCompatActivity() {
                 }
             }
             override fun onNothingSelected(parent: AdapterView<*>) { }
-
         }
+
+        // Új: időszakválasztó spinner inicializálása
+        periodSpinner = findViewById(R.id.periodSpinner)
+        val periodOpciók = listOf("Naponta", "Hetente", "Havonta", "Évente")
+        val periodAdapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, periodOpciók)
+        periodAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        periodSpinner.adapter = periodAdapter
+        // Alapértelmezett érték legyen mondjuk "Havonta" (vagy ahogy neked megfelel)
+        periodSpinner.setSelection(2)
 
         // RecyclerView beállítása
         recyclerView = findViewById(R.id.recyclerView)
@@ -111,11 +122,14 @@ class RendszeresKifizetesek : AppCompatActivity() {
         hozzaadButton.setOnClickListener {
             val nev = nevEditText.text.toString()
             val osszegInput = osszegEditText.text.toString().toDoubleOrNull()
+            val period = periodSpinner.selectedItem.toString() // Az időszak kiválasztása
 
             if (nev.isNotEmpty() && osszegInput != null) {
+                // Az új kifizetéshez most eltároljuk a period mezőt is
                 val kifizetes = hashMapOf(
                     "nev" to nev,
-                    "osszeg" to osszegInput
+                    "osszeg" to osszegInput,
+                    "period" to period
                 )
 
                 db.collection("users").document(userId)
@@ -179,7 +193,9 @@ class RendszeresKifizetesek : AppCompatActivity() {
                     val docId = document.id
                     val nev = document.getString("nev") ?: "N/A"
                     val osszeg = document.getDouble("osszeg") ?: 0.0
-                    kifizetesekLista.add(KifizetesItem(docId, nev, osszeg))
+                    val period = document.getString("period") ?: "N/A"
+                    // Ha szeretnéd megjeleníteni a period értéket is, akkor azt is tárolhatod a modelben
+                    kifizetesekLista.add(Kifizetesitem(docId, nev, osszeg, period))
                 }
                 adapter.notifyDataSetChanged()
             }
@@ -208,6 +224,7 @@ class RendszeresKifizetesek : AppCompatActivity() {
                 frissitKifizetesekMegjelenites(userId)
             }
     }
+
     private fun Kijelentkezes() {
         auth.signOut()
         getSharedPreferences("UserPreferences", Context.MODE_PRIVATE)

@@ -1,5 +1,6 @@
 package com.example.szemelyes_penzugyi_menedzser
 
+import Kifizetesitem
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -7,7 +8,7 @@ import android.widget.CheckBox
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 
-class KifizetesAdapter(private val kifizetesek: MutableList<KifizetesItem>) :
+class KifizetesAdapter(private val kifizetesek: MutableList<Kifizetesitem>) :
     RecyclerView.Adapter<KifizetesAdapter.KifizetesViewHolder>() {
 
     inner class KifizetesViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
@@ -35,7 +36,7 @@ class KifizetesAdapter(private val kifizetesek: MutableList<KifizetesItem>) :
 
     override fun getItemCount(): Int = kifizetesek.size
 
-    fun getKijeloltElemek(): List<KifizetesItem> {
+    fun getKijeloltElemek(): List<Kifizetesitem> {
         return kifizetesek.filter { it.isChecked }
     }
 }

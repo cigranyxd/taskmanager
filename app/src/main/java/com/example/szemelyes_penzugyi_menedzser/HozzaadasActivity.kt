@@ -1,7 +1,6 @@
 package com.example.szemelyes_penzugyi_menedzser
 
 import KategoriaAdapter
-import android.graphics.Color
 import android.os.Bundle
 import android.util.Log
 import android.view.View
@@ -11,6 +10,7 @@ import com.google.firebase.Timestamp
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import java.time.LocalDate
+import android.graphics.Color
 
 class HozzaadasActivity : AppCompatActivity() {
 
