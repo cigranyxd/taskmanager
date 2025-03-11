@@ -107,17 +107,6 @@ class ElemzesActivity : AppCompatActivity() {
         super.onResume()
         spinner.setSelection(1)
     }
-    // Overlay eltávolítása a BarChart szülőjéből, ha létezik
-    fun removeNoDataOverlay(chart: BarChart) {
-        val parent = chart.parent as? ViewGroup ?: return
-        for (i in parent.childCount - 1 downTo 0) {
-            val child = parent.getChildAt(i)
-            if (child.tag == "noDataOverlay") {
-                parent.removeViewAt(i)
-            }
-        }
-        chart.visibility = View.VISIBLE
-    }
 
     // Overlay eltávolítása a BarChart szülőjéből
     fun removeNoDataOverlay(chart: BarChart) {

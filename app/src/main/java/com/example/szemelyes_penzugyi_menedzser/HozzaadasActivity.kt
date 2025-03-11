@@ -11,7 +11,6 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import java.time.LocalDate
 import android.graphics.Color
-import android.util.Log
 
 class HozzaadasActivity : AppCompatActivity() {
 

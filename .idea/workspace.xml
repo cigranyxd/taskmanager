@@ -82,9 +82,8 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="864991dd-f490-462a-88b7-8446eb36b39d" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.gradle/buildOutputCleanup/buildOutputCleanup.lock" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/buildOutputCleanup/buildOutputCleanup.lock" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.gradle/file-system.probe" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/file-system.probe" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/src/main/java/com/example/szemelyes_penzugyi_menedzser/ElemzesActivity.kt" beforeDir="false" afterPath="$PROJECT_DIR$/app/src/main/java/com/example/szemelyes_penzugyi_menedzser/ElemzesActivity.kt" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -174,7 +173,7 @@
     "com.google.services.firebase.aqiPopupShown": "true",
     "git-widget-placeholder": "cigrany",
     "kotlin-language-version-configured": "true",
-    "last_opened_file_path": "C:/szemelyipenzugy",
+    "last_opened_file_path": "D:/szemelyipenzugy",
     "settings.editor.selected.configurable": "preferences.lookFeel"
   },
   "keyToStringList": {
