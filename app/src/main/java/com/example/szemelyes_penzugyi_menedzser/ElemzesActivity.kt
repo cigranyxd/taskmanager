@@ -7,6 +7,7 @@ import android.graphics.Color
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
+import android.util.TypedValue
 import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
@@ -36,7 +37,6 @@ import android.annotation.SuppressLint as SuppressLint1
 class ElemzesActivity : AppCompatActivity() {
 
     private lateinit var spinner: Spinner
-
     private val aktualisOldal = "Elemzés"
 
     @SuppressLint1("MissingInflatedId")
@@ -51,7 +51,7 @@ class ElemzesActivity : AppCompatActivity() {
             return
         }
 
-        // Navigációs feliratok (fix elhelyezés az XML-ben, pl. "feliratokLayout")
+        // Navigációs feliratok
         findViewById<TextView>(R.id.NapFelirat).setOnClickListener { SzovegreKattint(it) }
         findViewById<TextView>(R.id.HetFelirat).setOnClickListener { SzovegreKattint(it) }
         findViewById<TextView>(R.id.HonapFelirat).setOnClickListener { SzovegreKattint(it) }
@@ -64,7 +64,7 @@ class ElemzesActivity : AppCompatActivity() {
             insets
         }
 
-        // Spinner
+        // Spinner inicializálása
         spinner = findViewById(R.id.lenyilo_menu)
         val lehetosegek = listOf("Főoldal", "Elemzés", "Kategóriák", "Rendszeres kifizetések", "Beállítások", "Kijelentkezés")
         val spinnerAdapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, lehetosegek)
@@ -84,28 +84,13 @@ class ElemzesActivity : AppCompatActivity() {
                     return
                 }
                 val kiválasztottElem = parent.getItemAtPosition(position).toString()
-                // Ha a kiválasztott elem megegyezik az aktuális oldallal, ne navigáljunk
                 if (kiválasztottElem == aktualisOldal) return
                 when (kiválasztottElem) {
-                    "Főoldal" -> {
-                        val intent = Intent(this@ElemzesActivity, Telefonszam::class.java)
-                        startActivity(intent)
-                    }
-                    "Kategóriák" -> {
-                        val intent = Intent(this@ElemzesActivity, Kategoriak::class.java)
-                        startActivity(intent)
-                    }
-                    "Rendszeres kifizetések" -> {
-                        val intent = Intent(this@ElemzesActivity, RendszeresKifizetesek::class.java)
-                        startActivity(intent)
-                    }
-                    "Beállítások" -> {
-                        val intent = Intent(this@ElemzesActivity, BeallitasokActivity::class.java)
-                        startActivity(intent)
-                    }
-                    "Kijelentkezés" -> {
-                        Kijelentkezes()
-                    }
+                    "Főoldal" -> startActivity(Intent(this@ElemzesActivity, Telefonszam::class.java))
+                    "Kategóriák" -> startActivity(Intent(this@ElemzesActivity, Kategoriak::class.java))
+                    "Rendszeres kifizetések" -> startActivity(Intent(this@ElemzesActivity, RendszeresKifizetesek::class.java))
+                    "Beállítások" -> startActivity(Intent(this@ElemzesActivity, BeallitasokActivity::class.java))
+                    "Kijelentkezés" -> Kijelentkezes()
                 }
             }
             override fun onNothingSelected(parent: AdapterView<*>) { }
@@ -113,17 +98,18 @@ class ElemzesActivity : AppCompatActivity() {
 
         applyFontSizeToCurrentActivity()
 
-        // Fragmentek a fix konténerbe (pl. R.id.oszlopDiagram)
+        // Fragment betöltése
         supportFragmentManager.beginTransaction()
             .replace(R.id.oszlopDiagram, NapFragment())
             .commit()
     }
+
     override fun onResume() {
         super.onResume()
-        // Visszatéréskor állítsuk be a spinner kiválasztását úgy, hogy az aktuális oldal ("Elemzés") legyen kiválasztva (index 1)
         spinner.setSelection(1)
     }
-    // Overlay eltávolítása a BarChart szülőjéből, ha létezik
+
+    // Overlay eltávolítása a BarChart szülőjéből
     fun removeNoDataOverlay(chart: BarChart) {
         val parent = chart.parent as? ViewGroup ?: return
         for (i in parent.childCount - 1 downTo 0) {
@@ -163,18 +149,7 @@ class ElemzesActivity : AppCompatActivity() {
         }
         //updateTextViewsFontSize(findViewById(android.R.id.content), size)
     }
-    /*
-    private fun updateTextViewsFontSize(view: View, fontSize: Float) {
-        if (view is TextView) view.textSize = fontSize
-        if (view is ViewGroup) {
-            for (i in 0 until view.childCount) {
-                updateTextViewsFontSize(view.getChildAt(i), fontSize)
-            }
-        }
 
-        applyFontSizeToCurrentActivity()
-    }
-    */
     private fun Kijelentkezes() {
         FirebaseManager.signOut()
         getSharedPreferences("UserPreferences", Context.MODE_PRIVATE)
@@ -186,9 +161,9 @@ class ElemzesActivity : AppCompatActivity() {
         startActivity(intent)
         finish()
     }
+
     @Suppress("MissingSuperCall")
     override fun onBackPressed() {
-        // Vissza gomb: mindig a Főoldalra navigálunk
         val intent = Intent(this, Telefonszam::class.java)
         intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK
         startActivity(intent)
@@ -229,7 +204,6 @@ class ElemzesActivity : AppCompatActivity() {
             val categoriesLayout = requireActivity().findViewById<LinearLayout>(R.id.CategoriesLinearLayout)
             categoriesLayout.visibility = View.VISIBLE
             chart.visibility = View.VISIBLE
-            categoriesLayout.removeAllViews()
 
             if (currentUser == null) {
                 Toast.makeText(context, "Nincs bejelentkezett felhasználó!", Toast.LENGTH_SHORT).show()
@@ -241,17 +215,37 @@ class ElemzesActivity : AppCompatActivity() {
             firestore.collection("users").document(uid)
                 .collection("nap")
                 .whereEqualTo(FieldPath.documentId(), todayStr)
-                .get()
-                .addOnSuccessListener { querySnapshot ->
-                    if (querySnapshot.isEmpty) {
-                        showNoDataOverlay("Nincs megjeleníthető adat a választott időszakra.", chart, categoriesLayout)
-                        chart.visibility = View.INVISIBLE
-                        return@addOnSuccessListener
+                .addSnapshotListener { querySnapshot, e ->
+                    categoriesLayout.removeAllViews()
+                    if (e != null) {
+                        Log.e("FirestoreDebug", "Hiba a napi adatok lekérdezése során: ${e.message}")
+                        Toast.makeText(context, "Hiba a napi adatok lekérdezése során.", Toast.LENGTH_SHORT).show()
+                        return@addSnapshotListener
                     }
-                    (activity as ElemzesActivity).removeNoDataOverlay(chart)
+                    if (querySnapshot == null || querySnapshot.isEmpty) {
+                        // Nincs dokumentum az adott napon, vagy esetleg már töröltük
+                        if (categoriesLayout.findViewWithTag<View>("noDataOverlay") == null) {
+                            showNoDataOverlay("Nincs megjeleníthető adat a választott időszakra.", chart, categoriesLayout)
+                            chart.visibility = View.INVISIBLE
+                        }
+                        return@addSnapshotListener
+                    }
+                    val dailyDoc = querySnapshot.documents[0]
+                    val transactions = dailyDoc.get("tranzakciok") as? List<Map<String, Any>> ?: emptyList()
+                    if (transactions.isEmpty()) {
+                        // Ha nincs tranzakció, töröljük a dokumentumot
+                        firestore.collection("users").document(uid)
+                            .collection("nap").document(todayStr)
+                            .delete()
+                        // Majd jelenítsük meg a "nincs adat" overlay-t
+                        if (categoriesLayout.findViewWithTag<View>("noDataOverlay") == null) {
+                            showNoDataOverlay("Nincs megjeleníthető adat a választott időszakra.", chart, categoriesLayout)
+                            chart.visibility = View.INVISIBLE
+                        }
+                        return@addSnapshotListener
+                    }
+                    (activity as? ElemzesActivity)?.removeNoDataOverlay(chart)
                     try {
-                        val dailyDoc = querySnapshot.documents[0]
-                        val transactions = dailyDoc.get("tranzakciok") as? List<Map<String, Any>> ?: emptyList()
                         val sortedTransactions = if (transactions.isNotEmpty() && transactions[0].containsKey("timestamp"))
                             transactions.sortedByDescending { it["timestamp"] as? Long ?: 0L }
                         else transactions.reversed()
@@ -267,12 +261,8 @@ class ElemzesActivity : AppCompatActivity() {
                             }
                             val category = (trans["kategoria"] as? String)?.trim() ?: "Egyéb"
                             val type = (trans["tipus"] as? String)?.trim()?.toLowerCase(Locale.getDefault()) ?: ""
-
-                            // A törlő ikon hozzáadása is: a createTransactionView mostantól tartalmaz egy bin ikont,
-                            // mely törli a tranzakciót és utána frissíti a fragmentet
                             val transactionView = createTransactionView(category, amount, type, trans, todayStr)
                             categoriesLayout.addView(transactionView)
-
                             if (type == "bevétel") totalRevenue += amount
                             else if (type == "kiadás") totalExpense += amount
                         }
@@ -291,10 +281,6 @@ class ElemzesActivity : AppCompatActivity() {
                         Toast.makeText(context, "Hiba az adatok feldolgozása közben.", Toast.LENGTH_SHORT).show()
                     }
                 }
-                .addOnFailureListener { e ->
-                    Log.e("FirestoreDebug", "Hiba a napi adatok lekérdezése során: ${e.message}")
-                    Toast.makeText(context, "Hiba a napi adatok lekérdezése során.", Toast.LENGTH_SHORT).show()
-                }
         }
 
         private fun showNoDataOverlay(message: String, chart: BarChart, container: LinearLayout) {
@@ -304,7 +290,6 @@ class ElemzesActivity : AppCompatActivity() {
                 parent.addView(overlay)
                 overlay.bringToFront()
             }
-            // A container (a tranzakciós lista) és a chart továbbra is megjelenik, csak a chart overlay-t mutat
         }
 
         private fun createNoDataOverlay(message: String): View {
@@ -334,7 +319,9 @@ class ElemzesActivity : AppCompatActivity() {
                 textSize = 16f
                 setTextColor(Color.DKGRAY)
                 gravity = Gravity.CENTER
-                layoutParams = FrameLayout.LayoutParams(FrameLayout.LayoutParams.WRAP_CONTENT, FrameLayout.LayoutParams.WRAP_CONTENT).apply { gravity = Gravity.CENTER }
+                layoutParams = FrameLayout.LayoutParams(
+                    FrameLayout.LayoutParams.WRAP_CONTENT, FrameLayout.LayoutParams.WRAP_CONTENT
+                ).apply { gravity = Gravity.CENTER }
             }
             bottomHalf.addView(tv)
             overlay.addView(topHalf)
@@ -342,15 +329,23 @@ class ElemzesActivity : AppCompatActivity() {
             return overlay
         }
 
-        // A createTransactionView függvény, mely mostantól hozzáad egy bin ikont is a törléshez,
-        // és törlés után frissíti a fragmentet
-        private fun createTransactionView(category: String, amount: Float, type: String, transaction: Map<String, Any>, docId: String): View {
+        private fun createTransactionView(
+            category: String,
+            amount: Float,
+            type: String,
+            transaction: Map<String, Any>,
+            docId: String
+        ): View {
             val context = requireContext()
+            // Az egész tranzakciót tartalmazó container – vízszintes elrendezés
             val containerLayout = LinearLayout(context).apply {
                 orientation = LinearLayout.HORIZONTAL
-                layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT)
+                layoutParams = LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.MATCH_PARENT,
+                    LinearLayout.LayoutParams.WRAP_CONTENT
+                )
             }
-            // Bin ikon törléshez
+            // A törléshez használt ikon
             val binIcon = ImageView(context).apply {
                 setImageResource(R.drawable.bin_icon)
                 val size = (24 * resources.displayMetrics.density).toInt()
@@ -359,10 +354,9 @@ class ElemzesActivity : AppCompatActivity() {
                     setMargins(8, 0, 8, 0)
                 }
                 setOnClickListener {
-                    (activity as ElemzesActivity).deleteTransaction(docId, transaction, {
+                    (activity as? ElemzesActivity)?.deleteTransaction(docId, transaction, {
                         Toast.makeText(context, "Tranzakció törölve", Toast.LENGTH_SHORT).show()
-                        // Frissítjük a fragmentet
-                        requireActivity().supportFragmentManager.beginTransaction().detach(this@NapFragment).attach(this@NapFragment).commit()
+                        // Itt a fragment frissítése már a snapshot listener-rel történik
                     }, { e ->
                         Toast.makeText(context, "Törlési hiba: ${e.message}", Toast.LENGTH_SHORT).show()
                     })
@@ -370,46 +364,70 @@ class ElemzesActivity : AppCompatActivity() {
             }
             containerLayout.addView(binIcon)
 
+            // A tranzakció részleteit tartalmazó, függőleges elrendezés
             val transactionDetails = LinearLayout(context).apply {
                 orientation = LinearLayout.VERTICAL
-                layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT)
+                layoutParams = LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.MATCH_PARENT,
+                    LinearLayout.LayoutParams.WRAP_CONTENT
+                )
+                // Tegyük kattinthatóvá a részletek területét
+                isClickable = true
+                isFocusable = true
             }
+            // A kategória neve
             val catTextView = TextView(context).apply {
                 text = category
                 textSize = 16f
                 setTextColor(Color.DKGRAY)
                 gravity = Gravity.START
-                layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT).apply {
-                    setMargins(0, 4, 0, 2)
-                }
+                layoutParams = LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.MATCH_PARENT,
+                    LinearLayout.LayoutParams.WRAP_CONTENT
+                ).apply { setMargins(0, 4, 0, 2) }
             }
             transactionDetails.addView(catTextView)
+
+            // A fő adatokat tartalmazó sor (összeg, ikon)
             val rowLayout = RelativeLayout(context).apply {
-                layoutParams = RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.MATCH_PARENT, RelativeLayout.LayoutParams.WRAP_CONTENT)
+                layoutParams = RelativeLayout.LayoutParams(
+                    RelativeLayout.LayoutParams.MATCH_PARENT,
+                    RelativeLayout.LayoutParams.WRAP_CONTENT
+                )
             }
             val amountTextView = TextView(context).apply {
                 id = View.generateViewId()
                 textSize = 16f
                 gravity = Gravity.START
-                setTextColor(if (type == "bevétel") Color.GREEN else if (type == "kiadás") Color.RED else Color.BLACK)
+                setTextColor(
+                    if (type == "bevétel") Color.GREEN else if (type == "kiadás") Color.RED else Color.BLACK
+                )
                 text = when (type) {
                     "bevétel" -> "+ $amount"
                     "kiadás" -> "- $amount"
                     else -> "$amount"
                 }
             }
-            val amountParams = RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.WRAP_CONTENT).apply {
+            val amountParams = RelativeLayout.LayoutParams(
+                RelativeLayout.LayoutParams.WRAP_CONTENT,
+                RelativeLayout.LayoutParams.WRAP_CONTENT
+            ).apply {
                 addRule(RelativeLayout.ALIGN_PARENT_START)
                 addRule(RelativeLayout.CENTER_VERTICAL)
             }
             amountTextView.layoutParams = amountParams
             rowLayout.addView(amountTextView)
-            val iconRes = (activity as ElemzesActivity).getIconResForCategory(category)
+
+            // Az ikon a jobb oldalon
+            val iconRes = (activity as? ElemzesActivity)?.getIconResForCategory(category) ?: R.drawable.egyeb_icon
             val iconView = ImageView(context).apply {
                 id = View.generateViewId()
                 setImageResource(iconRes)
             }
-            val iconParams = RelativeLayout.LayoutParams((24 * resources.displayMetrics.density).toInt(), (24 * resources.displayMetrics.density).toInt()).apply {
+            val iconParams = RelativeLayout.LayoutParams(
+                (24 * resources.displayMetrics.density).toInt(),
+                (24 * resources.displayMetrics.density).toInt()
+            ).apply {
                 addRule(RelativeLayout.ALIGN_PARENT_END)
                 addRule(RelativeLayout.CENTER_VERTICAL)
                 setMargins(8, 0, 8, 0)
@@ -417,13 +435,31 @@ class ElemzesActivity : AppCompatActivity() {
             iconView.layoutParams = iconParams
             rowLayout.addView(iconView)
             transactionDetails.addView(rowLayout)
+
+            // Új: A leírást tartalmazó TextView, amely alapból rejtett
+            val description = transaction["leiras"] as? String ?: ""
+            val descriptionTextView = TextView(context).apply {
+                text = "Leírás: $description"
+                textSize = 14f
+                setTextColor(Color.DKGRAY)
+                visibility = View.GONE
+                setPadding(0, 8, 0, 8)
+            }
+            transactionDetails.addView(descriptionTextView)
+
+            // A tranzakció részleteire kattintva váltogatjuk a leírás megjelenítését
+            transactionDetails.setOnClickListener {
+                descriptionTextView.visibility =
+                    if (descriptionTextView.visibility == View.GONE) View.VISIBLE else View.GONE
+            }
+
             containerLayout.addView(transactionDetails)
             return containerLayout
         }
     }
 
     // 2. HetFragment – Az aktuális hét adatai (csökkenő sorrendben)
-    class HetFragment : Fragment() {
+     class HetFragment : Fragment() {
         private val firestore = FirebaseManager.firestore
         private val currentUser = FirebaseManager.auth.currentUser
         private val formatter = DateTimeFormatter.ISO_LOCAL_DATE
@@ -440,7 +476,6 @@ class ElemzesActivity : AppCompatActivity() {
             val categoriesLayout = requireActivity().findViewById<LinearLayout>(R.id.CategoriesLinearLayout)
             categoriesLayout.visibility = View.VISIBLE
             chart.visibility = View.VISIBLE
-            categoriesLayout.removeAllViews()
 
             if (currentUser == null) {
                 Toast.makeText(context, "Nincs bejelentkezett felhasználó!", Toast.LENGTH_SHORT).show()
@@ -458,25 +493,36 @@ class ElemzesActivity : AppCompatActivity() {
                 .get()
                 .addOnSuccessListener { querySnapshot ->
                     if (querySnapshot.isEmpty) {
-                        showNoDataOverlay("Nincs megjeleníthető adat a választott időszakra.", chart, categoriesLayout)
+                        if (categoriesLayout.findViewWithTag<View>("noDataOverlay") == null) {
+                            showNoDataOverlay("Nincs megjeleníthető adat a választott időszakra.", chart, categoriesLayout)
+                        }
                         return@addOnSuccessListener
                     }
-                    (activity as ElemzesActivity).removeNoDataOverlay(chart)
+                    (activity as? ElemzesActivity)?.removeNoDataOverlay(chart)
                     var totalRevenue = 0f
                     var totalExpense = 0f
 
                     val sortedDocs = querySnapshot.documents.sortedByDescending { LocalDate.parse(it.id, formatter) }
                     for (doc in sortedDocs) {
+                        // Ellenőrizzük, hogy a dokumentum "tranzakciok" listája nem üres-e
+                        val transactions = doc.get("tranzakciok") as? List<Map<String, Any>> ?: emptyList()
+                        if (transactions.isEmpty()) {
+                            firestore.collection("users").document(uid)
+                                .collection("nap").document(doc.id).delete()
+                            continue
+                        }
                         val dateStr = doc.id
                         val dateHeader = TextView(requireContext()).apply {
                             text = dateStr
                             textSize = 16f
                             setTextColor(Color.DKGRAY)
-                            layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT).apply { setMargins(0, 8, 0, 4) }
+                            layoutParams = LinearLayout.LayoutParams(
+                                LinearLayout.LayoutParams.WRAP_CONTENT,
+                                LinearLayout.LayoutParams.WRAP_CONTENT
+                            ).apply { setMargins(0, 8, 0, 4) }
                         }
                         categoriesLayout.addView(dateHeader, 0)
                         try {
-                            val transactions = doc.get("tranzakciok") as? List<Map<String, Any>> ?: emptyList()
                             val sortedTransactions = if (transactions.isNotEmpty() && transactions[0].containsKey("timestamp"))
                                 transactions.sortedByDescending { it["timestamp"] as? Long ?: 0L }
                             else transactions.reversed()
@@ -530,11 +576,16 @@ class ElemzesActivity : AppCompatActivity() {
             val context = requireContext()
             val overlay = LinearLayout(context).apply {
                 orientation = LinearLayout.VERTICAL
-                layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT)
+                layoutParams = LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.MATCH_PARENT,
+                    LinearLayout.LayoutParams.MATCH_PARENT
+                )
                 tag = "noDataOverlay"
             }
             val topHalf = FrameLayout(context).apply {
-                layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, 0, 1f)
+                layoutParams = LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.MATCH_PARENT, 0, 1f
+                )
             }
             val iv = ImageView(context).apply {
                 setImageResource(R.drawable.no_data_icon)
@@ -543,14 +594,18 @@ class ElemzesActivity : AppCompatActivity() {
             }
             topHalf.addView(iv)
             val bottomHalf = FrameLayout(context).apply {
-                layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, 0, 1f)
+                layoutParams = LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.MATCH_PARENT, 0, 1f
+                )
             }
             val tv = TextView(context).apply {
                 text = message
                 textSize = 16f
                 setTextColor(Color.DKGRAY)
                 gravity = Gravity.CENTER
-                layoutParams = FrameLayout.LayoutParams(FrameLayout.LayoutParams.WRAP_CONTENT, FrameLayout.LayoutParams.WRAP_CONTENT).apply { gravity = Gravity.CENTER }
+                layoutParams = FrameLayout.LayoutParams(
+                    FrameLayout.LayoutParams.WRAP_CONTENT, FrameLayout.LayoutParams.WRAP_CONTENT
+                ).apply { gravity = Gravity.CENTER }
             }
             bottomHalf.addView(tv)
             overlay.addView(topHalf)
@@ -558,13 +613,23 @@ class ElemzesActivity : AppCompatActivity() {
             return overlay
         }
 
-        private fun createTransactionView(category: String, amount: Float, type: String, transaction: Map<String, Any>, docId: String): View {
+        private fun createTransactionView(
+            category: String,
+            amount: Float,
+            type: String,
+            transaction: Map<String, Any>,
+            docId: String
+        ): View {
             val context = requireContext()
+            // Az egész tranzakciót tartalmazó container – vízszintes elrendezés
             val containerLayout = LinearLayout(context).apply {
                 orientation = LinearLayout.HORIZONTAL
-                layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT)
+                layoutParams = LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.MATCH_PARENT,
+                    LinearLayout.LayoutParams.WRAP_CONTENT
+                )
             }
-            // Bin ikon törléshez
+            // A törléshez használt ikon
             val binIcon = ImageView(context).apply {
                 setImageResource(R.drawable.bin_icon)
                 val size = (24 * resources.displayMetrics.density).toInt()
@@ -573,10 +638,9 @@ class ElemzesActivity : AppCompatActivity() {
                     setMargins(8, 0, 8, 0)
                 }
                 setOnClickListener {
-                    (activity as ElemzesActivity).deleteTransaction(docId, transaction, {
+                    (activity as? ElemzesActivity)?.deleteTransaction(docId, transaction, {
                         Toast.makeText(context, "Tranzakció törölve", Toast.LENGTH_SHORT).show()
-                        // Frissítjük a NapFragment-et
-                        requireActivity().supportFragmentManager.beginTransaction().detach(NapFragment()).attach(NapFragment()).commit()
+                        // Itt a fragment frissítése már a snapshot listener-rel történik
                     }, { e ->
                         Toast.makeText(context, "Törlési hiba: ${e.message}", Toast.LENGTH_SHORT).show()
                     })
@@ -584,46 +648,70 @@ class ElemzesActivity : AppCompatActivity() {
             }
             containerLayout.addView(binIcon)
 
+            // A tranzakció részleteit tartalmazó, függőleges elrendezés
             val transactionDetails = LinearLayout(context).apply {
                 orientation = LinearLayout.VERTICAL
-                layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT)
+                layoutParams = LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.MATCH_PARENT,
+                    LinearLayout.LayoutParams.WRAP_CONTENT
+                )
+                // Tegyük kattinthatóvá a részletek területét
+                isClickable = true
+                isFocusable = true
             }
+            // A kategória neve
             val catTextView = TextView(context).apply {
                 text = category
                 textSize = 16f
                 setTextColor(Color.DKGRAY)
                 gravity = Gravity.START
-                layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT).apply {
-                    setMargins(0, 4, 0, 2)
-                }
+                layoutParams = LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.MATCH_PARENT,
+                    LinearLayout.LayoutParams.WRAP_CONTENT
+                ).apply { setMargins(0, 4, 0, 2) }
             }
             transactionDetails.addView(catTextView)
+
+            // A fő adatokat tartalmazó sor (összeg, ikon)
             val rowLayout = RelativeLayout(context).apply {
-                layoutParams = RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.MATCH_PARENT, RelativeLayout.LayoutParams.WRAP_CONTENT)
+                layoutParams = RelativeLayout.LayoutParams(
+                    RelativeLayout.LayoutParams.MATCH_PARENT,
+                    RelativeLayout.LayoutParams.WRAP_CONTENT
+                )
             }
             val amountTextView = TextView(context).apply {
                 id = View.generateViewId()
                 textSize = 16f
                 gravity = Gravity.START
-                setTextColor(if (type == "bevétel") Color.GREEN else if (type == "kiadás") Color.RED else Color.BLACK)
+                setTextColor(
+                    if (type == "bevétel") Color.GREEN else if (type == "kiadás") Color.RED else Color.BLACK
+                )
                 text = when (type) {
                     "bevétel" -> "+ $amount"
                     "kiadás" -> "- $amount"
                     else -> "$amount"
                 }
             }
-            val amountParams = RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.WRAP_CONTENT).apply {
+            val amountParams = RelativeLayout.LayoutParams(
+                RelativeLayout.LayoutParams.WRAP_CONTENT,
+                RelativeLayout.LayoutParams.WRAP_CONTENT
+            ).apply {
                 addRule(RelativeLayout.ALIGN_PARENT_START)
                 addRule(RelativeLayout.CENTER_VERTICAL)
             }
             amountTextView.layoutParams = amountParams
             rowLayout.addView(amountTextView)
-            val iconRes = (activity as ElemzesActivity).getIconResForCategory(category)
+
+            // Az ikon a jobb oldalon
+            val iconRes = (activity as? ElemzesActivity)?.getIconResForCategory(category) ?: R.drawable.egyeb_icon
             val iconView = ImageView(context).apply {
                 id = View.generateViewId()
                 setImageResource(iconRes)
             }
-            val iconParams = RelativeLayout.LayoutParams((24 * resources.displayMetrics.density).toInt(), (24 * resources.displayMetrics.density).toInt()).apply {
+            val iconParams = RelativeLayout.LayoutParams(
+                (24 * resources.displayMetrics.density).toInt(),
+                (24 * resources.displayMetrics.density).toInt()
+            ).apply {
                 addRule(RelativeLayout.ALIGN_PARENT_END)
                 addRule(RelativeLayout.CENTER_VERTICAL)
                 setMargins(8, 0, 8, 0)
@@ -631,6 +719,24 @@ class ElemzesActivity : AppCompatActivity() {
             iconView.layoutParams = iconParams
             rowLayout.addView(iconView)
             transactionDetails.addView(rowLayout)
+
+            // Új: A leírást tartalmazó TextView, amely alapból rejtett
+            val description = transaction["leiras"] as? String ?: ""
+            val descriptionTextView = TextView(context).apply {
+                text = "Leírás: $description"
+                textSize = 14f
+                setTextColor(Color.DKGRAY)
+                visibility = View.GONE
+                setPadding(0, 8, 0, 8)
+            }
+            transactionDetails.addView(descriptionTextView)
+
+            // A tranzakció részleteire kattintva váltogatjuk a leírás megjelenítését
+            transactionDetails.setOnClickListener {
+                descriptionTextView.visibility =
+                    if (descriptionTextView.visibility == View.GONE) View.VISIBLE else View.GONE
+            }
+
             containerLayout.addView(transactionDetails)
             return containerLayout
         }
@@ -654,12 +760,12 @@ class ElemzesActivity : AppCompatActivity() {
             val categoriesLayout = requireActivity().findViewById<LinearLayout>(R.id.CategoriesLinearLayout)
             categoriesLayout.visibility = View.VISIBLE
             chart.visibility = View.VISIBLE
-            categoriesLayout.removeAllViews()
 
             if (currentUser == null) {
                 Toast.makeText(context, "Nincs bejelentkezett felhasználó!", Toast.LENGTH_SHORT).show()
                 return
             }
+
             val uid = currentUser.uid
             val today = LocalDate.now()
             val monthStart = today.withDayOfMonth(1)
@@ -669,31 +775,45 @@ class ElemzesActivity : AppCompatActivity() {
                 .collection("nap")
                 .whereGreaterThanOrEqualTo(FieldPath.documentId(), monthStart.format(formatter))
                 .whereLessThanOrEqualTo(FieldPath.documentId(), monthEnd.format(formatter))
-                .get()
-                .addOnSuccessListener { querySnapshot ->
-                    if (querySnapshot.isEmpty) {
-                        showNoDataOverlay("Nincs megjeleníthető adat a választott időszakra.", categoriesLayout)
-                        chart.visibility = View.INVISIBLE
-                        return@addOnSuccessListener
+                .addSnapshotListener { querySnapshot, e ->
+                    categoriesLayout.removeAllViews()
+                    if (e != null) {
+                        Log.e("FirestoreDebug", "Hiba a havi adatok lekérdezése során: ${e.message}")
+                        Toast.makeText(context, "Hiba a havi adatok lekérdezése során.", Toast.LENGTH_SHORT).show()
+                        return@addSnapshotListener
                     }
-                    (activity as ElemzesActivity).removeNoDataOverlay(chart)
+                    if (querySnapshot == null || querySnapshot.isEmpty) {
+                        if (categoriesLayout.findViewWithTag<View>("noDataOverlay") == null) {
+                            showNoDataOverlay("Nincs megjeleníthető adat a választott időszakra.", chart, categoriesLayout)
+                            chart.visibility = View.INVISIBLE
+                        }
+                        return@addSnapshotListener
+                    }
+                    (activity as? ElemzesActivity)?.removeNoDataOverlay(chart)
                     var totalRevenue = 0f
                     var totalExpense = 0f
 
                     val sortedDocs = querySnapshot.documents.sortedByDescending { LocalDate.parse(it.id, formatter) }
                     for (doc in sortedDocs) {
+                        // Ellenőrizzük, hogy a dokumentum "tranzakciok" listája nem üres-e
+                        val transactions = doc.get("tranzakciok") as? List<Map<String, Any>> ?: emptyList()
+                        if (transactions.isEmpty()) {
+                            firestore.collection("users").document(uid)
+                                .collection("nap").document(doc.id).delete()
+                            continue
+                        }
                         val dateStr = doc.id
                         val dateHeader = TextView(requireContext()).apply {
                             text = dateStr
                             textSize = 16f
                             setTextColor(Color.DKGRAY)
-                            layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT).apply {
-                                setMargins(0, 8, 0, 4)
-                            }
+                            layoutParams = LinearLayout.LayoutParams(
+                                LinearLayout.LayoutParams.WRAP_CONTENT,
+                                LinearLayout.LayoutParams.WRAP_CONTENT
+                            ).apply { setMargins(0, 8, 0, 4) }
                         }
                         categoriesLayout.addView(dateHeader)
                         try {
-                            val transactions = doc.get("tranzakciok") as? List<Map<String, Any>> ?: emptyList()
                             val sortedTransactions = if (transactions.isNotEmpty() && transactions[0].containsKey("timestamp"))
                                 transactions.sortedByDescending { it["timestamp"] as? Long ?: 0L }
                             else transactions.reversed()
@@ -726,57 +846,77 @@ class ElemzesActivity : AppCompatActivity() {
                     chart.setFitBars(true)
                     chart.invalidate()
                 }
-                .addOnFailureListener { e ->
-                    Log.e("FirestoreDebug", "Hiba a havi adatok lekérdezése során: ${e.message}")
-                    Toast.makeText(context, "Hiba a havi adatok lekérdezése során.", Toast.LENGTH_SHORT).show()
-                }
         }
 
-        private fun showNoDataOverlay(message: String, container: LinearLayout) {
-            for (i in 0 until container.childCount) {
-                if (container.getChildAt(i).tag == "noDataOverlay") return
+        private fun showNoDataOverlay(message: String, chart: BarChart, container: LinearLayout) {
+            val parent = chart.parent as? ViewGroup
+            if (parent != null && parent.findViewWithTag<View>("noDataOverlay") == null) {
+                val overlay = createNoDataOverlay(message)
+                parent.addView(overlay)
+                overlay.bringToFront()
             }
-            val overlay = LinearLayout(requireContext()).apply {
+            chart.visibility = View.INVISIBLE
+        }
+
+        private fun createNoDataOverlay(message: String): View {
+            val context = requireContext()
+            val overlay = LinearLayout(context).apply {
                 orientation = LinearLayout.VERTICAL
                 layoutParams = LinearLayout.LayoutParams(
-                    container.width.takeIf { it > 0 } ?: LinearLayout.LayoutParams.MATCH_PARENT,
-                    container.height.takeIf { it > 0 } ?: LinearLayout.LayoutParams.MATCH_PARENT
+                    LinearLayout.LayoutParams.MATCH_PARENT,
+                    LinearLayout.LayoutParams.MATCH_PARENT
                 )
                 tag = "noDataOverlay"
             }
-            val topHalf = FrameLayout(requireContext()).apply {
-                layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, 0, 1f)
+            val topHalf = FrameLayout(context).apply {
+                layoutParams = LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.MATCH_PARENT, 0, 1f
+                )
             }
-            val iv = ImageView(requireContext()).apply {
+            val iv = ImageView(context).apply {
                 setImageResource(R.drawable.no_data_icon)
                 val size = (48 * resources.displayMetrics.density).toInt()
                 layoutParams = FrameLayout.LayoutParams(size, size).apply { gravity = Gravity.CENTER }
             }
             topHalf.addView(iv)
-            val bottomHalf = FrameLayout(requireContext()).apply {
-                layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, 0, 1f)
+            val bottomHalf = FrameLayout(context).apply {
+                layoutParams = LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.MATCH_PARENT, 0, 1f
+                )
             }
-            val tv = TextView(requireContext()).apply {
+            val tv = TextView(context).apply {
                 text = message
                 textSize = 16f
                 setTextColor(Color.DKGRAY)
                 gravity = Gravity.CENTER
-                layoutParams = FrameLayout.LayoutParams(FrameLayout.LayoutParams.WRAP_CONTENT, FrameLayout.LayoutParams.WRAP_CONTENT).apply { gravity = Gravity.CENTER }
+                layoutParams = FrameLayout.LayoutParams(
+                    FrameLayout.LayoutParams.WRAP_CONTENT,
+                    FrameLayout.LayoutParams.WRAP_CONTENT
+                ).apply { gravity = Gravity.CENTER }
             }
             bottomHalf.addView(tv)
             overlay.addView(topHalf)
             overlay.addView(bottomHalf)
-            container.addView(overlay)
-            overlay.bringToFront()
+            return overlay
         }
 
-        private fun createTransactionView(category: String, amount: Float, type: String, transaction: Map<String, Any>, docId: String): View {
+        private fun createTransactionView(
+            category: String,
+            amount: Float,
+            type: String,
+            transaction: Map<String, Any>,
+            docId: String
+        ): View {
             val context = requireContext()
+            // Az egész tranzakciót tartalmazó container – vízszintes elrendezés
             val containerLayout = LinearLayout(context).apply {
                 orientation = LinearLayout.HORIZONTAL
-                layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT)
+                layoutParams = LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.MATCH_PARENT,
+                    LinearLayout.LayoutParams.WRAP_CONTENT
+                )
             }
-            // Bin ikon törléshez
+            // A törléshez használt ikon
             val binIcon = ImageView(context).apply {
                 setImageResource(R.drawable.bin_icon)
                 val size = (24 * resources.displayMetrics.density).toInt()
@@ -785,56 +925,80 @@ class ElemzesActivity : AppCompatActivity() {
                     setMargins(8, 0, 8, 0)
                 }
                 setOnClickListener {
-                    (activity as ElemzesActivity).deleteTransaction(docId, transaction, {
+                    (activity as? ElemzesActivity)?.deleteTransaction(docId, transaction, {
                         Toast.makeText(context, "Tranzakció törölve", Toast.LENGTH_SHORT).show()
-                        // Frissítjük a HonapFragment-et
-                        requireActivity().supportFragmentManager.beginTransaction().detach(this@HonapFragment).attach(this@HonapFragment).commit()
+                        // Itt a fragment frissítése már a snapshot listener-rel történik
                     }, { e ->
                         Toast.makeText(context, "Törlési hiba: ${e.message}", Toast.LENGTH_SHORT).show()
                     })
                 }
             }
             containerLayout.addView(binIcon)
+
+            // A tranzakció részleteit tartalmazó, függőleges elrendezés
             val transactionDetails = LinearLayout(context).apply {
                 orientation = LinearLayout.VERTICAL
-                layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT)
+                layoutParams = LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.MATCH_PARENT,
+                    LinearLayout.LayoutParams.WRAP_CONTENT
+                )
+                // Tegyük kattinthatóvá a részletek területét
+                isClickable = true
+                isFocusable = true
             }
+            // A kategória neve
             val catTextView = TextView(context).apply {
                 text = category
                 textSize = 16f
                 setTextColor(Color.DKGRAY)
                 gravity = Gravity.START
-                layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT).apply {
-                    setMargins(0, 4, 0, 2)
-                }
+                layoutParams = LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.MATCH_PARENT,
+                    LinearLayout.LayoutParams.WRAP_CONTENT
+                ).apply { setMargins(0, 4, 0, 2) }
             }
             transactionDetails.addView(catTextView)
+
+            // A fő adatokat tartalmazó sor (összeg, ikon)
             val rowLayout = RelativeLayout(context).apply {
-                layoutParams = RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.MATCH_PARENT, RelativeLayout.LayoutParams.WRAP_CONTENT)
+                layoutParams = RelativeLayout.LayoutParams(
+                    RelativeLayout.LayoutParams.MATCH_PARENT,
+                    RelativeLayout.LayoutParams.WRAP_CONTENT
+                )
             }
             val amountTextView = TextView(context).apply {
                 id = View.generateViewId()
                 textSize = 16f
                 gravity = Gravity.START
-                setTextColor(if (type == "bevétel") Color.GREEN else if (type == "kiadás") Color.RED else Color.BLACK)
+                setTextColor(
+                    if (type == "bevétel") Color.GREEN else if (type == "kiadás") Color.RED else Color.BLACK
+                )
                 text = when (type) {
                     "bevétel" -> "+ $amount"
                     "kiadás" -> "- $amount"
                     else -> "$amount"
                 }
             }
-            val amountParams = RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.WRAP_CONTENT).apply {
+            val amountParams = RelativeLayout.LayoutParams(
+                RelativeLayout.LayoutParams.WRAP_CONTENT,
+                RelativeLayout.LayoutParams.WRAP_CONTENT
+            ).apply {
                 addRule(RelativeLayout.ALIGN_PARENT_START)
                 addRule(RelativeLayout.CENTER_VERTICAL)
             }
             amountTextView.layoutParams = amountParams
             rowLayout.addView(amountTextView)
-            val iconRes = (activity as ElemzesActivity).getIconResForCategory(category)
+
+            // Az ikon a jobb oldalon
+            val iconRes = (activity as? ElemzesActivity)?.getIconResForCategory(category) ?: R.drawable.egyeb_icon
             val iconView = ImageView(context).apply {
                 id = View.generateViewId()
                 setImageResource(iconRes)
             }
-            val iconParams = RelativeLayout.LayoutParams((24 * resources.displayMetrics.density).toInt(), (24 * resources.displayMetrics.density).toInt()).apply {
+            val iconParams = RelativeLayout.LayoutParams(
+                (24 * resources.displayMetrics.density).toInt(),
+                (24 * resources.displayMetrics.density).toInt()
+            ).apply {
                 addRule(RelativeLayout.ALIGN_PARENT_END)
                 addRule(RelativeLayout.CENTER_VERTICAL)
                 setMargins(8, 0, 8, 0)
@@ -842,13 +1006,32 @@ class ElemzesActivity : AppCompatActivity() {
             iconView.layoutParams = iconParams
             rowLayout.addView(iconView)
             transactionDetails.addView(rowLayout)
+
+            // Új: A leírást tartalmazó TextView, amely alapból rejtett
+            val description = transaction["leiras"] as? String ?: ""
+            val descriptionTextView = TextView(context).apply {
+                text = "Leírás: $description"
+                textSize = 14f
+                setTextColor(Color.DKGRAY)
+                visibility = View.GONE
+                setPadding(0, 8, 0, 8)
+            }
+            transactionDetails.addView(descriptionTextView)
+
+            // A tranzakció részleteire kattintva váltogatjuk a leírás megjelenítését
+            transactionDetails.setOnClickListener {
+                descriptionTextView.visibility =
+                    if (descriptionTextView.visibility == View.GONE) View.VISIBLE else View.GONE
+            }
+
             containerLayout.addView(transactionDetails)
             return containerLayout
         }
     }
 
+
     // 4. EvFragment – Az aktuális év adatai (csökkenő sorrendben)
-    class EvFragment : Fragment() {
+     class EvFragment : Fragment() {
         private val firestore = FirebaseManager.firestore
         private val currentUser = FirebaseManager.auth.currentUser
         private val formatter = DateTimeFormatter.ISO_LOCAL_DATE
@@ -883,28 +1066,37 @@ class ElemzesActivity : AppCompatActivity() {
                 .get()
                 .addOnSuccessListener { querySnapshot ->
                     if (querySnapshot.isEmpty) {
-                        showNoDataOverlay("Nincs megjeleníthető adat a választott időszakra.", categoriesLayout)
-                        chart.visibility = View.INVISIBLE
+                        if (categoriesLayout.findViewWithTag<View>("noDataOverlay") == null) {
+                            showNoDataOverlay("Nincs megjeleníthető adat a választott időszakra.", categoriesLayout)
+                            chart.visibility = View.INVISIBLE
+                        }
                         return@addOnSuccessListener
                     }
-                    (activity as ElemzesActivity).removeNoDataOverlay(chart)
+                    (activity as? ElemzesActivity)?.removeNoDataOverlay(chart)
                     var totalRevenue = 0f
                     var totalExpense = 0f
 
                     val sortedDocs = querySnapshot.documents.sortedByDescending { LocalDate.parse(it.id, formatter) }
                     for (doc in sortedDocs) {
+                        // Ha a tranzakció lista üres, töröljük a dokumentumot
+                        val transactions = doc.get("tranzakciok") as? List<Map<String, Any>> ?: emptyList()
+                        if (transactions.isEmpty()) {
+                            firestore.collection("users").document(uid)
+                                .collection("nap").document(doc.id).delete()
+                            continue
+                        }
                         val dateStr = doc.id
                         val dateHeader = TextView(requireContext()).apply {
                             text = dateStr
                             textSize = 16f
                             setTextColor(Color.DKGRAY)
-                            layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT).apply {
-                                setMargins(0, 8, 0, 4)
-                            }
+                            layoutParams = LinearLayout.LayoutParams(
+                                LinearLayout.LayoutParams.WRAP_CONTENT,
+                                LinearLayout.LayoutParams.WRAP_CONTENT
+                            ).apply { setMargins(0, 8, 0, 4) }
                         }
                         categoriesLayout.addView(dateHeader)
                         try {
-                            val transactions = doc.get("tranzakciok") as? List<Map<String, Any>> ?: emptyList()
                             val sortedTransactions = if (transactions.isNotEmpty() && transactions[0].containsKey("timestamp"))
                                 transactions.sortedByDescending { it["timestamp"] as? Long ?: 0L }
                             else transactions.reversed()
@@ -943,6 +1135,7 @@ class ElemzesActivity : AppCompatActivity() {
                 }
         }
 
+
         private fun showNoDataOverlay(message: String, container: LinearLayout) {
             for (i in 0 until container.childCount) {
                 if (container.getChildAt(i).tag == "noDataOverlay") return
@@ -956,7 +1149,9 @@ class ElemzesActivity : AppCompatActivity() {
                 tag = "noDataOverlay"
             }
             val topHalf = FrameLayout(requireContext()).apply {
-                layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, 0, 1f)
+                layoutParams = LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.MATCH_PARENT, 0, 1f
+                )
             }
             val iv = ImageView(requireContext()).apply {
                 setImageResource(R.drawable.no_data_icon)
@@ -965,14 +1160,18 @@ class ElemzesActivity : AppCompatActivity() {
             }
             topHalf.addView(iv)
             val bottomHalf = FrameLayout(requireContext()).apply {
-                layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, 0, 1f)
+                layoutParams = LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.MATCH_PARENT, 0, 1f
+                )
             }
             val tv = TextView(requireContext()).apply {
                 text = message
                 textSize = 16f
                 setTextColor(Color.DKGRAY)
                 gravity = Gravity.CENTER
-                layoutParams = FrameLayout.LayoutParams(FrameLayout.LayoutParams.WRAP_CONTENT, FrameLayout.LayoutParams.WRAP_CONTENT).apply { gravity = Gravity.CENTER }
+                layoutParams = FrameLayout.LayoutParams(
+                    FrameLayout.LayoutParams.WRAP_CONTENT, FrameLayout.LayoutParams.WRAP_CONTENT
+                ).apply { gravity = Gravity.CENTER }
             }
             bottomHalf.addView(tv)
             overlay.addView(topHalf)
@@ -981,13 +1180,23 @@ class ElemzesActivity : AppCompatActivity() {
             overlay.bringToFront()
         }
 
-        private fun createTransactionView(category: String, amount: Float, type: String, transaction: Map<String, Any>, docId: String): View {
+        private fun createTransactionView(
+            category: String,
+            amount: Float,
+            type: String,
+            transaction: Map<String, Any>,
+            docId: String
+        ): View {
             val context = requireContext()
+            // Az egész tranzakciót tartalmazó container – vízszintes elrendezés
             val containerLayout = LinearLayout(context).apply {
                 orientation = LinearLayout.HORIZONTAL
-                layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT)
+                layoutParams = LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.MATCH_PARENT,
+                    LinearLayout.LayoutParams.WRAP_CONTENT
+                )
             }
-            // Bin ikon törléshez
+            // A törléshez használt ikon
             val binIcon = ImageView(context).apply {
                 setImageResource(R.drawable.bin_icon)
                 val size = (24 * resources.displayMetrics.density).toInt()
@@ -996,56 +1205,80 @@ class ElemzesActivity : AppCompatActivity() {
                     setMargins(8, 0, 8, 0)
                 }
                 setOnClickListener {
-                    (activity as ElemzesActivity).deleteTransaction(docId, transaction, {
+                    (activity as? ElemzesActivity)?.deleteTransaction(docId, transaction, {
                         Toast.makeText(context, "Tranzakció törölve", Toast.LENGTH_SHORT).show()
-                        // Frissítjük a HonapFragment-et
-                        requireActivity().supportFragmentManager.beginTransaction().detach(HonapFragment()).attach(HonapFragment()).commit()
+                        // Itt a fragment frissítése már a snapshot listener-rel történik
                     }, { e ->
                         Toast.makeText(context, "Törlési hiba: ${e.message}", Toast.LENGTH_SHORT).show()
                     })
                 }
             }
             containerLayout.addView(binIcon)
+
+            // A tranzakció részleteit tartalmazó, függőleges elrendezés
             val transactionDetails = LinearLayout(context).apply {
                 orientation = LinearLayout.VERTICAL
-                layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT)
+                layoutParams = LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.MATCH_PARENT,
+                    LinearLayout.LayoutParams.WRAP_CONTENT
+                )
+                // Tegyük kattinthatóvá a részletek területét
+                isClickable = true
+                isFocusable = true
             }
+            // A kategória neve
             val catTextView = TextView(context).apply {
                 text = category
                 textSize = 16f
                 setTextColor(Color.DKGRAY)
                 gravity = Gravity.START
-                layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT).apply {
-                    setMargins(0, 4, 0, 2)
-                }
+                layoutParams = LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.MATCH_PARENT,
+                    LinearLayout.LayoutParams.WRAP_CONTENT
+                ).apply { setMargins(0, 4, 0, 2) }
             }
             transactionDetails.addView(catTextView)
+
+            // A fő adatokat tartalmazó sor (összeg, ikon)
             val rowLayout = RelativeLayout(context).apply {
-                layoutParams = RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.MATCH_PARENT, RelativeLayout.LayoutParams.WRAP_CONTENT)
+                layoutParams = RelativeLayout.LayoutParams(
+                    RelativeLayout.LayoutParams.MATCH_PARENT,
+                    RelativeLayout.LayoutParams.WRAP_CONTENT
+                )
             }
             val amountTextView = TextView(context).apply {
                 id = View.generateViewId()
                 textSize = 16f
                 gravity = Gravity.START
-                setTextColor(if (type == "bevétel") Color.GREEN else if (type == "kiadás") Color.RED else Color.BLACK)
+                setTextColor(
+                    if (type == "bevétel") Color.GREEN else if (type == "kiadás") Color.RED else Color.BLACK
+                )
                 text = when (type) {
                     "bevétel" -> "+ $amount"
                     "kiadás" -> "- $amount"
                     else -> "$amount"
                 }
             }
-            val amountParams = RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.WRAP_CONTENT).apply {
+            val amountParams = RelativeLayout.LayoutParams(
+                RelativeLayout.LayoutParams.WRAP_CONTENT,
+                RelativeLayout.LayoutParams.WRAP_CONTENT
+            ).apply {
                 addRule(RelativeLayout.ALIGN_PARENT_START)
                 addRule(RelativeLayout.CENTER_VERTICAL)
             }
             amountTextView.layoutParams = amountParams
             rowLayout.addView(amountTextView)
-            val iconRes = (activity as ElemzesActivity).getIconResForCategory(category)
+
+            // Az ikon a jobb oldalon
+            val iconRes = (activity as? ElemzesActivity)?.getIconResForCategory(category) ?: R.drawable.egyeb_icon
             val iconView = ImageView(context).apply {
                 id = View.generateViewId()
                 setImageResource(iconRes)
             }
-            val iconParams = RelativeLayout.LayoutParams((24 * resources.displayMetrics.density).toInt(), (24 * resources.displayMetrics.density).toInt()).apply {
+            val iconParams = RelativeLayout.LayoutParams(
+                (24 * resources.displayMetrics.density).toInt(),
+                (24 * resources.displayMetrics.density).toInt()
+            ).apply {
                 addRule(RelativeLayout.ALIGN_PARENT_END)
                 addRule(RelativeLayout.CENTER_VERTICAL)
                 setMargins(8, 0, 8, 0)
@@ -1053,13 +1286,31 @@ class ElemzesActivity : AppCompatActivity() {
             iconView.layoutParams = iconParams
             rowLayout.addView(iconView)
             transactionDetails.addView(rowLayout)
+
+            // Új: A leírást tartalmazó TextView, amely alapból rejtett
+            val description = transaction["leiras"] as? String ?: ""
+            val descriptionTextView = TextView(context).apply {
+                text = "Leírás: $description"
+                textSize = 14f
+                setTextColor(Color.DKGRAY)
+                visibility = View.GONE
+                setPadding(0, 8, 0, 8)
+            }
+            transactionDetails.addView(descriptionTextView)
+
+            // A tranzakció részleteire kattintva váltogatjuk a leírás megjelenítését
+            transactionDetails.setOnClickListener {
+                descriptionTextView.visibility =
+                    if (descriptionTextView.visibility == View.GONE) View.VISIBLE else View.GONE
+            }
+
             containerLayout.addView(transactionDetails)
             return containerLayout
         }
     }
 
     // 5. IdoszakFragment – Egy egyedi időszak adatai (csökkenő sorrendben)
-    class IdoszakFragment : Fragment() {
+     class IdoszakFragment : Fragment() {
         private val firestore = FirebaseManager.firestore
         private val currentUser = FirebaseManager.auth.currentUser
 
@@ -1131,26 +1382,37 @@ class ElemzesActivity : AppCompatActivity() {
                 .get()
                 .addOnSuccessListener { querySnapshot ->
                     if (querySnapshot.isEmpty) {
-                        showNoDataOverlay("Nincs megjeleníthető adat a választott időszakra.", categoriesLayout)
-                        chart.visibility = View.INVISIBLE
+                        if (categoriesLayout.findViewWithTag<View>("noDataOverlay") == null) {
+                            showNoDataOverlay("Nincs megjeleníthető adat a választott időszakra.", categoriesLayout)
+                            chart.visibility = View.INVISIBLE
+                        }
                         return@addOnSuccessListener
                     }
-                    (activity as ElemzesActivity).removeNoDataOverlay(chart)
+                    (activity as? ElemzesActivity)?.removeNoDataOverlay(chart)
                     var totalRevenue = 0f
                     var totalExpense = 0f
 
                     val sortedDocs = querySnapshot.documents.sortedByDescending { LocalDate.parse(it.id) }
                     for (doc in sortedDocs) {
+                        // Ha a tranzakció lista üres, töröljük a dokumentumot
+                        val transactions = doc.get("tranzakciok") as? List<Map<String, Any>> ?: emptyList()
+                        if (transactions.isEmpty()) {
+                            firestore.collection("users").document(uid)
+                                .collection("nap").document(doc.id).delete()
+                            continue
+                        }
                         val dateStr = doc.id
                         val dateHeader = TextView(requireContext()).apply {
                             text = dateStr
                             textSize = 16f
                             setTextColor(Color.DKGRAY)
-                            layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT).apply { setMargins(0, 8, 0, 4) }
+                            layoutParams = LinearLayout.LayoutParams(
+                                LinearLayout.LayoutParams.WRAP_CONTENT,
+                                LinearLayout.LayoutParams.WRAP_CONTENT
+                            ).apply { setMargins(0, 8, 0, 4) }
                         }
                         categoriesLayout.addView(dateHeader)
                         try {
-                            val transactions = doc.get("tranzakciok") as? List<Map<String, Any>> ?: emptyList()
                             val sortedTransactions = if (transactions.isNotEmpty() && transactions[0].containsKey("timestamp"))
                                 transactions.sortedByDescending { it["timestamp"] as? Long ?: 0L }
                             else transactions.reversed()
@@ -1189,6 +1451,7 @@ class ElemzesActivity : AppCompatActivity() {
                 }
         }
 
+
         private fun showNoDataOverlay(message: String, container: LinearLayout) {
             for (i in 0 until container.childCount) {
                 if (container.getChildAt(i).tag == "noDataOverlay") return
@@ -1202,7 +1465,9 @@ class ElemzesActivity : AppCompatActivity() {
                 tag = "noDataOverlay"
             }
             val topHalf = FrameLayout(requireContext()).apply {
-                layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, 0, 1f)
+                layoutParams = LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.MATCH_PARENT, 0, 1f
+                )
             }
             val iv = ImageView(requireContext()).apply {
                 setImageResource(R.drawable.no_data_icon)
@@ -1211,14 +1476,18 @@ class ElemzesActivity : AppCompatActivity() {
             }
             topHalf.addView(iv)
             val bottomHalf = FrameLayout(requireContext()).apply {
-                layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, 0, 1f)
+                layoutParams = LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.MATCH_PARENT, 0, 1f
+                )
             }
             val tv = TextView(requireContext()).apply {
                 text = message
                 textSize = 16f
                 setTextColor(Color.DKGRAY)
                 gravity = Gravity.CENTER
-                layoutParams = FrameLayout.LayoutParams(FrameLayout.LayoutParams.WRAP_CONTENT, FrameLayout.LayoutParams.WRAP_CONTENT).apply { gravity = Gravity.CENTER }
+                layoutParams = FrameLayout.LayoutParams(
+                    FrameLayout.LayoutParams.WRAP_CONTENT, FrameLayout.LayoutParams.WRAP_CONTENT
+                ).apply { gravity = Gravity.CENTER }
             }
             bottomHalf.addView(tv)
             overlay.addView(topHalf)
@@ -1227,13 +1496,23 @@ class ElemzesActivity : AppCompatActivity() {
             overlay.bringToFront()
         }
 
-        private fun createTransactionView(category: String, amount: Float, type: String, transaction: Map<String, Any>, docId: String): View {
+        private fun createTransactionView(
+            category: String,
+            amount: Float,
+            type: String,
+            transaction: Map<String, Any>,
+            docId: String
+        ): View {
             val context = requireContext()
+            // Az egész tranzakciót tartalmazó container – vízszintes elrendezés
             val containerLayout = LinearLayout(context).apply {
                 orientation = LinearLayout.HORIZONTAL
-                layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT)
+                layoutParams = LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.MATCH_PARENT,
+                    LinearLayout.LayoutParams.WRAP_CONTENT
+                )
             }
-            // Bin ikon törléshez
+            // A törléshez használt ikon
             val binIcon = ImageView(context).apply {
                 setImageResource(R.drawable.bin_icon)
                 val size = (24 * resources.displayMetrics.density).toInt()
@@ -1242,56 +1521,80 @@ class ElemzesActivity : AppCompatActivity() {
                     setMargins(8, 0, 8, 0)
                 }
                 setOnClickListener {
-                    (activity as ElemzesActivity).deleteTransaction(docId, transaction, {
+                    (activity as? ElemzesActivity)?.deleteTransaction(docId, transaction, {
                         Toast.makeText(context, "Tranzakció törölve", Toast.LENGTH_SHORT).show()
-                        // Frissítjük az IdoszakFragment-et
-                        requireActivity().supportFragmentManager.beginTransaction().detach(this@IdoszakFragment).attach(this@IdoszakFragment).commit()
+                        // Itt a fragment frissítése már a snapshot listener-rel történik
                     }, { e ->
                         Toast.makeText(context, "Törlési hiba: ${e.message}", Toast.LENGTH_SHORT).show()
                     })
                 }
             }
             containerLayout.addView(binIcon)
+
+            // A tranzakció részleteit tartalmazó, függőleges elrendezés
             val transactionDetails = LinearLayout(context).apply {
                 orientation = LinearLayout.VERTICAL
-                layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT)
+                layoutParams = LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.MATCH_PARENT,
+                    LinearLayout.LayoutParams.WRAP_CONTENT
+                )
+                // Tegyük kattinthatóvá a részletek területét
+                isClickable = true
+                isFocusable = true
             }
+            // A kategória neve
             val catTextView = TextView(context).apply {
                 text = category
                 textSize = 16f
                 setTextColor(Color.DKGRAY)
                 gravity = Gravity.START
-                layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT).apply {
-                    setMargins(0, 4, 0, 2)
-                }
+                layoutParams = LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.MATCH_PARENT,
+                    LinearLayout.LayoutParams.WRAP_CONTENT
+                ).apply { setMargins(0, 4, 0, 2) }
             }
             transactionDetails.addView(catTextView)
+
+            // A fő adatokat tartalmazó sor (összeg, ikon)
             val rowLayout = RelativeLayout(context).apply {
-                layoutParams = RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.MATCH_PARENT, RelativeLayout.LayoutParams.WRAP_CONTENT)
+                layoutParams = RelativeLayout.LayoutParams(
+                    RelativeLayout.LayoutParams.MATCH_PARENT,
+                    RelativeLayout.LayoutParams.WRAP_CONTENT
+                )
             }
             val amountTextView = TextView(context).apply {
                 id = View.generateViewId()
                 textSize = 16f
                 gravity = Gravity.START
-                setTextColor(if (type == "bevétel") Color.GREEN else if (type == "kiadás") Color.RED else Color.BLACK)
+                setTextColor(
+                    if (type == "bevétel") Color.GREEN else if (type == "kiadás") Color.RED else Color.BLACK
+                )
                 text = when (type) {
                     "bevétel" -> "+ $amount"
                     "kiadás" -> "- $amount"
                     else -> "$amount"
                 }
             }
-            val amountParams = RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.WRAP_CONTENT).apply {
+            val amountParams = RelativeLayout.LayoutParams(
+                RelativeLayout.LayoutParams.WRAP_CONTENT,
+                RelativeLayout.LayoutParams.WRAP_CONTENT
+            ).apply {
                 addRule(RelativeLayout.ALIGN_PARENT_START)
                 addRule(RelativeLayout.CENTER_VERTICAL)
             }
             amountTextView.layoutParams = amountParams
             rowLayout.addView(amountTextView)
-            val iconRes = (activity as ElemzesActivity).getIconResForCategory(category)
+
+            // Az ikon a jobb oldalon
+            val iconRes = (activity as? ElemzesActivity)?.getIconResForCategory(category) ?: R.drawable.egyeb_icon
             val iconView = ImageView(context).apply {
                 id = View.generateViewId()
                 setImageResource(iconRes)
             }
-            val iconParams = RelativeLayout.LayoutParams((24 * resources.displayMetrics.density).toInt(), (24 * resources.displayMetrics.density).toInt()).apply {
+            val iconParams = RelativeLayout.LayoutParams(
+                (24 * resources.displayMetrics.density).toInt(),
+                (24 * resources.displayMetrics.density).toInt()
+            ).apply {
                 addRule(RelativeLayout.ALIGN_PARENT_END)
                 addRule(RelativeLayout.CENTER_VERTICAL)
                 setMargins(8, 0, 8, 0)
@@ -1299,13 +1602,31 @@ class ElemzesActivity : AppCompatActivity() {
             iconView.layoutParams = iconParams
             rowLayout.addView(iconView)
             transactionDetails.addView(rowLayout)
+
+            // Új: A leírást tartalmazó TextView, amely alapból rejtett
+            val description = transaction["leiras"] as? String ?: ""
+            val descriptionTextView = TextView(context).apply {
+                text = "Leírás: $description"
+                textSize = 14f
+                setTextColor(Color.DKGRAY)
+                visibility = View.GONE
+                setPadding(0, 8, 0, 8)
+            }
+            transactionDetails.addView(descriptionTextView)
+
+            // A tranzakció részleteire kattintva váltogatjuk a leírás megjelenítését
+            transactionDetails.setOnClickListener {
+                descriptionTextView.visibility =
+                    if (descriptionTextView.visibility == View.GONE) View.VISIBLE else View.GONE
+            }
+
             containerLayout.addView(transactionDetails)
             return containerLayout
         }
     }
 
     // 6. DefaultFragment – fallback elrendezés
-    class DefaultFragment : Fragment() {
+    inner class DefaultFragment : Fragment() {
         override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
             return inflater.inflate(R.layout.fragment_alap, container, false)
         }
@@ -1315,23 +1636,28 @@ class ElemzesActivity : AppCompatActivity() {
     fun deleteTransaction(docId: String, transaction: Map<String, Any>, onSuccess: () -> Unit, onFailure: (Exception) -> Unit) {
         val uid = FirebaseAuth.getInstance().currentUser?.uid ?: return
         val userDocRef = FirebaseFirestore.getInstance().collection("users").document(uid)
-        // Számoljuk ki az összeget
         val amount = when (val a = transaction["mennyiseg"]) {
             is Double -> a.toFloat()
             is Long -> a.toFloat()
             else -> 0f
         }
         val type = (transaction["tipus"] as? String)?.trim()?.toLowerCase(Locale.getDefault()) ?: ""
-        // Ha bevétel törlésénél a fő egyenleg csökken, kiadásnál nő
         val delta = if (type == "bevétel") -amount else if (type == "kiadás") amount else 0f
 
         FirebaseFirestore.getInstance().runTransaction { trans ->
-            // Először olvassuk be a felhasználói dokumentumot
             val userSnapshot = trans.get(userDocRef)
             val napDocRef = userDocRef.collection("nap").document(docId)
-            // Frissítjük a tranzakciók listáját: távolítsuk el a törölt tranzakciót
-            trans.update(napDocRef, "tranzakciok", FieldValue.arrayRemove(transaction))
-            // Frissítjük a fő egyenleget
+            val napSnapshot = trans.get(napDocRef)
+            // Lekérjük az aktuális tranzakciókat
+            val currentTransactions = napSnapshot.get("tranzakciok") as? List<Map<String, Any>> ?: emptyList()
+            // Eltávolítjuk a törlendő elemet
+            val newTransactions = currentTransactions.filterNot { it == transaction }
+            if (newTransactions.isEmpty()) {
+                // Ha nincs több tranzakció, töröljük a nap dokumentumát
+                trans.delete(napDocRef)
+            } else {
+                trans.update(napDocRef, "tranzakciok", newTransactions)
+            }
             val currentBalance = userSnapshot.getDouble("aktualisPenz") ?: 0.0
             val newBalance = currentBalance + delta
             trans.update(userDocRef, "aktualisPenz", newBalance)

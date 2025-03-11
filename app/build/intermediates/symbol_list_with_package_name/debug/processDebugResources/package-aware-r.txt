@@ -3714,6 +3714,7 @@ id auto
 id autoComplete
 id autoCompleteToEnd
 id autoCompleteToStart
+id backToLoginText
 id barrier
 id baseline
 id beginOnFirstDraw
@@ -3763,6 +3764,7 @@ id collapseActionView
 id compose_view_saveable_id_tag
 id compress
 id confirm_button
+id confirmationMessage
 id constraint
 id consume_window_insets_tag
 id container
@@ -3847,6 +3849,7 @@ id fixed
 id flip
 id floating
 id forever
+id forgotPasswordLayout
 id fragment_container_view_tag
 id frost
 id fullscreen_header
@@ -4067,6 +4070,9 @@ id ratio
 id rectangles
 id recyclerView
 id report_drawn
+id resetEmailInput
+id resetPasswordButton
+id resetPasswordPrompt
 id reverseSawtooth
 id right
 id rightToLeft

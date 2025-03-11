@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/main"
@@ -8,7 +9,7 @@
     tools:context=".Bejelentkezes"
     android:background="@color/gray">
 
-    <!-- Email mező -->
+    <!-- E-mail mező -->
     <EditText
         android:id="@+id/Email"
         android:layout_width="0dp"
@@ -55,7 +56,7 @@
         app:layout_constraintTop_toBottomOf="@id/Jelszo"
         app:layout_constraintEnd_toEndOf="parent"
         android:gravity="end"
-        android:layout_marginEnd="32dp"/> <!-- Jobb oldali margó növelése -->
+        android:layout_marginEnd="32dp"/>
 
     <!-- Maradjak bejelentkezve jelölőnégyzet -->
     <CheckBox
@@ -103,5 +104,85 @@
         android:layout_marginEnd="32dp"
         android:padding="16dp"
         android:elevation="4dp"/>
+
+    <!-- Forgot Password Layout (alapértelmezett állapotban rejtve) -->
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/forgotPasswordLayout"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <!-- Felirat az e-mail cím megadásához -->
+        <TextView
+            android:id="@+id/resetPasswordPrompt"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Kérjük adja meg az e-mail címét:"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:layout_marginTop="80dp" />
+
+        <!-- E-mail input mező -->
+        <EditText
+            android:id="@+id/resetEmailInput"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:hint="E-mail"
+            android:inputType="textEmailAddress"
+            android:background="@color/white"
+            android:padding="16dp"
+            app:layout_constraintTop_toBottomOf="@id/resetPasswordPrompt"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:layout_marginStart="32dp"
+            android:layout_marginEnd="32dp"
+            android:layout_marginTop="16dp" />
+
+        <!-- Jelszó visszaállítása gomb -->
+        <Button
+            android:id="@+id/resetPasswordButton"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="jelszó visszaállítása"
+            app:layout_constraintTop_toBottomOf="@id/resetEmailInput"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:layout_marginStart="32dp"
+            android:layout_marginEnd="32dp"
+            android:layout_marginTop="24dp" />
+
+        <!-- Sikeres visszaállítás esetén megjelenő felirat -->
+        <TextView
+            android:id="@+id/confirmationMessage"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Elküldtük önnek az e-mailt, kérjük kövesse az ott található utasításokat."
+            android:visibility="gone"
+            app:layout_constraintTop_toBottomOf="@id/resetPasswordButton"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:layout_marginTop="24dp" />
+
+        <!-- Vissza a kezdőképernyőre felirat, az aljára középre igazítva -->
+        <TextView
+            android:id="@+id/backToLoginText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="vissza a kezdőképernyőre"
+            android:textColor="@color/colorLink"
+            android:textStyle="bold"
+            android:clickable="true"
+            android:focusable="true"
+            android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:layout_marginBottom="32dp"/>
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

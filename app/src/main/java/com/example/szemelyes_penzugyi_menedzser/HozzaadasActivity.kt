@@ -15,7 +15,8 @@ import android.util.Log
 class HozzaadasActivity : AppCompatActivity() {
 
     private var kivalasztottKategoria: String? = null  // Kiválasztott kategória tárolása
-    private var tranzakcioTipus: String? = null  // Bevétel vagy kiadás tárolása
+    // A tranzakció típus alapértelmezett értéke "Bevétel" – így nem lesz null
+    private var tranzakcioTipus: String = "Bevétel"
     private var selectedView: View? = null  // A kijelölt item tárolása
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -50,7 +51,7 @@ class HozzaadasActivity : AppCompatActivity() {
 
             // Most válasszuk ki az új elemet
             selectedView = view
-            view.setBackgroundColor(Color.LTGRAY)  // Kijelölés vizuális jele (szürke háttér)
+            view.setBackgroundColor(Color.LTGRAY)  // Kijelölés vizuális jele
 
             kivalasztottKategoria = if (tranzakcioTipus == "Bevétel") {
                 // Ha Bevétel van kiválasztva, csak a megfelelő kategóriákat engedjük
@@ -74,7 +75,7 @@ class HozzaadasActivity : AppCompatActivity() {
 
         tranzakcioTipusSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(parentView: AdapterView<*>?, view: View?, position: Int, id: Long) {
-                if (position == 0) {  // Ha Bevétel van kiválasztva
+                if (position == 0) {  // Bevétel
                     val ujKategoriak = listOf("Fizetési csekk", "Ajándékok", "Egyéb")
                     val ujKategoriakIkonok = listOf(
                         R.drawable.szabadido_icon, R.drawable.ajandekok_icon, R.drawable.egyeb_icon
@@ -89,7 +90,8 @@ class HozzaadasActivity : AppCompatActivity() {
             }
 
             override fun onNothingSelected(parentView: AdapterView<*>?) {
-                tranzakcioTipus = null
+                // Ha semmi nincs kiválasztva, alapértelmezetten "Bevétel"
+                tranzakcioTipus = "Bevétel"
             }
         }
 
@@ -109,17 +111,17 @@ class HozzaadasActivity : AppCompatActivity() {
             val uid = currentUser.uid
             val dokNev = LocalDate.now().toString()
 
-            if (osszeg == null || leiras.isBlank() || tranzakcioTipus == null || kivalasztottKategoria == null) {
+            if (osszeg == null || leiras.isBlank() || kivalasztottKategoria == null) {
                 Toast.makeText(this, "Érvényes összeget, leírást, tranzakció típust és kategóriát adj meg!", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
 
             val transaction = hashMapOf<String, Any>(
                 "mennyiseg" to osszeg,
-                "kategoria" to (kivalasztottKategoria ?: "Nincs kategória"),
+                "kategoria" to kivalasztottKategoria!!,
                 "datum" to Timestamp.now(),
                 "leiras" to leiras,
-                "tipus" to (tranzakcioTipus ?: "Nincs megadva")
+                "tipus" to tranzakcioTipus
             )
 
             firestore.collection("users")
@@ -140,12 +142,12 @@ class HozzaadasActivity : AppCompatActivity() {
                             .update("tranzakciok", mutableTransactions)
                             .addOnSuccessListener {
                                 Toast.makeText(this, "Sikeresen mentve: $dokNev", Toast.LENGTH_SHORT).show()
-                                // Frissítsük a fő egyenleget
                                 if (tranzakcioTipus == "Bevétel") {
                                     updateMainBalance(osszeg.toFloat())
                                 } else if (tranzakcioTipus == "Kiadás") {
                                     updateMainBalance(-osszeg.toFloat())
                                 }
+                                finish()  // Visszalépés az ElemzesActivity-be
                             }
                             .addOnFailureListener { e ->
                                 Toast.makeText(this, "Hiba: ${e.message}", Toast.LENGTH_SHORT).show()
@@ -160,12 +162,12 @@ class HozzaadasActivity : AppCompatActivity() {
                             .set(mapOf("tranzakciok" to transactions))
                             .addOnSuccessListener {
                                 Toast.makeText(this, "Sikeresen mentve: $dokNev", Toast.LENGTH_SHORT).show()
-                                // Frissítsük a fő egyenleget
                                 if (tranzakcioTipus == "Bevétel") {
                                     updateMainBalance(osszeg.toFloat())
                                 } else if (tranzakcioTipus == "Kiadás") {
                                     updateMainBalance(-osszeg.toFloat())
                                 }
+                                finish()  // Visszalépés az ElemzesActivity-be
                             }
                             .addOnFailureListener { e ->
                                 Toast.makeText(this, "Hiba: ${e.message}", Toast.LENGTH_SHORT).show()
@@ -178,11 +180,6 @@ class HozzaadasActivity : AppCompatActivity() {
         }
     }
 
-    /**
-     * Frissíti a felhasználó fő egyenlegét (az "aktualisPenz" mezőt) úgy, hogy hozzáadja (pozitív delta)
-     * vagy kivonja (negatív delta) a megadott értéket.
-     * Ez a verzió tranzakciót használ a megbízható frissítéshez.
-     */
     fun updateMainBalance(delta: Float) {
         val uid = FirebaseAuth.getInstance().currentUser?.uid ?: return
         val userDocRef = FirebaseFirestore.getInstance().collection("users").document(uid)

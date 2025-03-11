@@ -78,6 +78,7 @@ id Regisztracio_gomb_atvezeto
 id Regisztracio_vegrehajtas
 id addCategoryButton
 id addCategoryContainer
+id backToLoginText
 id betumeret_button
 id categoryIcon
 id categoryIconImageView
@@ -85,6 +86,7 @@ id categoryName
 id categoryNameEditText
 id categoryNameTextView
 id checkBox
+id confirmationMessage
 id elemzes
 id elfelejtettemJelszavam
 id expenseAmountTextView
@@ -93,6 +95,7 @@ id expenseProgressBar
 id expenseRadioButton
 id felhasznalonev
 id feliratokLayout
+id forgotPasswordLayout
 id guideline
 id hozzaadButton
 id hozzaadasGomb
@@ -124,6 +127,9 @@ id penzugyi_adatok_torles_button
 id profil_torles_button
 id progressBar
 id recyclerView
+id resetEmailInput
+id resetPasswordButton
+id resetPasswordPrompt
 id scrollView
 id selectIconLabel
 id torlesButton
