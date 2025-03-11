@@ -3419,6 +3419,8 @@ drawable abc_textfield_search_default_mtrl_alpha
 drawable abc_textfield_search_material
 drawable abc_vector_test
 drawable ajandekok_icon
+drawable arrow_left
+drawable arrow_right
 drawable avd_hide_password
 drawable avd_show_password
 drawable bin_icon
@@ -3708,6 +3710,8 @@ id animateToStart
 id antiClockwise
 id anticipate
 id arc
+id arrowBack
+id arrowForward
 id asConfigured
 id async
 id auto
@@ -3878,6 +3882,7 @@ id icon
 id iconGridView
 id icon_group
 id icon_only
+id idoszakValasztoSpinner
 id ifRoom
 id ignore
 id ignoreRequest
@@ -4452,6 +4457,7 @@ layout places_autocomplete_prediction
 layout select_dialog_item_material
 layout select_dialog_multichoice_material
 layout select_dialog_singlechoice_material
+layout spinner_item
 layout support_simple_spinner_dropdown_item
 menu menu_options
 mipmap ic_launcher

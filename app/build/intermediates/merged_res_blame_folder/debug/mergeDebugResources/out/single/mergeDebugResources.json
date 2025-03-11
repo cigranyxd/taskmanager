@@ -56,6 +56,10 @@
         "source": "C:\\Users\\User\\.gradle\\daemon\\8.7\\com.example.szemelyes_penzugyi_menedzser.app-main-74:\\drawable\\ikon8.png"
     },
     {
+        "merged": "com.example.szemelyes_penzugyi_menedzser.app-debug-72:/drawable_arrow_left.png.flat",
+        "source": "com.example.szemelyes_penzugyi_menedzser.app-main-74:/drawable/arrow_left.png"
+    },
+    {
         "merged": "C:\\Users\\User\\.gradle\\daemon\\8.7\\com.example.szemelyes_penzugyi_menedzser.app-debug-72:\\layout_kategoria_item.xml.flat",
         "source": "C:\\Users\\User\\.gradle\\daemon\\8.7\\com.example.szemelyes_penzugyi_menedzser.app-main-74:\\layout\\kategoria_item.xml"
     },
@@ -80,6 +84,10 @@
         "source": "C:\\Users\\User\\.gradle\\daemon\\8.7\\com.example.szemelyes_penzugyi_menedzser.app-main-74:\\layout\\activity_kategoria_tranzakciok.xml"
     },
     {
+        "merged": "com.example.szemelyes_penzugyi_menedzser.app-debug-72:/drawable_arrow_right.png.flat",
+        "source": "com.example.szemelyes_penzugyi_menedzser.app-main-74:/drawable/arrow_right.png"
+    },
+    {
         "merged": "C:\\Users\\User\\.gradle\\daemon\\8.7\\com.example.szemelyes_penzugyi_menedzser.app-debug-72:\\drawable_ikon13.png.flat",
         "source": "C:\\Users\\User\\.gradle\\daemon\\8.7\\com.example.szemelyes_penzugyi_menedzser.app-main-74:\\drawable\\ikon13.png"
     },
@@ -90,10 +98,6 @@
     {
         "merged": "C:\\Users\\User\\.gradle\\daemon\\8.7\\com.example.szemelyes_penzugyi_menedzser.app-debug-72:\\drawable_input_bg.xml.flat",
         "source": "C:\\Users\\User\\.gradle\\daemon\\8.7\\com.example.szemelyes_penzugyi_menedzser.app-main-74:\\drawable\\input_bg.xml"
-    },
-    {
-        "merged": "com.example.szemelyes_penzugyi_menedzser.app-debug-72:/layout_bejelentkezes.xml.flat",
-        "source": "com.example.szemelyes_penzugyi_menedzser.app-main-74:/layout/bejelentkezes.xml"
     },
     {
         "merged": "C:\\Users\\User\\.gradle\\daemon\\8.7\\com.example.szemelyes_penzugyi_menedzser.app-debug-72:\\drawable_red_button.xml.flat",
@@ -114,6 +118,10 @@
     {
         "merged": "C:\\Users\\User\\.gradle\\daemon\\8.7\\com.example.szemelyes_penzugyi_menedzser.app-debug-72:\\drawable_kavezo_icon.png.flat",
         "source": "C:\\Users\\User\\.gradle\\daemon\\8.7\\com.example.szemelyes_penzugyi_menedzser.app-main-74:\\drawable\\kavezo_icon.png"
+    },
+    {
+        "merged": "com.example.szemelyes_penzugyi_menedzser.app-debug-72:/layout_spinner_item.xml.flat",
+        "source": "com.example.szemelyes_penzugyi_menedzser.app-main-74:/layout/spinner_item.xml"
     },
     {
         "merged": "C:\\Users\\User\\.gradle\\daemon\\8.7\\com.example.szemelyes_penzugyi_menedzser.app-debug-72:\\drawable_ikon9.png.flat",
@@ -194,6 +202,10 @@
     {
         "merged": "C:\\Users\\User\\.gradle\\daemon\\8.7\\com.example.szemelyes_penzugyi_menedzser.app-debug-72:\\layout_fragment_idoszak.xml.flat",
         "source": "C:\\Users\\User\\.gradle\\daemon\\8.7\\com.example.szemelyes_penzugyi_menedzser.app-main-74:\\layout\\fragment_idoszak.xml"
+    },
+    {
+        "merged": "com.example.szemelyes_penzugyi_menedzser.app-debug-72:/layout_activity_kategoriak.xml.flat",
+        "source": "com.example.szemelyes_penzugyi_menedzser.app-main-74:/layout/activity_kategoriak.xml"
     },
     {
         "merged": "C:\\Users\\User\\.gradle\\daemon\\8.7\\com.example.szemelyes_penzugyi_menedzser.app-debug-72:\\layout_kategoria_item_elemzeshez.xml.flat",

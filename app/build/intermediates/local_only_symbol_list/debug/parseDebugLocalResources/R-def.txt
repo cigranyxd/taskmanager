@@ -13,6 +13,8 @@ color purple
 color red
 color white
 drawable ajandekok_icon
+drawable arrow_left
+drawable arrow_right
 drawable bin_icon
 drawable button_background
 drawable button_secondary_background
@@ -78,6 +80,8 @@ id Regisztracio_gomb_atvezeto
 id Regisztracio_vegrehajtas
 id addCategoryButton
 id addCategoryContainer
+id arrowBack
+id arrowForward
 id backToLoginText
 id betumeret_button
 id categoryIcon
@@ -100,6 +104,7 @@ id guideline
 id hozzaadButton
 id hozzaadasGomb
 id iconGridView
+id idoszakValasztoSpinner
 id incomeAmountTextView
 id incomeContainer
 id incomeProgressBar
@@ -162,6 +167,7 @@ layout kategoria_item
 layout kategoria_item_elemzeshez
 layout kifizetes_item
 layout linechart
+layout spinner_item
 menu menu_options
 mipmap ic_launcher
 mipmap ic_launcher_round
