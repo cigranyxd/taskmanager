@@ -77,6 +77,44 @@
             android:focusable="true" />
     </LinearLayout>
 
+    <!-- Egyedi időszak kiválasztó sor: két nyíl és a spinner középre igazítva -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center"
+        android:layout_marginTop="8dp">
+
+        <!-- Bal oldali nyíl: vissza -->
+        <ImageButton
+            android:id="@+id/arrowBack"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:src="@drawable/arrow_left"
+            android:scaleType="fitCenter"
+            android:contentDescription="Vissza"
+            android:background="?attr/selectableItemBackgroundBorderless" />
+
+        <!-- Az egyedi időszak kiválasztó spinner -->
+        <Spinner
+            android:id="@+id/idoszakValasztoSpinner"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:spinnerMode="dropdown"
+            android:layout_marginStart="8dp"
+            android:layout_marginEnd="8dp" />
+
+        <!-- Jobb oldali nyíl: előre -->
+        <ImageButton
+            android:id="@+id/arrowForward"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:src="@drawable/arrow_right"
+            android:scaleType="fitCenter"
+            android:contentDescription="Előre"
+            android:background="@null" />
+    </LinearLayout>
+
     <!-- Üzenet, ha nincs adat -->
     <TextView
         android:id="@+id/noDataTextView"
@@ -122,10 +160,10 @@
         android:id="@+id/kategoriakListView"
         android:layout_width="match_parent"
         android:layout_height="0dp"
+        android:layout_marginTop="8dp"
         android:layout_weight="1"
         android:divider="@android:color/darker_gray"
-        android:dividerHeight="1dp"
-        android:layout_marginTop="8dp" />
+        android:dividerHeight="1dp" />
 
     <!-- Gomb: Új kategória hozzáadása -->
     <Button

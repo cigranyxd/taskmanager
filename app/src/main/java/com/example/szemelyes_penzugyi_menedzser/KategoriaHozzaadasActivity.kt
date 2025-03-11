@@ -1,11 +1,14 @@
 package com.example.szemelyes_penzugyi_menedzser
 
+import KategoriaAdapter
+import android.graphics.Color
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
+import com.google.firebase.auth.FirebaseAuth
 
 class KategoriaHozzaadasActivity : AppCompatActivity() {
 
@@ -14,7 +17,7 @@ class KategoriaHozzaadasActivity : AppCompatActivity() {
     private lateinit var ikonGridView: GridView
     private lateinit var hozzadasGomb: Button
 
-    // Például 21 ikon resource ID (győződj meg róla, hogy ezek léteznek a drawable mappában)
+    // Például 21 ikon resource ID
     private val ikonLista = listOf(
         R.drawable.ikon1, R.drawable.ikon2, R.drawable.ikon3, R.drawable.ikon4,
         R.drawable.ikon5, R.drawable.ikon6, R.drawable.ikon7, R.drawable.ikon8,
@@ -25,6 +28,8 @@ class KategoriaHozzaadasActivity : AppCompatActivity() {
     )
 
     private var kivalasztottIkonResId: Int? = null
+    // Tároljuk a kiválasztott ikon pozícióját; ha nincs kiválasztva, -1
+    private var selectedIconPosition: Int = -1
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -35,13 +40,29 @@ class KategoriaHozzaadasActivity : AppCompatActivity() {
         ikonGridView = findViewById(R.id.iconGridView)
         hozzadasGomb = findViewById(R.id.addCategoryButton)
 
-        // Ikonok megjelenítése a GridView-ban
-        val adapter = IkonAdapter(this, ikonLista)
+        // Custom kategóriák betöltése Firestore-ból, ha be van jelentkezve
+        val currentUser = FirebaseAuth.getInstance().currentUser
+        if (currentUser != null) {
+            EgyediKategoriak.betoltFirestore(this, currentUser.uid)
+        } else {
+            EgyediKategoriak.betolt(this)
+        }
+
+        // Az adapterben csak az ikonok jelennek meg, a nevek üresek, mivel a felhasználó írja be a kategória nevet.
+        val adapter = KategoriaAdapter(this, List(ikonLista.size) { "" }, ikonLista)
         ikonGridView.adapter = adapter
 
-        ikonGridView.onItemClickListener = AdapterView.OnItemClickListener { _, _, position, _ ->
-            kivalasztottIkonResId = ikonLista[position]
-            adapter.setSelectedPosition(position)
+        ikonGridView.setOnItemClickListener { parent, view, position, _ ->
+            // Ha ugyanarra az elemre kattintanak, visszavonjuk a kijelölést
+            if (selectedIconPosition == position) {
+                selectedIconPosition = -1
+                kivalasztottIkonResId = null
+            } else {
+                selectedIconPosition = position
+                kivalasztottIkonResId = ikonLista[position]
+            }
+            // Frissítjük az adapter kiválasztott pozícióját
+            adapter.selectedPosition = selectedIconPosition
             adapter.notifyDataSetChanged()
             ellenorizMezok()
         }
@@ -65,16 +86,20 @@ class KategoriaHozzaadasActivity : AppCompatActivity() {
                 R.id.expenseRadioButton -> "Kiadás"
                 else -> ""
             }
-            val ikonRes = kivalasztottIkonResId
 
-            if (kategoriaNev.isNotEmpty() && ikonRes != null && kategoriaTipus.isNotEmpty()) {
-                // Új kategória mentése a globális EgyediKategoriak objektumba
-                val ujKategoria = EgyediKategoria(kategoriaNev, ikonRes, kategoriaTipus)
+            if (kategoriaNev.isNotEmpty() && kivalasztottIkonResId != null && kategoriaTipus.isNotEmpty()) {
+                val ujKategoria = EgyediKategoria(kategoriaNev, kivalasztottIkonResId!!, kategoriaTipus)
                 EgyediKategoriak.kategoriak.add(ujKategoria)
-                // Mentés SharedPreferences-be, hogy újraindítás után is megmaradjanak
-                EgyediKategoriak.save(this)
-                Toast.makeText(this, "Kategória hozzáadva: $kategoriaNev, $kategoriaTipus", Toast.LENGTH_SHORT).show()
-                finish()  // Visszalépés a főképernyőre
+                EgyediKategoriak.ment(this)
+                if (currentUser != null) {
+                    EgyediKategoriak.mentFirestore(this, currentUser.uid) {
+                        Toast.makeText(this, "Kategória hozzáadva: $kategoriaNev, $kategoriaTipus", Toast.LENGTH_SHORT).show()
+                        finish()
+                    }
+                } else {
+                    Toast.makeText(this, "Kategória hozzáadva lokálisan: $kategoriaNev, $kategoriaTipus", Toast.LENGTH_SHORT).show()
+                    finish()
+                }
             }
         }
 
@@ -84,13 +109,8 @@ class KategoriaHozzaadasActivity : AppCompatActivity() {
     private fun ellenorizMezok() {
         val isNevValid = kategoriaNevEditText.text.toString().trim().isNotEmpty()
         val isIkonKivalasztva = kivalasztottIkonResId != null
-
-        if (isNevValid && isIkonKivalasztva) {
-            hozzadasGomb.isEnabled = true
-            hozzadasGomb.setBackgroundColor(ContextCompat.getColor(this, android.R.color.holo_red_dark))
-        } else {
-            hozzadasGomb.isEnabled = false
-            hozzadasGomb.setBackgroundColor(ContextCompat.getColor(this, android.R.color.darker_gray))
-        }
+        hozzadasGomb.isEnabled = isNevValid && isIkonKivalasztva
+        val colorRes = if (isNevValid && isIkonKivalasztva) android.R.color.holo_red_dark else android.R.color.darker_gray
+        hozzadasGomb.setBackgroundColor(ContextCompat.getColor(this, colorRes))
     }
 }

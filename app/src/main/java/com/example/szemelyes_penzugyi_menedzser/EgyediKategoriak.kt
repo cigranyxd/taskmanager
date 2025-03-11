@@ -1,32 +1,90 @@
 package com.example.szemelyes_penzugyi_menedzser
 
 import android.content.Context
+import android.util.Log
+import com.google.firebase.firestore.FirebaseFirestore
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 
+private const val TAG = "EgyediKategoriak"
 
-// Singleton objektum a custom kategóriák tárolására
+
+
+// Singleton az egyedi kategóriák kezelésére
 object EgyediKategoriak {
     val kategoriak: MutableList<EgyediKategoria> = mutableListOf()
 
-    // Betölti a kategóriákat SharedPreferences-ből
-    fun load(context: Context) {
-        val prefs = context.getSharedPreferences("custom_categories", Context.MODE_PRIVATE)
+    // Betölti a kategóriákat SharedPreferences-ből (fallback vagy első futáskor)
+    fun betolt(context: Context) {
+        val prefs = context.getSharedPreferences("egyedi_kategoriak", Context.MODE_PRIVATE)
         val json = prefs.getString("kategoriak", null)
         if (json != null) {
-            val type = object : TypeToken<List<EgyediKategoria>>() {}.type
-            val lista: List<EgyediKategoria> = Gson().fromJson(json, type)
-            kategoriak.clear()
-            kategoriak.addAll(lista)
+            try {
+                val tipusToken = object : TypeToken<List<EgyediKategoria>>() {}.type
+                val lista: List<EgyediKategoria> = Gson().fromJson(json, tipusToken)
+                kategoriak.clear()
+                kategoriak.addAll(lista)
+                Log.d(TAG, "Custom kategóriák betöltve SharedPreferences-ből.")
+            } catch (e: Exception) {
+                Log.e(TAG, "Hiba SharedPreferences betöltésénél: ${e.message}")
+            }
+        } else {
+            Log.d(TAG, "Nincs custom kategória adat SharedPreferences-ben.")
         }
     }
 
     // Elmenti a kategóriákat SharedPreferences-be
-    fun save(context: Context) {
-        val prefs = context.getSharedPreferences("custom_categories", Context.MODE_PRIVATE)
-        val editor = prefs.edit()
+    fun ment(context: Context) {
+        val prefs = context.getSharedPreferences("egyedi_kategoriak", Context.MODE_PRIVATE)
+        val szerkeszto = prefs.edit()
         val json = Gson().toJson(kategoriak)
-        editor.putString("kategoriak", json)
-        editor.apply()
+        szerkeszto.putString("kategoriak", json)
+        szerkeszto.apply()
+        Log.d(TAG, "Custom kategóriák elmentve SharedPreferences-be.")
+    }
+
+    // Betölti a kategóriákat Firestore-ból a felhasználóhoz rendelve
+    fun betoltFirestore(context: Context, felhasznaloId: String, onBefejez: () -> Unit = {}) {
+        val firestore = FirebaseFirestore.getInstance()
+        firestore.collection("users").document(felhasznaloId)
+            .collection("egyedi_kategoriak")
+            .get()
+            .addOnSuccessListener { querySnapshot ->
+                kategoriak.clear()
+                for (doc in querySnapshot.documents) {
+                    val egyediKat = doc.toObject(EgyediKategoria::class.java)
+                    if (egyediKat != null) {
+                        kategoriak.add(egyediKat)
+                    }
+                }
+                Log.d(TAG, "Custom kategóriák betöltve Firestore-ból.")
+                onBefejez()
+            }
+            .addOnFailureListener { e ->
+                Log.e(TAG, "Hiba Firestore betöltésénél: ${e.message}")
+                // Hibakezelés: fallbackként SharedPreferences-ből töltjük be
+                betolt(context)
+                onBefejez()
+            }
+    }
+
+    // Elmenti a kategóriákat Firestore-ba a felhasználóhoz rendelve
+    fun mentFirestore(context: Context, felhasznaloId: String, onBefejez: (() -> Unit)? = null) {
+        val firestore = FirebaseFirestore.getInstance()
+        val batch = firestore.batch()
+        val egyediKatRef = firestore.collection("users").document(felhasznaloId)
+            .collection("egyedi_kategoriak")
+        for (egyediKat in kategoriak) {
+            val docRef = egyediKatRef.document(egyediKat.nev)
+            batch.set(docRef, egyediKat)
+        }
+        batch.commit()
+            .addOnSuccessListener {
+                Log.d(TAG, "Custom kategóriák elmentve Firestore-ba.")
+                onBefejez?.invoke()
+            }
+            .addOnFailureListener { e ->
+                Log.e(TAG, "Hiba Firestore mentésénél: ${e.message}")
+            }
     }
 }
