@@ -1,262 +1,61 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout
+<LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:id="@+id/settings_layout"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#E1F5FE">
+    android:orientation="vertical"
+    android:padding="16dp"
+    tools:context=".BeallitasokActivity">
 
-    <!-- Toolbar -->
-    <com.google.android.material.appbar.MaterialToolbar
-        android:id="@+id/toolbar"
-        android:layout_width="0dp"
-        android:layout_height="?attr/actionBarSize"
-        android:background="#4FC3F7"
-        app:title="Beállítások"
-        app:titleTextColor="@android:color/white"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        android:fontFamily="sans-serif-medium">
+    <!-- Lenyíló menü (spinner) a navigációhoz -->
+    <Spinner
+        android:id="@+id/lenyilo_menu"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:spinnerMode="dropdown"
+        android:layout_marginBottom="16dp" />
 
-        <!-- Fogaskerék -->
-        <ImageView
-            android:layout_width="24dp"
-            android:layout_height="24dp"
-            android:adjustViewBounds="true"
-            android:scaleType="fitCenter"
-            android:layout_gravity="start|center_vertical"
-            android:padding="8dp"
-            android:src="@android:drawable/ic_menu_manage" />
-    </com.google.android.material.appbar.MaterialToolbar>
+    <!-- Betűméret gomb -->
+    <Button
+        android:id="@+id/betumeret_button"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Betűméret"
+        android:layout_marginBottom="8dp" />
 
-    <!-- Görgethető beállítási lehetőségek -->
-    <ScrollView
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        app:layout_constraintTop_toBottomOf="@id/toolbar"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        android:padding="16dp">
+    <!-- Nyelv gomb -->
+    <Button
+        android:id="@+id/nyelv_button"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Nyelv"
+        android:layout_marginBottom="8dp" />
 
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical">
+    <!-- Jelszó változtatás gomb -->
+    <Button
+        android:id="@+id/jelszo_button"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Jelszó változtatás"
+        android:layout_marginBottom="8dp" />
 
-            <!-- Betűméret beállítás -->
-            <com.google.android.material.card.MaterialCardView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="16dp"
-                app:cardCornerRadius="16dp"
-                app:cardElevation="4dp"
-                android:backgroundTint="@android:color/white"
-                android:clickable="true"
-                android:foreground="?attr/selectableItemBackground">
+    <!-- Profil törlése gomb -->
+    <Button
+        android:id="@+id/profil_torles_button"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Profil törlése"
+        android:layout_marginBottom="8dp" />
 
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:padding="16dp"
-                    android:gravity="center_vertical">
+    <!-- Pénzügyi adatok törlése gomb -->
+    <Button
+        android:id="@+id/penzugyi_adatok_torles_button"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Pénzügyi adatok törlése"
+        android:layout_marginBottom="8dp" />
 
-                    <ImageView
-                        android:layout_width="24dp"
-                        android:layout_height="24dp"
-                        android:src="@android:drawable/ic_menu_sort_alphabetically"
-                        android:tint="#4FC3F7"/>
-
-                    <TextView
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:text="Betűméret"
-                        android:textSize="16sp"
-                        android:textColor="#212121"
-                        android:paddingStart="16dp"
-                        android:fontFamily="sans-serif-medium"/>
-
-                    <ImageView
-                        android:layout_width="24dp"
-                        android:layout_height="24dp"
-                        android:src="@android:drawable/ic_menu_forward"
-                        android:tint="#4FC3F7"/>
-                </LinearLayout>
-            </com.google.android.material.card.MaterialCardView>
-
-            <!-- Nyelv beállítás -->
-            <com.google.android.material.card.MaterialCardView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="16dp"
-                app:cardCornerRadius="16dp"
-                app:cardElevation="4dp"
-                android:backgroundTint="@android:color/white"
-                android:clickable="true"
-                android:foreground="?attr/selectableItemBackground">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:padding="16dp"
-                    android:gravity="center_vertical">
-
-                    <ImageView
-                        android:layout_width="24dp"
-                        android:layout_height="24dp"
-                        android:src="@android:drawable/ic_menu_info_details"
-                        android:tint="#4FC3F7"/>
-
-                    <TextView
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:text="Nyelv"
-                        android:textSize="16sp"
-                        android:textColor="#212121"
-                        android:paddingStart="16dp"
-                        android:fontFamily="sans-serif-medium"/>
-
-                    <ImageView
-                        android:layout_width="24dp"
-                        android:layout_height="24dp"
-                        android:src="@android:drawable/ic_menu_forward"
-                        android:tint="#4FC3F7"/>
-                </LinearLayout>
-            </com.google.android.material.card.MaterialCardView>
-
-            <!-- Jelszó változtatás -->
-            <com.google.android.material.card.MaterialCardView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="16dp"
-                app:cardCornerRadius="16dp"
-                app:cardElevation="4dp"
-                android:backgroundTint="@android:color/white"
-                android:clickable="true"
-                android:foreground="?attr/selectableItemBackground">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:padding="16dp"
-                    android:gravity="center_vertical">
-
-                    <ImageView
-                        android:layout_width="24dp"
-                        android:layout_height="24dp"
-                        android:src="@android:drawable/ic_lock_lock"
-                        android:tint="#4FC3F7"/>
-
-                    <TextView
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:text="Jelszó változtatás"
-                        android:textSize="16sp"
-                        android:textColor="#212121"
-                        android:paddingStart="16dp"
-                        android:fontFamily="sans-serif-medium"/>
-
-                    <ImageView
-                        android:layout_width="24dp"
-                        android:layout_height="24dp"
-                        android:src="@android:drawable/ic_menu_forward"
-                        android:tint="#4FC3F7"/>
-                </LinearLayout>
-            </com.google.android.material.card.MaterialCardView>
-
-            <!-- Profil törlés -->
-            <com.google.android.material.card.MaterialCardView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="16dp"
-                app:cardCornerRadius="16dp"
-                app:cardElevation="4dp"
-                android:backgroundTint="@android:color/white"
-                android:clickable="true"
-                android:foreground="?attr/selectableItemBackground">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:padding="16dp"
-                    android:gravity="center_vertical">
-
-                    <ImageView
-                        android:layout_width="24dp"
-                        android:layout_height="24dp"
-                        android:src="@android:drawable/ic_menu_delete"
-                        android:tint="#4FC3F7"/>
-
-                    <TextView
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:text="Profil törlése"
-                        android:textSize="16sp"
-                        android:textColor="#212121"
-                        android:paddingStart="16dp"
-                        android:fontFamily="sans-serif-medium"/>
-
-                    <ImageView
-                        android:layout_width="24dp"
-                        android:layout_height="24dp"
-                        android:src="@android:drawable/ic_menu_forward"
-                        android:tint="#4FC3F7"/>
-                </LinearLayout>
-            </com.google.android.material.card.MaterialCardView>
-
-            <!-- Pénzügyi adatok törlése -->
-            <com.google.android.material.card.MaterialCardView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="16dp"
-                app:cardCornerRadius="16dp"
-                app:cardElevation="4dp"
-                android:backgroundTint="@android:color/white"
-                android:clickable="true"
-                android:foreground="?attr/selectableItemBackground">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:padding="16dp"
-                    android:gravity="center_vertical">
-
-                    <ImageView
-                        android:layout_width="24dp"
-                        android:layout_height="24dp"
-                        android:src="@android:drawable/ic_menu_agenda"
-                        android:tint="#4FC3F7"/>
-
-                    <TextView
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:text="Pénzügyi adatok törlése"
-                        android:textSize="16sp"
-                        android:textColor="#212121"
-                        android:paddingStart="16dp"
-                        android:fontFamily="sans-serif-medium"/>
-
-                    <ImageView
-                        android:layout_width="24dp"
-                        android:layout_height="24dp"
-                        android:src="@android:drawable/ic_menu_forward"
-                        android:tint="#4FC3F7"/>
-                </LinearLayout>
-            </com.google.android.material.card.MaterialCardView>
-
-        </LinearLayout>
-    </ScrollView>
-
-</androidx.constraintlayout.widget.ConstraintLayout>
+</LinearLayout>

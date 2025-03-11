@@ -1,7 +1,13 @@
 package com.example.szemelyes_penzugyi_menedzser
 
+import androidx.annotation.Keep
+
+@Keep
 data class EgyediKategoria(
-    val nev: String,
-    val ikon: Int,
-    val tipus: String // "Bevétel" vagy "Kiadás"
-)
+    var nev: String = "",
+    var ikon: Int = 0,
+    var tipus: String = "" // "Bevétel" vagy "Kiadás"
+) {
+    // Explicit üres konstruktor
+    constructor() : this("", 0, "")
+}

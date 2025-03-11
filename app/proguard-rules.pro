@@ -22,3 +22,7 @@
 -keep class com.google.android.gms.** { *; }
 -keep class com.google.firebase.** { *; }
 -dontwarn com.google.**
+-keepclassmembers class com.example.szemelyes_penzugyi_menedzser.EgyediKategoria {
+    public <init>(...);
+}
+

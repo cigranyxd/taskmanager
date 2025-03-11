@@ -1,37 +1,28 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/main"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:padding="24dp"
-    android:background="#E1F5FE"
+    android:padding="16dp"
     tools:context=".Kategoriak">
 
-    <!-- Modern legördülő menü a navigációhoz -->
-    <com.google.android.material.textfield.TextInputLayout
-        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+    <!-- Lenyíló menü (spinner) a navigációhoz -->
+    <Spinner
+        android:id="@+id/lenyilo_menu"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="24dp">
-        <com.google.android.material.textfield.MaterialAutoCompleteTextView
-            android:id="@+id/lenyilo_menu"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="Navigáció" />
-    </com.google.android.material.textfield.TextInputLayout>
+        android:spinnerMode="dropdown" />
 
     <!-- Időszak választó sor -->
     <LinearLayout
-        android:id="@+id/periodSelectorLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:gravity="center"
-        android:layout_marginBottom="24dp">
+        android:layout_marginTop="8dp">
 
         <TextView
             android:id="@+id/NapFelirat"
@@ -41,7 +32,7 @@
             android:text="Nap"
             android:textSize="18sp"
             android:gravity="center"
-            android:padding="12dp"
+            android:padding="8dp"
             android:background="?attr/selectableItemBackground"
             android:clickable="true"
             android:focusable="true" />
@@ -54,7 +45,7 @@
             android:text="Hét"
             android:textSize="18sp"
             android:gravity="center"
-            android:padding="12dp"
+            android:padding="8dp"
             android:background="?attr/selectableItemBackground"
             android:clickable="true"
             android:focusable="true" />
@@ -67,7 +58,7 @@
             android:text="Hónap"
             android:textSize="18sp"
             android:gravity="center"
-            android:padding="12dp"
+            android:padding="8dp"
             android:background="?attr/selectableItemBackground"
             android:clickable="true"
             android:focusable="true" />
@@ -80,10 +71,48 @@
             android:text="Év"
             android:textSize="18sp"
             android:gravity="center"
-            android:padding="12dp"
+            android:padding="8dp"
             android:background="?attr/selectableItemBackground"
             android:clickable="true"
             android:focusable="true" />
+    </LinearLayout>
+
+    <!-- Egyedi időszak kiválasztó sor: két nyíl és a spinner középre igazítva -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center"
+        android:layout_marginTop="8dp">
+
+        <!-- Bal oldali nyíl: vissza -->
+        <ImageButton
+            android:id="@+id/arrowBack"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:src="@drawable/arrow_left"
+            android:scaleType="fitCenter"
+            android:contentDescription="Vissza"
+            android:background="?attr/selectableItemBackgroundBorderless" />
+
+        <!-- Az egyedi időszak kiválasztó spinner -->
+        <Spinner
+            android:id="@+id/idoszakValasztoSpinner"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:spinnerMode="dropdown"
+            android:layout_marginStart="8dp"
+            android:layout_marginEnd="8dp" />
+
+        <!-- Jobb oldali nyíl: előre -->
+        <ImageButton
+            android:id="@+id/arrowForward"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:src="@drawable/arrow_right"
+            android:scaleType="fitCenter"
+            android:contentDescription="Előre"
+            android:background="@null" />
     </LinearLayout>
 
     <!-- Üzenet, ha nincs adat -->
@@ -91,19 +120,18 @@
         android:id="@+id/noDataTextView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Nincs adat a kiválasztott időszakra"
+        android:text="nincs adat a kiválasztott időszakra"
         android:textSize="16sp"
         android:gravity="center"
-        android:layout_marginBottom="24dp"
+        android:layout_marginTop="8dp"
         android:visibility="gone" />
 
     <!-- Összegző adatok: összbevétel és összkiadás -->
     <LinearLayout
-        android:id="@+id/summaryLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:layout_marginBottom="24dp">
+        android:layout_marginTop="8dp">
 
         <TextView
             android:id="@+id/totalIncomeTextView"
@@ -132,19 +160,16 @@
         android:id="@+id/kategoriakListView"
         android:layout_width="match_parent"
         android:layout_height="0dp"
+        android:layout_marginTop="8dp"
         android:layout_weight="1"
         android:divider="@android:color/darker_gray"
-        android:dividerHeight="1dp"
-        android:layout_marginBottom="24dp" />
+        android:dividerHeight="1dp" />
 
     <!-- Gomb: Új kategória hozzáadása -->
-    <com.google.android.material.button.MaterialButton
+    <Button
         android:id="@+id/ujKategoriaHozzaadasa"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="Új kategória hozzáadása"
-        app:backgroundTint="#4FC3F7"
-        android:textColor="#FFFFFF"
-        android:layout_marginBottom="16dp" />
-
+        android:layout_marginTop="8dp" />
 </LinearLayout>

@@ -1,154 +1,77 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#0A0A0A"
     tools:context=".Regisztracio">
 
-    <!-- Logo -->
-    <ImageView
-        android:id="@+id/logo"
-        android:layout_width="64dp"
-        android:layout_height="64dp"
-        android:src="@drawable/ic_launcher_foreground"
-        app:tint="@android:color/white"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginTop="80dp"/>
-
-    <!-- Cím -->
-    <TextView
-        android:id="@+id/title"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Regisztrálj"
-        android:textColor="@android:color/white"
-        android:textSize="22sp"
-        android:textStyle="bold"
-        app:layout_constraintTop_toBottomOf="@id/logo"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginTop="16dp"/>
-
-    <!-- Felhasználónév mező -->
+    <!-- Username Field -->
     <EditText
-        android:id="@+id/Felhasznalonev"
+        android:id="@+id/felhasznalonev"
         android:layout_width="0dp"
-        android:layout_height="50dp"
-        android:layout_marginHorizontal="32dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
         android:layout_marginTop="32dp"
+        android:layout_marginEnd="16dp"
         android:hint="Felhasználónév"
-        android:background="@android:color/transparent"
-        android:textColor="@android:color/white"
         android:inputType="textPersonName"
-        android:drawableStart="@android:drawable/ic_menu_myplaces"
-        android:padding="16dp"
-        app:layout_constraintTop_toBottomOf="@id/title"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"/>
+        app:layout_constraintTop_toTopOf="parent" />
 
-    <!-- E-mail mező -->
+    <!-- Email Field -->
     <EditText
-        android:id="@+id/Email"
+        android:id="@+id/Email_regisztacio"
         android:layout_width="0dp"
-        android:layout_height="50dp"
-        android:layout_marginHorizontal="32dp"
-        android:layout_marginTop="12dp"
-        android:hint="Email Address"
-        android:background="@android:color/transparent"
-        android:textColor="@android:color/white"
-        android:inputType="textEmailAddress"
-        android:drawableStart="@android:drawable/ic_dialog_email"
-        android:padding="16dp"
-        app:layout_constraintTop_toBottomOf="@id/Felhasznalonev"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"/>
-
-    <!-- Jelszó mező -->
-    <EditText
-        android:id="@+id/Jelszo"
-        android:layout_width="0dp"
-        android:layout_height="50dp"
-        android:layout_marginHorizontal="32dp"
-        android:layout_marginTop="12dp"
-        android:hint="Password"
-        android:background="@android:color/transparent"
-        android:textColor="@android:color/white"
-        android:inputType="textPassword"
-        android:drawableStart="@android:drawable/ic_lock_lock"
-        android:padding="16dp"
-        app:layout_constraintTop_toBottomOf="@id/Email"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"/>
-
-    <!-- Jelszó megjelenítés ikon -->
-    <ImageButton
-        android:id="@+id/PasswordToggle"
-        android:layout_width="40dp"
-        android:layout_height="40dp"
-        android:background="@android:color/transparent"
-        android:src="@android:drawable/ic_menu_view"
-        app:layout_constraintEnd_toEndOf="@id/Jelszo"
-        app:layout_constraintBottom_toBottomOf="@id/Jelszo"/>
-
-    <!-- Jelszó ismét mező -->
-    <EditText
-        android:id="@+id/JelszoConfirm"
-        android:layout_width="0dp"
-        android:layout_height="50dp"
-        android:layout_marginHorizontal="32dp"
-        android:layout_marginTop="12dp"
-        android:hint="Confirm Password"
-        android:background="@android:color/transparent"
-        android:textColor="@android:color/white"
-        android:inputType="textPassword"
-        android:drawableStart="@android:drawable/ic_lock_lock"
-        android:padding="16dp"
-        app:layout_constraintTop_toBottomOf="@id/Jelszo"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"/>
-
-    <!-- Jelszó ismét megjelenítés ikon -->
-    <ImageButton
-        android:id="@+id/PasswordToggleConfirm"
-        android:layout_width="40dp"
-        android:layout_height="40dp"
-        android:background="@android:color/transparent"
-        android:src="@android:drawable/ic_menu_view"
-        app:layout_constraintEnd_toEndOf="@id/JelszoConfirm"
-        app:layout_constraintBottom_toBottomOf="@id/JelszoConfirm"/>
-
-    <!-- Regisztráció gomb -->
-    <Button
-        android:id="@+id/Regisztracio_gomb"
-        android:layout_width="0dp"
-        android:layout_height="50dp"
-        android:layout_marginHorizontal="32dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
         android:layout_marginTop="16dp"
-        android:text="Regisztráció"
-        android:textSize="16sp"
-        app:backgroundTint="#4FC3F7"
-        android:textColor="@android:color/white"
-        android:background="@android:color/holo_blue_dark"
-        app:layout_constraintTop_toBottomOf="@id/JelszoConfirm"
+        android:layout_marginEnd="16dp"
+        android:hint="E-mail"
+        android:inputType="textEmailAddress"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"/>
+        app:layout_constraintTop_toBottomOf="@id/felhasznalonev" />
 
+    <!-- Password Field -->
+    <EditText
+        android:id="@+id/Jelszo_regisztracio"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="16dp"
+        android:hint="Jelszó"
+        android:inputType="textPassword"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/Email_regisztacio" />
 
-    <!-- Bejelentkezés szöveg -->
-    <TextView
-        android:id="@+id/SignInText"
+    <!-- Confirm Password Field -->
+    <EditText
+        android:id="@+id/Jelszo_megerositese"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="16dp"
+        android:hint="Jelszó megerősítése"
+        android:inputType="textPassword"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/Jelszo_regisztracio" />
+
+    <!-- Register Button -->
+    <Button
+        android:id="@+id/Regisztracio_vegrehajtas"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Már regisztráltál? Jelentkezz be!"
-        android:textColor="@android:color/holo_blue_light"
-        android:textSize="14sp"
-        app:layout_constraintTop_toBottomOf="@id/Regisztracio_gomb"
-        app:layout_constraintStart_toStartOf="parent"
+        android:layout_marginTop="24dp"
+        android:text="Regisztráció"
         app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginTop="16dp"/>
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/Jelszo_megerositese" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>

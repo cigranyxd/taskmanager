@@ -8,6 +8,7 @@ import android.view.View
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.Button
+import android.widget.ImageButton
 import android.widget.ListView
 import android.widget.Spinner
 import android.widget.TextView
@@ -17,6 +18,9 @@ import com.google.firebase.firestore.FirebaseFirestore
 import java.time.LocalDate
 import java.time.DayOfWeek
 import java.time.temporal.TemporalAdjusters
+
+// Data class az időszak elemekhez
+data class PeriodusElem(val megjelenitoSzoveg: String, val kezdoDatum: LocalDate, val zaroDatum: LocalDate)
 
 class Kategoriak : AppCompatActivity() {
 
@@ -39,47 +43,50 @@ class Kategoriak : AppCompatActivity() {
     // Az aktuális oldal neve (ez az Activity célja)
     private val aktualisOldal = "Kategóriák"
 
-    private lateinit var spinner: Spinner
+    private lateinit var navigaciosSpinner: Spinner
+    private lateinit var idoszakValasztoSpinner: Spinner
     private lateinit var auth: FirebaseAuth
 
-    // Változó, mely tárolja az aktuálisan kiválasztott időszakot
-    private var currentPeriod: String = "Nap"
+    // Változó, mely tárolja az aktuálisan kiválasztott fő időszakot ("Nap", "Het", "Honap", "Ev")
+    private var aktualisIdoszak: String = "Nap"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        // Az activity_kategoriak.xml tartalmazza az időszakválasztó elemeket, ListView-t és a spinner-t
+        // Az activity_kategoriak.xml tartalmazza az időszakválasztó elemeket, a ListView–t,
+        // a navigációs spinner–t és az egyedi időszak kiválasztó sor elemeit (spinner két nyíllal)
         setContentView(R.layout.activity_kategoriak)
 
         auth = FirebaseAuth.getInstance()
-        // Betöltjük az egyedi kategóriákat SharedPreferences-ből
-        EgyediKategoriak.load(this)
+        // Betöltjük az egyedi kategóriákat SharedPreferences–ből
+        EgyediKategoriak.betolt(this)
 
         val firestore = FirebaseFirestore.getInstance()
         val aktualisFelhasznalo = auth.currentUser
         val felhasznaloId = aktualisFelhasznalo?.uid ?: return
 
-        // Időszak választó elemek
+        // Időszak választó elemek (pl. NapFelirat, HetFelirat, stb.)
         val napFelirat = findViewById<TextView>(R.id.NapFelirat)
         val hetFelirat = findViewById<TextView>(R.id.HetFelirat)
         val honapFelirat = findViewById<TextView>(R.id.HonapFelirat)
         val evFelirat = findViewById<TextView>(R.id.EvFelirat)
 
-        // OnClickListener-ek az időszak elemekhez, itt frissítjük a currentPeriod változót
+        // OnClickListener–ek az időszak elemekhez:
+        // Frissítjük az aktuális időszak változót és frissítjük az egyedi időszak kiválasztó menüt
         napFelirat.setOnClickListener {
-            currentPeriod = "Nap"
-            tranzakciokBetoltese(felhasznaloId, "Nap")
+            aktualisIdoszak = "Nap"
+            frissitIdoszakValasztot(felhasznaloId)
         }
         hetFelirat.setOnClickListener {
-            currentPeriod = "Het"
-            tranzakciokBetoltese(felhasznaloId, "Het")
+            aktualisIdoszak = "Het"
+            frissitIdoszakValasztot(felhasznaloId)
         }
         honapFelirat.setOnClickListener {
-            currentPeriod = "Honap"
-            tranzakciokBetoltese(felhasznaloId, "Honap")
+            aktualisIdoszak = "Honap"
+            frissitIdoszakValasztot(felhasznaloId)
         }
         evFelirat.setOnClickListener {
-            currentPeriod = "Ev"
-            tranzakciokBetoltese(felhasznaloId, "Ev")
+            aktualisIdoszak = "Ev"
+            frissitIdoszakValasztot(felhasznaloId)
         }
 
         // Gomb az új kategória hozzáadásához
@@ -88,18 +95,18 @@ class Kategoriak : AppCompatActivity() {
             startActivity(intent)
         }
 
-        // Spinner inicializálása
-        spinner = findViewById(R.id.lenyilo_menu)
+        // Navigációs spinner inicializálása (Főoldal, Elemzés, stb.)
+        navigaciosSpinner = findViewById(R.id.lenyilo_menu)
         val lehetosegek = listOf("Főoldal", "Elemzés", "Kategóriák", "Rendszeres kifizetések", "Beállítások", "Kijelentkezés")
         val spinnerAdapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, lehetosegek)
         spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        spinner.adapter = spinnerAdapter
+        navigaciosSpinner.adapter = spinnerAdapter
 
         // Az aktuális oldal beállítása
-        spinner.setSelection(2)
+        navigaciosSpinner.setSelection(2)
 
         var elsoFutas = true
-        spinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+        navigaciosSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(parent: AdapterView<*>, view: View?, position: Int, id: Long) {
                 if (elsoFutas) {
                     elsoFutas = false
@@ -118,18 +125,40 @@ class Kategoriak : AppCompatActivity() {
             override fun onNothingSelected(parent: AdapterView<*>) { }
         }
 
-        // Alapértelmezetten a "Nap" időszak legyen kiválasztva
-        tranzakciokBetoltese(felhasznaloId, "Nap")
+        // Az egyedi időszak kiválasztó spinner inicializálása
+        idoszakValasztoSpinner = findViewById(R.id.idoszakValasztoSpinner)
+        // Alapértelmezetten a "Nap" időszak legyen kiválasztva, így frissítjük a kiválasztó menüt
+        frissitIdoszakValasztot(felhasznaloId)
+
+        // Inicializáljuk az arrow gombokat az időszak navigációhoz
+        val arrowBack = findViewById<ImageButton>(R.id.arrowBack)
+        val arrowForward = findViewById<ImageButton>(R.id.arrowForward)
+
+        // Bal oldali nyíl: régebbi időszak (növeli az indexet a spinner listában)
+        arrowBack.setOnClickListener {
+            val currentIndex = idoszakValasztoSpinner.selectedItemPosition
+            if (currentIndex < idoszakValasztoSpinner.adapter.count - 1) {
+                idoszakValasztoSpinner.setSelection(currentIndex + 1)
+            }
+        }
+
+        // Jobb oldali nyíl: újabb időszak (csökkenti az indexet a spinner listában)
+        arrowForward.setOnClickListener {
+            val currentIndex = idoszakValasztoSpinner.selectedItemPosition
+            if (currentIndex > 0) {
+                idoszakValasztoSpinner.setSelection(currentIndex - 1)
+            }
+        }
     }
 
     override fun onResume() {
         super.onResume()
-        // Visszatéréskor állítsuk be a spinner értékét az aktuális oldalnak megfelelően
-        spinner.setSelection(2)
+        // Visszatéréskor állítsuk be a navigációs spinner értékét az aktuális oldalnak megfelelően
+        navigaciosSpinner.setSelection(2)
     }
 
     @Suppress("MissingSuperCall")
-    override fun onBackPressed(){
+    override fun onBackPressed() {
         // Vissza gomb: mindig a Főoldalra navigálunk
         val intent = Intent(this, Telefonszam::class.java)
         intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK
@@ -162,36 +191,36 @@ class Kategoriak : AppCompatActivity() {
      * Az időszak kezdő és záró dátumát adja vissza (yyyy-mm-dd formátumban).
      */
     fun idoszakKezelo(period: String): Pair<String, String> {
-        val today = LocalDate.now()
+        val ma = LocalDate.now()
         return when (period) {
-            "Nap" -> Pair(today.toString(), today.toString())
+            "Nap" -> Pair(ma.toString(), ma.toString())
             "Het" -> {
-                val start = today.with(java.time.temporal.TemporalAdjusters.previousOrSame(java.time.DayOfWeek.MONDAY))
-                val end = today.with(java.time.temporal.TemporalAdjusters.nextOrSame(java.time.DayOfWeek.SUNDAY))
-                Pair(start.toString(), end.toString())
+                val kezdo = ma.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY))
+                val zaro = ma.with(TemporalAdjusters.nextOrSame(DayOfWeek.SUNDAY))
+                Pair(kezdo.toString(), zaro.toString())
             }
             "Honap" -> {
-                val start = today.withDayOfMonth(1)
-                val end = today.withDayOfMonth(today.lengthOfMonth())
-                Pair(start.toString(), end.toString())
+                val kezdo = ma.withDayOfMonth(1)
+                val zaro = ma.withDayOfMonth(ma.lengthOfMonth())
+                Pair(kezdo.toString(), zaro.toString())
             }
             "Ev" -> {
-                val start = today.withDayOfYear(1)
-                val end = today.withDayOfYear(today.lengthOfYear())
-                Pair(start.toString(), end.toString())
+                val kezdo = ma.withDayOfYear(1)
+                val zaro = ma.withDayOfYear(ma.lengthOfYear())
+                Pair(kezdo.toString(), zaro.toString())
             }
             else -> Pair("", "")
         }
     }
 
     fun tranzakciokLekerdezese(felhasznaloId: String, period: String, callback: (List<Tranzakcio>) -> Unit) {
-        val (startDate, endDate) = idoszakKezelo(period)
+        val (kezdoDatum, zaroDatum) = idoszakKezelo(period)
         val firestore = FirebaseFirestore.getInstance()
         if (period == "Nap") {
             firestore.collection("users")
                 .document(felhasznaloId)
                 .collection("nap")
-                .document(startDate)
+                .document(kezdoDatum)
                 .get()
                 .addOnSuccessListener { document ->
                     val tranzakciok = mutableListOf<Tranzakcio>()
@@ -214,8 +243,8 @@ class Kategoriak : AppCompatActivity() {
             firestore.collection("users")
                 .document(felhasznaloId)
                 .collection("nap")
-                .whereGreaterThanOrEqualTo(com.google.firebase.firestore.FieldPath.documentId(), startDate)
-                .whereLessThanOrEqualTo(com.google.firebase.firestore.FieldPath.documentId(), endDate)
+                .whereGreaterThanOrEqualTo(com.google.firebase.firestore.FieldPath.documentId(), kezdoDatum)
+                .whereLessThanOrEqualTo(com.google.firebase.firestore.FieldPath.documentId(), zaroDatum)
                 .get()
                 .addOnSuccessListener { documents ->
                     val tranzakciok = mutableListOf<Tranzakcio>()
@@ -270,7 +299,7 @@ class Kategoriak : AppCompatActivity() {
         return normalizaltNev.capitalize()
     }
 
-    private fun ikonForKey(normalizaltNev: String): Int {
+    private fun ikonKulcsra(normalizaltNev: String): Int {
         val custom = EgyediKategoriak.kategoriak.find { it.nev.trim().toLowerCase() == normalizaltNev }
         if (custom != null) return custom.ikon
         for ((orig, ikon) in kategoriaIkonTerkep) {
@@ -287,15 +316,12 @@ class Kategoriak : AppCompatActivity() {
         val teljesBevetel = bevetelMap.values.sum()
         val teljesKiadas = kiadasMap.values.sum()
 
+        // Csak azokat a kategóriákat jelenítjük meg, amelyekhez tartozik tranzakció
         val normKulcsok = (bevetelMap.keys + kiadasMap.keys).toMutableSet()
-        if (period != "Nap") {
-            EgyediKategoriak.kategoriak.forEach { customKategoria ->
-                normKulcsok.add(customKategoria.nev.trim().toLowerCase())
-            }
-        }
+
         val vegsoNormKulcsok = normKulcsok.toList()
         val vegsoKategoriaNevek = vegsoNormKulcsok.map { megjelenitoNev(it) }
-        val vegsoKategoriaIkonok = vegsoNormKulcsok.map { ikonForKey(it) }
+        val vegsoKategoriaIkonok = vegsoNormKulcsok.map { ikonKulcsra(it) }
 
         val vegsoExpenseProgress = vegsoNormKulcsok.map { key ->
             val kiadas = kiadasMap[key] ?: 0f
@@ -350,14 +376,157 @@ class Kategoriak : AppCompatActivity() {
             listaNezet.adapter = vegsoAdapter
             vegsoAdapter.notifyDataSetChanged()
 
-            // Kattinthatóság hozzáadása: kattintáskor elküldjük a kiválasztott kategória nevét és az aktuális időszakot
+            // Kattinthatóság: kattintáskor elküldjük a kiválasztott kategória nevét és az aktuális időszakot
             listaNezet.setOnItemClickListener { parent, view, position, id ->
                 val selectedCategory = vegsoKategoriaNevek[position]
                 val intent = Intent(this, KategoriaTranzakciokActivity::class.java)
                 intent.putExtra("categoryName", selectedCategory)
-                intent.putExtra("period", currentPeriod)
+                intent.putExtra("period", aktualisIdoszak)
                 startActivity(intent)
             }
+        }
+    }
+
+    // --- SEGÉLFÜGGVÉNYEK AZ EGYEDI IDŐSZAK KIVÁLASZTÁSÁHOZ ---
+
+    // Lekéri a letöltés dátumát (ha nincs, akkor a 2024.10.01-et állítja be)
+    private fun getLetoltesDatum(): LocalDate {
+        val alapDatum = LocalDate.of(2024, 10, 1)
+        val prefs = getSharedPreferences("UserPreferences", Context.MODE_PRIVATE)
+        prefs.edit().putString("letoltesDatum", alapDatum.toString()).apply()
+        return alapDatum
+    }
+
+    // Generálja az időszak listát a kiválasztott típus alapján ("Nap", "Het", "Honap", "Ev")
+    private fun generalPeriodLista(period: String): List<PeriodusElem> {
+        val lista = mutableListOf<PeriodusElem>()
+        val letoltesDatum = getLetoltesDatum()
+        val ma = LocalDate.now()
+        when (period) {
+            "Nap" -> {
+                var datum = ma
+                while (!datum.isBefore(letoltesDatum)) {
+                    lista.add(PeriodusElem(datum.toString(), datum, datum))
+                    datum = datum.minusDays(1)
+                }
+            }
+            "Het" -> {
+                var hetKezdo = ma.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY))
+                while (!hetKezdo.isBefore(letoltesDatum)) {
+                    val hetVege = hetKezdo.with(TemporalAdjusters.nextOrSame(DayOfWeek.SUNDAY))
+                    lista.add(PeriodusElem("${hetKezdo.toString()} - ${hetVege.toString()}", hetKezdo, hetVege))
+                    hetKezdo = hetKezdo.minusWeeks(1)
+                }
+            }
+            "Honap" -> {
+                var honapKezdo = ma.withDayOfMonth(1)
+                val letoltesHonapKezdo = letoltesDatum.withDayOfMonth(1)
+                // Magyar hónap nevek térképe: hónap száma -> név
+                val honapNevek = mapOf(
+                    1 to "január",
+                    2 to "február",
+                    3 to "március",
+                    4 to "április",
+                    5 to "május",
+                    6 to "június",
+                    7 to "július",
+                    8 to "augusztus",
+                    9 to "szeptember",
+                    10 to "október",
+                    11 to "november",
+                    12 to "december"
+                )
+                while (!honapKezdo.isBefore(letoltesHonapKezdo)) {
+                    val honapVege = honapKezdo.withDayOfMonth(honapKezdo.lengthOfMonth())
+                    val display = "${honapNevek[honapKezdo.monthValue]} ${honapKezdo.year}"
+                    lista.add(PeriodusElem(display, honapKezdo, honapVege))
+                    honapKezdo = honapKezdo.minusMonths(1)
+                }
+            }
+            "Ev" -> {
+                var ev = ma.year
+                val letoltesEv = letoltesDatum.year
+                while (ev >= letoltesEv) {
+                    val kezdo = LocalDate.of(ev, 1, 1)
+                    val zaro = LocalDate.of(ev, 12, 31)
+                    lista.add(PeriodusElem(ev.toString(), kezdo, zaro))
+                    ev--
+                }
+            }
+        }
+        return lista
+    }
+
+    // Lekéri a tranzakciókat a megadott egyedi időszakra (kezdoDatum és zaroDatum formátumban)
+    private fun tranzakciokBetolteseEgyedi(felhasznaloId: String, kezdoDatum: String, zaroDatum: String) {
+        val firestore = FirebaseFirestore.getInstance()
+        if (kezdoDatum == zaroDatum) {
+            firestore.collection("users")
+                .document(felhasznaloId)
+                .collection("nap")
+                .document(kezdoDatum)
+                .get()
+                .addOnSuccessListener { document ->
+                    val tranzakciok = mutableListOf<Tranzakcio>()
+                    if (document.exists()) {
+                        val trxLista = document.get("tranzakciok") as? List<Map<String, Any>> ?: emptyList()
+                        trxLista.forEach { trx ->
+                            val mennyiseg = (trx["mennyiseg"] as? Number)?.toFloat() ?: 0f
+                            val tipus = trx["tipus"] as? String ?: ""
+                            val kategoria = (trx["kategoria"] as? String ?: "").trim().toLowerCase()
+                            val leiras = trx["leiras"] as? String ?: ""
+                            tranzakciok.add(Tranzakcio(kategoria, leiras, mennyiseg, tipus))
+                        }
+                    }
+                    val (bevetelMap, kiadasMap) = tranzakciokOsszegzese(tranzakciok)
+                    osszegzettAdatokMegjelenitese("Egyedi", bevetelMap, kiadasMap)
+                }
+                .addOnFailureListener {
+                    osszegzettAdatokMegjelenitese("Egyedi", emptyMap(), emptyMap())
+                }
+        } else {
+            firestore.collection("users")
+                .document(felhasznaloId)
+                .collection("nap")
+                .whereGreaterThanOrEqualTo(com.google.firebase.firestore.FieldPath.documentId(), kezdoDatum)
+                .whereLessThanOrEqualTo(com.google.firebase.firestore.FieldPath.documentId(), zaroDatum)
+                .get()
+                .addOnSuccessListener { documents ->
+                    val tranzakciok = mutableListOf<Tranzakcio>()
+                    documents.forEach { document ->
+                        val trxLista = document.get("tranzakciok") as? List<Map<String, Any>> ?: emptyList()
+                        trxLista.forEach { trx ->
+                            val mennyiseg = (trx["mennyiseg"] as? Number)?.toFloat() ?: 0f
+                            val tipus = trx["tipus"] as? String ?: ""
+                            val kategoria = (trx["kategoria"] as? String ?: "").trim().toLowerCase()
+                            val leiras = trx["leiras"] as? String ?: ""
+                            tranzakciok.add(Tranzakcio(kategoria, leiras, mennyiseg, tipus))
+                        }
+                    }
+                    val (bevetelMap, kiadasMap) = tranzakciokOsszegzese(tranzakciok)
+                    osszegzettAdatokMegjelenitese("Egyedi", bevetelMap, kiadasMap)
+                }
+                .addOnFailureListener {
+                    osszegzettAdatokMegjelenitese("Egyedi", emptyMap(), emptyMap())
+                }
+        }
+    }
+
+    // Frissíti az egyedi időszak kiválasztó spinner–t a kiválasztott fő időszak alapján
+    private fun frissitIdoszakValasztot(felhasznaloId: String) {
+        val idoszakLista = generalPeriodLista(aktualisIdoszak)
+        // Az adapterben most a saját spinner_item layoutot használjuk, amely középre igazítja a szöveget.
+        val adapter = ArrayAdapter(this, R.layout.spinner_item, idoszakLista.map { it.megjelenitoSzoveg })
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        idoszakValasztoSpinner.adapter = adapter
+
+        idoszakValasztoSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(parent: AdapterView<*>, view: View?, position: Int, id: Long) {
+                val kiválasztottElem = idoszakLista[position]
+                // A kiválasztott időszak dátumai alapján lekéri a tranzakciókat
+                tranzakciokBetolteseEgyedi(felhasznaloId, kiválasztottElem.kezdoDatum.toString(), kiválasztottElem.zaroDatum.toString())
+            }
+            override fun onNothingSelected(parent: AdapterView<*>) {}
         }
     }
 }

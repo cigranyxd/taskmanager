@@ -1,97 +1,54 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
-    android:padding="16dp"
-    android:background="#E1F5FE"
-    tools:context=".YourActivity">
+    android:padding="16dp">
 
-    <!-- Összeg input (MaterialTextInputLayout) -->
-    <com.google.android.material.textfield.TextInputLayout
-        android:id="@+id/osszegInputLayout"
+    <EditText
+        android:id="@+id/osszegInput"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:boxBackgroundMode="outline"
-        app:boxCornerRadiusTopStart="8dp"
-        app:boxCornerRadiusTopEnd="8dp"
-        app:boxCornerRadiusBottomStart="8dp"
-        app:boxCornerRadiusBottomEnd="8dp"
-        android:layout_marginBottom="16dp">
-        <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/osszegInput"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="Összeg"
-            android:inputType="numberDecimal" />
-    </com.google.android.material.textfield.TextInputLayout>
+        android:hint="Összeg"
+        android:inputType="numberDecimal" />
 
-    <!-- Kategória (Exposed Dropdown) -->
-    <com.google.android.material.textfield.TextInputLayout
-        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
-        android:id="@+id/kategoriakSpinnerLayout"
+    <Spinner
+        android:id="@+id/kategoriakSpinner"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="16dp">
-        <com.google.android.material.textfield.MaterialAutoCompleteTextView
-            android:id="@+id/kategoriakSpinner"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="Kategória" />
-    </com.google.android.material.textfield.TextInputLayout>
+        android:layout_marginTop="8dp" />
 
-    <!-- Leírás input (MaterialTextInputLayout) -->
-    <com.google.android.material.textfield.TextInputLayout
-        android:id="@+id/leirasInputLayout"
+    <!-- Leírás mező -->
+    <EditText
+        android:id="@+id/leirasInput"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:boxBackgroundMode="outline"
-        app:boxCornerRadiusTopStart="8dp"
-        app:boxCornerRadiusTopEnd="8dp"
-        app:boxCornerRadiusBottomStart="8dp"
-        app:boxCornerRadiusBottomEnd="8dp"
-        android:layout_marginBottom="16dp">
-        <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/leirasInput"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="Leírás"
-            android:inputType="textMultiLine"
-            android:maxLines="5"
-            android:gravity="start|top" />
-    </com.google.android.material.textfield.TextInputLayout>
+        android:hint="Leírás"
+        android:inputType="textMultiLine"
+        android:maxLines="5"
+        android:gravity="start|top"
+        android:layout_marginTop="8dp"
+        android:background="@android:drawable/edit_text" />
 
-    <!-- Gombok egy sorban -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:layout_marginTop="16dp">
 
-        <!-- Mentés gomb MaterialButton-ként -->
-        <com.google.android.material.button.MaterialButton
+        <Button
             android:id="@+id/mentesGomb"
             android:layout_width="0dp"
             android:layout_weight="1"
             android:layout_height="wrap_content"
-            android:text="Mentés"
-            app:backgroundTint="#4FC3F7"
-            android:textColor="#FFFFFF"
-            android:layout_marginEnd="8dp" />
+            android:text="Mentés" />
 
-        <!-- Mégse gomb MaterialButton-ként -->
-        <com.google.android.material.button.MaterialButton
+        <Button
             android:id="@+id/megseGomb"
             android:layout_width="0dp"
             android:layout_weight="1"
             android:layout_height="wrap_content"
-            android:text="Mégse"
-            app:backgroundTint="#B0BEC5"
-            android:textColor="#FFFFFF"
-            android:layout_marginStart="8dp" />
+            android:text="Mégse" />
     </LinearLayout>
-
 </LinearLayout>
