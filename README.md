@@ -40,8 +40,6 @@ Egy hétköznapi személy pénzének a könnyű, átlátható, és praktikus kez
 
 #### Főoldal:
 1.  Egyenleg összegének a megjelenítése
-2. Egyenleghez való hozzáadás
-3. Egyenlegből való levonás
 4. Többi funkciót tartalmazó ablak elérése egy legördülő menüvel
 
 #### Elemzés
@@ -49,22 +47,21 @@ Egy hétköznapi személy pénzének a könnyű, átlátható, és praktikus kez
 1. Elsődlegesen a kiadások grafikonos megjelenítése
 2. Kategorizálja akár a bevételt, de első soron a kiadásokat
 3. Ezeket mind kimutatja a szoftverben található módon, nap, hét, hónap, év, vagy akár egy saját magunk által megadott időszakban
+4. Egy listában a grafikon alatt megjeleníti
+5. Ha egy listában levő elemre rányom a felhasználó, akkor kiírja az összeg alatt a felhasználó által megadott leírást
+6. Ikonokkal mégjobbra emeljük az elemek kategóriájinak megkülönböztetését, ezt a listában is látni lehet
 
 #### Rendszeres kifizetések
 
 1. Ez azt a célt szolgálja, hogy a például havi előfizetésekkel mutatja számunkra az egyenlegünk, ezzel is azt elősegítve, hogy mennyi pénzzel számoljunk igazán
 2. Rendszeres kifizetés hozzáadása (összeg, név, és kategória megadása)
 3. Rendszeres kifizetés eltávolítása, szerkesztése
+4. Rendszeres kifizetések kilistázva megjelennek a felhasználónak, ahol lehet őket törölni, illetve szerkeszteni is
 
-#### Adósságok
+#### Kategória
 
-1. Adósságok (név, összeg megadásával) hozzáadása, ez oly módon segít, mint a rendszeres kifizetéseknél, ha van, akkor levonja automatikusan az egyenlegből, ugyanazzal a céllal, mint az előbb említett fülnél
-2. Adósságok eltávolítása, szerkesztése
-
-#### Rendszeres bevételek
-
-1. Ha van ilyen, akkor be tudod álítani, hogy hányadikán legkésőbb, de a program automatikusan hozzáadja ezt az összeget az egyenleghez
-2. Ezeket a felhasználó képes is lesz eltávolítani, vagy változtatni
+1. A felhasználó kategorizált költekezesét mutatja meg napokra, hetekre, hónapokra, illetve évekre bontva
+2. Képes a felhasználó az adott kategóriára kattintva megnézni részletesen a költekezését
 
 #### Általános beállítások
 
