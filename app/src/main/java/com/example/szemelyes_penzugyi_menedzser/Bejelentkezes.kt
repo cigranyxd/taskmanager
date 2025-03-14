@@ -3,14 +3,11 @@ package com.example.szemelyes_penzugyi_menedzser
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.text.method.PasswordTransformationMethod
 import android.util.Patterns
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Button
-import android.widget.CheckBox
-import android.widget.EditText
-import android.widget.TextView
-import android.widget.Toast
+import android.widget.*
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import com.google.firebase.auth.FirebaseAuth
@@ -40,6 +37,25 @@ class Bejelentkezes : AppCompatActivity() {
         val jelszo = findViewById<EditText>(R.id.Jelszo)
         val loginButton = findViewById<Button>(R.id.Bejelentkezes_gomb)
         val regisztracioGomb = findViewById<Button>(R.id.Regisztracio_gomb_atvezeto)
+        val togglePasswordButton = findViewById<ImageButton>(R.id.togglePasswordButton)
+
+        // Alapértelmezett: a jelszó rejtett
+        jelszo.transformationMethod = PasswordTransformationMethod.getInstance()
+        var passwordVisible = false
+
+        togglePasswordButton.setOnClickListener {
+            if (passwordVisible) {
+                jelszo.transformationMethod = PasswordTransformationMethod.getInstance()
+                togglePasswordButton.setImageResource(R.drawable.visibility_off)
+                passwordVisible = false
+            } else {
+                jelszo.transformationMethod = null
+                togglePasswordButton.setImageResource(R.drawable.visibility)
+                passwordVisible = true
+            }
+            // Cursor pozíció megtartása
+            jelszo.setSelection(jelszo.text.length)
+        }
 
         loginButton.setOnClickListener {
             val emailText = email.text.toString()
@@ -101,11 +117,12 @@ class Bejelentkezes : AppCompatActivity() {
             findViewById<CheckBox>(R.id.Maradjak_bejelentkezve).visibility = View.GONE
             loginButton.visibility = View.GONE
             regisztracioGomb.visibility = View.GONE
+            togglePasswordButton.visibility = View.GONE
 
             forgotPasswordLayout.visibility = View.VISIBLE
         }
 
-        // Jelszó visszaállítása gomb: ellenőrizzük az e-mailt, majd elküldjük a jelszó visszaállító e-mailt
+        // Jelszó visszaállítása gomb
         resetPasswordButton.setOnClickListener {
             val resetEmail = resetEmailInput.text.toString()
             if (!Patterns.EMAIL_ADDRESS.matcher(resetEmail).matches()) {
@@ -114,9 +131,7 @@ class Bejelentkezes : AppCompatActivity() {
             }
             auth.sendPasswordResetEmail(resetEmail).addOnCompleteListener { task ->
                 if (task.isSuccessful) {
-                    // A "Kérjük adja meg az e-mail címét:" felirat eltűnik
                     resetPasswordPrompt.visibility = View.GONE
-                    // Az e-mail input és a gomb eltűnik, megjelenik a visszaigazolás üzenet és a "vissza a kezdőképernyőre" felirat
                     resetEmailInput.visibility = View.GONE
                     resetPasswordButton.visibility = View.GONE
                     confirmationMessage.visibility = View.VISIBLE
@@ -127,24 +142,22 @@ class Bejelentkezes : AppCompatActivity() {
             }
         }
 
-        // Vissza a kezdőképernyőre feliratra kattintva visszaállítjuk az eredeti bejelentkezési elemeket
+        // Vissza a kezdőképernyőre felirat
         backToLoginText.setOnClickListener {
-            // Visszaállítjuk a jelszó visszaállító elemek láthatóságát
             confirmationMessage.visibility = View.GONE
             backToLoginText.visibility = View.GONE
             resetEmailInput.visibility = View.VISIBLE
             resetPasswordButton.visibility = View.VISIBLE
             resetPasswordPrompt.visibility = View.VISIBLE
 
-            // Eredeti bejelentkezési elemek újra láthatóvá tétele
             email.visibility = View.VISIBLE
             jelszo.visibility = View.VISIBLE
             forgotPasswordText.visibility = View.VISIBLE
             findViewById<CheckBox>(R.id.Maradjak_bejelentkezve).visibility = View.VISIBLE
             loginButton.visibility = View.VISIBLE
             regisztracioGomb.visibility = View.VISIBLE
+            togglePasswordButton.visibility = View.VISIBLE
 
-            // Töröljük a reset e-mail mezőt, és elrejtjük a visszaállító felületet
             resetEmailInput.text.clear()
             forgotPasswordLayout.visibility = View.GONE
         }
@@ -152,17 +165,16 @@ class Bejelentkezes : AppCompatActivity() {
         applyFontSizeToCurrentActivity()
     }
 
-    // Ez a metódus opcionálisan meghívható az XML-ben az onClick attribútummal
+    // Az XML-ből meghívható forgot password metódus
     fun onForgotPasswordClick(view: View) {
-        // Az eredeti bejelentkezési elemek eltüntetése
         findViewById<EditText>(R.id.Email).visibility = View.GONE
         findViewById<EditText>(R.id.Jelszo).visibility = View.GONE
         findViewById<TextView>(R.id.elfelejtettemJelszavam).visibility = View.GONE
         findViewById<CheckBox>(R.id.Maradjak_bejelentkezve).visibility = View.GONE
         findViewById<Button>(R.id.Bejelentkezes_gomb).visibility = View.GONE
         findViewById<Button>(R.id.Regisztracio_gomb_atvezeto).visibility = View.GONE
+        findViewById<ImageButton>(R.id.togglePasswordButton).visibility = View.GONE
 
-        // A jelszó visszaállító felület megjelenítése
         findViewById<View>(R.id.forgotPasswordLayout).visibility = View.VISIBLE
     }
 

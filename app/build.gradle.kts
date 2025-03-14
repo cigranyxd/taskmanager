@@ -1,19 +1,17 @@
 plugins {
-
     alias(libs.plugins.kotlin.android)
     id("com.android.application")
-    id("com.google.gms.google-services")
-
+    id("com.google.gms.google-services") // Firebase szolgáltatásokhoz
 }
 
 android {
     namespace = "com.example.szemelyes_penzugyi_menedzser"
-    compileSdk = 35
+    compileSdk = 34  // Csak stabil verziókat használj!
 
     defaultConfig {
         applicationId = "com.example.szemelyes_penzugyi_menedzser"
         minSdk = 26
-        targetSdk = 35
+        targetSdk = 34  // Csak stabil verziót!
         versionCode = 1
         versionName = "1.0"
 
@@ -33,11 +31,11 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
     kotlinOptions {
-        jvmTarget = "1.8"
+        jvmTarget = "17"
     }
     buildFeatures {
         compose = true
@@ -53,43 +51,45 @@ android {
 }
 
 dependencies {
+    // Alap AndroidX csomagok
+    implementation("androidx.core:core-ktx:1.12.0")
+    implementation("androidx.appcompat:appcompat:1.6.1")
+    implementation("com.google.android.material:material:1.10.0")
 
-    implementation(libs.androidx.core.ktx)
-    implementation(libs.androidx.appcompat)
-    implementation(libs.material)
-    implementation(libs.androidx.activity)
+    // ConstraintLayout (MotionLayout is included)
     implementation(libs.androidx.constraintlayout)
-    implementation(libs.firebase.database.ktx)
-    implementation(libs.androidx.material3.android)
-    implementation(libs.firebase.firestore.ktx)
-    implementation(libs.places)
-    implementation(libs.androidx.lifecycle.runtime.ktx)
-    implementation(libs.androidx.activity.compose)
-    implementation(platform(libs.androidx.compose.bom))
-    implementation(libs.androidx.ui)
-    implementation(libs.androidx.ui.graphics)
-    implementation(libs.androidx.ui.tooling.preview)
-    implementation(libs.androidx.material3)
-    testImplementation(libs.junit)
-    androidTestImplementation(libs.androidx.junit)
-    androidTestImplementation(libs.androidx.espresso.core)
-    implementation(libs.firebase.auth)
-    implementation(libs.firebase.auth.ktx)
-    implementation(platform(libs.google.firebase.bom))
-    implementation(libs.firebase.analytics)
-    implementation(libs.mpandroidchart)
-    implementation (libs.androidx.appcompat.v161)
-    implementation (libs.firebase.firestore)
-    implementation (libs.play.services.auth)
-    implementation (libs.play.services.base)
-    implementation (libs.play.services.auth)
-    implementation("com.google.code.gson:gson:2.8.9")
-    androidTestImplementation(platform(libs.androidx.compose.bom))
-    androidTestImplementation(libs.androidx.ui.test.junit4)
-    debugImplementation(libs.androidx.ui.tooling)
-    debugImplementation(libs.androidx.ui.test.manifest)
-    implementation(libs.mpandroidchart.vv310)
-    implementation ("com.github.PhilJay:MPAndroidChart:v3.1.0")
+    implementation("androidx.constraintlayout:constraintlayout:2.1.4")
 
+    // Firebase csomagok
+    implementation(platform("com.google.firebase:firebase-bom:32.3.1"))
+    implementation("com.google.firebase:firebase-auth-ktx")
+    implementation("com.google.firebase:firebase-firestore-ktx")
+    implementation("com.google.firebase:firebase-database-ktx")
+    implementation("com.google.firebase:firebase-analytics")
+
+    // Google Services (bejelentkezéshez és API-khoz)
+    implementation("com.google.android.gms:play-services-auth:20.7.0")
+    implementation("com.google.android.gms:play-services-base:18.2.0")
+    implementation("com.google.android.libraries.places:places:3.3.0")
+
+    // Lifecycle komponensek
+    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.6.2")
+
+    // UI és Material 3
+    implementation("androidx.compose.material3:material3:1.1.2")
+
+    // MPAndroidChart (grafikonokhoz)
+    implementation("com.github.PhilJay:MPAndroidChart:v3.1.0")
+
+    // JSON kezeléshez
+    implementation("com.google.code.gson:gson:2.10.1")
+
+    // Teszteléshez
+    testImplementation("junit:junit:4.13.2")
+    androidTestImplementation("androidx.test.ext:junit:1.1.5")
+    androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
+
+    // Debugging és UI tesztelés
+    debugImplementation("androidx.compose.ui:ui-tooling:1.5.3")
+    debugImplementation("androidx.compose.ui:ui-test-manifest:1.5.3")
 }
-

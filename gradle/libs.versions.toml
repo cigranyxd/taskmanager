@@ -1,6 +1,8 @@
 [versions]
 agp = "8.6.0"
 appcompatVersion = "1.6.1"
+constraintlayoutMotion = "2.2.4"
+constraintlayoutVersion = "2.1.0"
 firebaseAuth = "23.1.0"
 firebaseBomVersion = "33.5.1"
 firebaseFirestore = "25.1.1"
@@ -28,6 +30,8 @@ composeBom = "2024.04.01"
 
 [libraries]
 androidx-appcompat-v161 = { module = "androidx.appcompat:appcompat", version.ref = "appcompatVersion" }
+androidx-constraintlayout-motion = { module = "androidx.constraintlayout:constraintlayout-motion", version.ref = "constraintlayoutMotion" }
+androidx-constraintlayout-v210 = { module = "androidx.constraintlayout:constraintlayout", version.ref = "constraintlayoutVersion" }
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 firebase-analytics = { module = "com.google.firebase:firebase-analytics" }
 firebase-auth = { module = "com.google.firebase:firebase-auth", version.ref = "firebaseAuth" }

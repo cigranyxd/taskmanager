@@ -56,6 +56,7 @@ class RendszeresKifizetesek : AppCompatActivity() {
         val hozzaadButton: Button = findViewById(R.id.hozzaadButton)
         val torlesButton: Button = findViewById(R.id.torlesButton)
 
+        // Spinner inicializálása a navigációhoz
         spinner = findViewById(R.id.lenyilo_menu)
         val lehetosegekSpinner = listOf("Főoldal", "Elemzés", "Kategóriák", "Rendszeres kifizetések", "Beállítások", "Kijelentkezés")
         val spinnerAdapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, lehetosegekSpinner)
@@ -72,41 +73,27 @@ class RendszeresKifizetesek : AppCompatActivity() {
                     return
                 }
                 val kiválasztottElem = parent.getItemAtPosition(position).toString()
-                // Ha a kiválasztott elem az aktuális oldal, ne navigáljunk
+                // Ha a kiválasztott elem az aktuális oldal ("Rendszeres kifizetések"), ne navigáljunk
                 if (kiválasztottElem == "Rendszeres kifizetések") return
 
                 when (kiválasztottElem) {
-                    "Főoldal" -> {
-                        val intent = Intent(this@RendszeresKifizetesek, Telefonszam::class.java)
-                        startActivity(intent)
-                    }
-                    "Elemzés" -> {
-                        val intent = Intent(this@RendszeresKifizetesek, ElemzesActivity::class.java)
-                        startActivity(intent)
-                    }
-                    "Kategóriák" -> {
-                        val intent = Intent(this@RendszeresKifizetesek, Kategoriak::class.java)
-                        startActivity(intent)
-                    }
-                    "Beállítások" -> {
-                        val intent = Intent(this@RendszeresKifizetesek, BeallitasokActivity::class.java)
-                        startActivity(intent)
-                    }
-                    "Kijelentkezés" -> {
-                        Kijelentkezes()
-                    }
+                    "Főoldal" -> startActivity(Intent(this@RendszeresKifizetesek, Telefonszam::class.java))
+                    "Elemzés" -> startActivity(Intent(this@RendszeresKifizetesek, ElemzesActivity::class.java))
+                    "Kategóriák" -> startActivity(Intent(this@RendszeresKifizetesek, Kategoriak::class.java))
+                    "Beállítások" -> startActivity(Intent(this@RendszeresKifizetesek, BeallitasokActivity::class.java))
+                    "Kijelentkezés" -> Kijelentkezes()
                 }
             }
             override fun onNothingSelected(parent: AdapterView<*>) { }
         }
 
-        // Új: időszakválasztó spinner inicializálása
+        // Időszakválasztó spinner inicializálása
         periodSpinner = findViewById(R.id.periodSpinner)
         val periodOpciók = listOf("Naponta", "Hetente", "Havonta", "Évente")
         val periodAdapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, periodOpciók)
         periodAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         periodSpinner.adapter = periodAdapter
-        // Alapértelmezett érték legyen mondjuk "Havonta" (vagy ahogy neked megfelel)
+        // Alapértelmezett érték legyen "Havonta"
         periodSpinner.setSelection(2)
 
         // RecyclerView beállítása
@@ -115,7 +102,7 @@ class RendszeresKifizetesek : AppCompatActivity() {
         adapter = KifizetesAdapter(kifizetesekLista)
         recyclerView.adapter = adapter
 
-        // Betöltjük az aktuális egyenleget Firestore-ból
+        // Az aktuális egyenleg betöltése Firestore-ból
         loadBalanceFromFirestore(userId, osszegTextView)
 
         // Kifizetés hozzáadása
@@ -125,7 +112,7 @@ class RendszeresKifizetesek : AppCompatActivity() {
             val period = periodSpinner.selectedItem.toString() // Az időszak kiválasztása
 
             if (nev.isNotEmpty() && osszegInput != null) {
-                // Az új kifizetéshez most eltároljuk a period mezőt is
+                // Az új kifizetéshez eltároljuk a period értéket is
                 val kifizetes = hashMapOf(
                     "nev" to nev,
                     "osszeg" to osszegInput,
@@ -136,7 +123,7 @@ class RendszeresKifizetesek : AppCompatActivity() {
                     .collection("kifizetesek")
                     .add(kifizetes)
                     .addOnSuccessListener {
-                        // Csak az oldalra betöltött összeg csökken
+                        // Az oldalra betöltött összeg csökkenése
                         osszeg -= osszegInput
                         osszegTextView.text = "Fő összeg: ${osszeg} Ft"
                         nevEditText.text.clear()
@@ -166,7 +153,6 @@ class RendszeresKifizetesek : AppCompatActivity() {
             .get()
             .addOnSuccessListener { document ->
                 if (document.exists()) {
-                    // Csak az adatbázisban tárolt egyenleget nem változtatjuk
                     osszeg = document.getDouble("aktualisPenz") ?: 0.0
                     osszegTextView.text = "Fő összeg: ${osszeg} Ft"
                 } else {
@@ -194,7 +180,6 @@ class RendszeresKifizetesek : AppCompatActivity() {
                     val nev = document.getString("nev") ?: "N/A"
                     val osszeg = document.getDouble("osszeg") ?: 0.0
                     val period = document.getString("period") ?: "N/A"
-                    // Ha szeretnéd megjeleníteni a period értéket is, akkor azt is tárolhatod a modelben
                     kifizetesekLista.add(Kifizetesitem(docId, nev, osszeg, period))
                 }
                 adapter.notifyDataSetChanged()
@@ -210,9 +195,7 @@ class RendszeresKifizetesek : AppCompatActivity() {
             .get()
             .addOnSuccessListener { document ->
                 val osszegVisszaallitando = document.getDouble("osszeg") ?: 0.0
-                // Ha törölsz egy kifizetést, akkor visszaállítjuk az oldalon megjelenített egyenleget
                 osszeg += osszegVisszaallitando
-                // Csak az oldal összegét frissítjük
                 val osszegTextView: TextView = findViewById(R.id.osszegTextView)
                 osszegTextView.text = "Fő összeg: ${osszeg} Ft"
             }
@@ -235,5 +218,15 @@ class RendszeresKifizetesek : AppCompatActivity() {
         intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
         startActivity(intent)
         finish()
+    }
+
+    /**
+     * Ha a felhasználó megnyomja a vissza gombot, navigáljunk a Telefonszám Activity-be.
+     */
+    @Suppress("MissingSuperCall")
+    override fun onBackPressed() {
+        val intent = Intent(this, Telefonszam::class.java)
+        intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK
+        startActivity(intent)
     }
 }

@@ -6,8 +6,8 @@
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".Bejelentkezes"
-    android:background="@color/gray">
+    android:background="@color/gray"
+    tools:context=".Bejelentkezes">
 
     <!-- E-mail mező -->
     <EditText
@@ -25,21 +25,42 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"/>
 
-    <!-- Jelszó mező -->
-    <EditText
-        android:id="@+id/Jelszo"
+    <!-- Password Container: a jelszó mező és a kapcsoló gomb együtt -->
+    <FrameLayout
+        android:id="@+id/passwordContainer"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
         android:layout_marginStart="32dp"
         android:layout_marginEnd="32dp"
-        android:hint="Jelszó"
-        android:inputType="textPassword"
-        android:background="@color/white"
-        android:padding="16dp"
+        android:layout_marginTop="16dp"
         app:layout_constraintTop_toBottomOf="@id/Email"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"/>
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <!-- Jelszó mező -->
+        <EditText
+            android:id="@+id/Jelszo"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Jelszó"
+            android:inputType="textPassword"
+            android:background="@color/white"
+            android:padding="16dp"
+            android:paddingEnd="48dp"/>
+
+        <!-- Jelszó láthatóságát kapcsoló gomb -->
+        <ImageButton
+            android:id="@+id/togglePasswordButton"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:layout_gravity="end|center_vertical"
+            android:layout_marginEnd="16dp"
+            android:background="@android:color/transparent"
+            android:contentDescription="Toggle Password Visibility"
+            android:adjustViewBounds="true"
+            android:scaleType="centerInside"
+            android:src="@drawable/visibility_off"/>
+    </FrameLayout>
 
     <!-- Elfelejtettem a jelszavam link -->
     <TextView
@@ -53,9 +74,8 @@
         android:focusable="true"
         android:onClick="onForgotPasswordClick"
         android:layout_marginTop="8dp"
-        app:layout_constraintTop_toBottomOf="@id/Jelszo"
+        app:layout_constraintTop_toBottomOf="@id/passwordContainer"
         app:layout_constraintEnd_toEndOf="parent"
-        android:gravity="end"
         android:layout_marginEnd="32dp"/>
 
     <!-- Maradjak bejelentkezve jelölőnégyzet -->
@@ -80,12 +100,12 @@
         android:textColor="@color/black"
         android:backgroundTint="@color/white"
         android:textSize="16sp"
+        android:padding="16dp"
         app:layout_constraintTop_toBottomOf="@id/Maradjak_bejelentkezve"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         android:layout_marginStart="32dp"
-        android:layout_marginEnd="32dp"
-        android:padding="16dp"/>
+        android:layout_marginEnd="32dp"/>
 
     <!-- Regisztráció gomb -->
     <Button
@@ -97,13 +117,13 @@
         android:textColor="@color/black"
         android:backgroundTint="@android:color/white"
         android:textSize="16sp"
+        android:padding="16dp"
+        android:elevation="4dp"
         app:layout_constraintTop_toBottomOf="@id/Bejelentkezes_gomb"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         android:layout_marginStart="32dp"
-        android:layout_marginEnd="32dp"
-        android:padding="16dp"
-        android:elevation="4dp"/>
+        android:layout_marginEnd="32dp"/>
 
     <!-- Forgot Password Layout (alapértelmezett állapotban rejtve) -->
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -116,7 +136,6 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent">
 
-        <!-- Felirat az e-mail cím megadásához -->
         <TextView
             android:id="@+id/resetPasswordPrompt"
             android:layout_width="wrap_content"
@@ -125,9 +144,8 @@
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            android:layout_marginTop="80dp" />
+            android:layout_marginTop="80dp"/>
 
-        <!-- E-mail input mező -->
         <EditText
             android:id="@+id/resetEmailInput"
             android:layout_width="0dp"
@@ -141,9 +159,8 @@
             app:layout_constraintEnd_toEndOf="parent"
             android:layout_marginStart="32dp"
             android:layout_marginEnd="32dp"
-            android:layout_marginTop="16dp" />
+            android:layout_marginTop="16dp"/>
 
-        <!-- Jelszó visszaállítása gomb -->
         <Button
             android:id="@+id/resetPasswordButton"
             android:layout_width="0dp"
@@ -154,9 +171,8 @@
             app:layout_constraintEnd_toEndOf="parent"
             android:layout_marginStart="32dp"
             android:layout_marginEnd="32dp"
-            android:layout_marginTop="24dp" />
+            android:layout_marginTop="24dp"/>
 
-        <!-- Sikeres visszaállítás esetén megjelenő felirat -->
         <TextView
             android:id="@+id/confirmationMessage"
             android:layout_width="wrap_content"
@@ -166,9 +182,8 @@
             app:layout_constraintTop_toBottomOf="@id/resetPasswordButton"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            android:layout_marginTop="24dp" />
+            android:layout_marginTop="24dp"/>
 
-        <!-- Vissza a kezdőképernyőre felirat, az aljára középre igazítva -->
         <TextView
             android:id="@+id/backToLoginText"
             android:layout_width="wrap_content"
@@ -184,5 +199,4 @@
             app:layout_constraintEnd_toEndOf="parent"
             android:layout_marginBottom="32dp"/>
     </androidx.constraintlayout.widget.ConstraintLayout>
-
 </androidx.constraintlayout.widget.ConstraintLayout>
