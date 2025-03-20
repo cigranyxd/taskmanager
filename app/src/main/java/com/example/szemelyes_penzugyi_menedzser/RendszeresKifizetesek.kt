@@ -18,6 +18,9 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import java.text.DecimalFormat
+import java.text.DecimalFormatSymbols
+import java.util.Locale
 
 class RendszeresKifizetesek : AppCompatActivity() {
 
@@ -28,8 +31,17 @@ class RendszeresKifizetesek : AppCompatActivity() {
     private lateinit var adapter: KifizetesAdapter
     private val kifizetesekLista = mutableListOf<Kifizetesitem>()
     private lateinit var spinner: Spinner
-    // Új: időszakválasztó spinner, amely megadja, milyen időközönként vonja le az összeget
+    // Új: időszakválasztó spinner
     private lateinit var periodSpinner: Spinner
+
+    // Segédfüggvény a fő összeg formázásához: 3 karakterenként szőköz
+    private fun formatOsszeg(osszeg: Double): String {
+        val symbols = DecimalFormatSymbols(Locale("hu", "HU"))
+        // Ha a helyi beállítás nem ad szőközt, kényszerítjük
+        symbols.groupingSeparator = ' '
+        val formatter = DecimalFormat("#,###", symbols)
+        return formatter.format(osszeg)
+    }
 
     @SuppressLint("MissingInflatedId")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -125,7 +137,7 @@ class RendszeresKifizetesek : AppCompatActivity() {
                     .addOnSuccessListener {
                         // Az oldalra betöltött összeg csökkenése
                         osszeg -= osszegInput
-                        osszegTextView.text = "Fő összeg: ${osszeg} Ft"
+                        osszegTextView.text = "Fő összeg: ${formatOsszeg(osszeg)} Ft"
                         nevEditText.text.clear()
                         osszegEditText.text.clear()
                         frissitKifizetesekMegjelenites(userId)
@@ -146,7 +158,7 @@ class RendszeresKifizetesek : AppCompatActivity() {
     }
 
     /**
-     * Lekéri az aktuális egyenleget Firestore-ból
+     * Lekéri az aktuális egyenleget Firestore-ból, és frissíti a fő összeg kijelzőt
      */
     private fun loadBalanceFromFirestore(userId: String, osszegTextView: TextView) {
         db.collection("users").document(userId)
@@ -154,10 +166,10 @@ class RendszeresKifizetesek : AppCompatActivity() {
             .addOnSuccessListener { document ->
                 if (document.exists()) {
                     osszeg = document.getDouble("aktualisPenz") ?: 0.0
-                    osszegTextView.text = "Fő összeg: ${osszeg} Ft"
+                    osszegTextView.text = "Fő összeg: ${formatOsszeg(osszeg)} Ft"
                 } else {
                     osszeg = 0.0
-                    osszegTextView.text = "Fő összeg: ${osszeg} Ft"
+                    osszegTextView.text = "Fő összeg: ${formatOsszeg(osszeg)} Ft"
                 }
             }
             .addOnFailureListener {
@@ -197,7 +209,7 @@ class RendszeresKifizetesek : AppCompatActivity() {
                 val osszegVisszaallitando = document.getDouble("osszeg") ?: 0.0
                 osszeg += osszegVisszaallitando
                 val osszegTextView: TextView = findViewById(R.id.osszegTextView)
-                osszegTextView.text = "Fő összeg: ${osszeg} Ft"
+                osszegTextView.text = "Fő összeg: ${formatOsszeg(osszeg)} Ft"
             }
 
         db.collection("users").document(userId)

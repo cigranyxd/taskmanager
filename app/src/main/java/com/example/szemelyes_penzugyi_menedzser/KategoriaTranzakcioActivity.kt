@@ -1,6 +1,7 @@
 package com.example.szemelyes_penzugyi_menedzser
 
 import android.os.Bundle
+import android.util.Log
 import android.widget.ArrayAdapter
 import android.widget.ListView
 import androidx.appcompat.app.AppCompatActivity
@@ -10,6 +11,7 @@ import com.google.firebase.firestore.FirebaseFirestore
 import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.temporal.TemporalAdjusters
+import java.util.Locale
 
 class KategoriaTranzakciokActivity : AppCompatActivity() {
 
@@ -17,6 +19,7 @@ class KategoriaTranzakciokActivity : AppCompatActivity() {
     private lateinit var firestore: FirebaseFirestore
     private lateinit var listView: ListView
     private lateinit var transactionsAdapter: ArrayAdapter<String>
+    private val TAG = "KategoriaTranzakciok"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -31,6 +34,7 @@ class KategoriaTranzakciokActivity : AppCompatActivity() {
         // Ha nincs explicit period extra, alapértelmezett érték: "Nap"
         val period = intent.getStringExtra("period")?.takeIf { it.isNotEmpty() } ?: "Nap"
 
+        Log.d(TAG, "Loading transactions for category: $categoryName, period: $period")
         loadTransactions(categoryName, period)
     }
 
@@ -64,11 +68,12 @@ class KategoriaTranzakciokActivity : AppCompatActivity() {
      * Lekéri az adott kategóriához tartozó tranzakciókat az adott időszakban.
      */
     private fun loadTransactions(category: String, period: String) {
-        // Normalizáljuk a kategória nevet (kisbetűs, trim)
-        val normalizedCategory = category.trim().toLowerCase()
+        // Normalizáljuk a kategória nevet: kisbetűs és trimelt
+        val normalizedCategory = category.trim().lowercase(Locale.getDefault())
         val userId = auth.currentUser?.uid ?: return
 
         val (startDate, endDate) = idoszakKezelo(period)
+        Log.d(TAG, "Date range: $startDate to $endDate for period: $period")
 
         if (period == "Nap") {
             // Nap esetén egyetlen dokumentumot kérünk le, melynek ID-ja a nap dátuma
@@ -81,14 +86,17 @@ class KategoriaTranzakciokActivity : AppCompatActivity() {
                     val transactionsList = mutableListOf<String>()
                     if (document.exists()) {
                         val trxList = document.get("tranzakciok") as? List<Map<String, Any>> ?: emptyList()
+                        Log.d(TAG, "Document $startDate exists with ${trxList.size} transactions")
                         for (trx in trxList) {
-                            val trxCategory = (trx["kategoria"] as? String)?.trim()?.toLowerCase() ?: ""
+                            val trxCategory = (trx["kategoria"] as? String)?.trim()?.lowercase(Locale.getDefault()) ?: ""
                             if (trxCategory == normalizedCategory) {
                                 val amount = (trx["mennyiseg"] as? Number)?.toFloat() ?: 0f
                                 val description = trx["leiras"] as? String ?: ""
                                 transactionsList.add("Dátum: $startDate\nLeírás: $description\nÖsszeg: ${amount.toInt()} Ft")
                             }
                         }
+                    } else {
+                        Log.d(TAG, "Document for date $startDate does not exist")
                     }
                     if (transactionsList.isEmpty()) {
                         transactionsList.add("Nincs tranzakció a kiválasztott napra.")
@@ -96,8 +104,8 @@ class KategoriaTranzakciokActivity : AppCompatActivity() {
                     transactionsAdapter = ArrayAdapter(this, android.R.layout.simple_list_item_1, transactionsList)
                     listView.adapter = transactionsAdapter
                 }
-                .addOnFailureListener {
-                    // Hibakezelés, pl. Toast üzenet
+                .addOnFailureListener { e ->
+                    Log.e(TAG, "Error loading document for date $startDate", e)
                 }
         } else {
             // Más időszak esetén a "nap" kollekcióból kérünk le dokumentumokat, amelyek ID-ja a dátum
@@ -109,11 +117,13 @@ class KategoriaTranzakciokActivity : AppCompatActivity() {
                 .get()
                 .addOnSuccessListener { documents ->
                     val transactionsList = mutableListOf<String>()
+                    Log.d(TAG, "Fetched ${documents.size()} documents in range")
                     for (document in documents) {
                         val date = document.id
                         val trxList = document.get("tranzakciok") as? List<Map<String, Any>> ?: emptyList()
+                        Log.d(TAG, "Document $date has ${trxList.size} transactions")
                         for (trx in trxList) {
-                            val trxCategory = (trx["kategoria"] as? String)?.trim()?.toLowerCase() ?: ""
+                            val trxCategory = (trx["kategoria"] as? String)?.trim()?.lowercase(Locale.getDefault()) ?: ""
                             if (trxCategory == normalizedCategory) {
                                 val amount = (trx["mennyiseg"] as? Number)?.toFloat() ?: 0f
                                 val description = trx["leiras"] as? String ?: ""
@@ -127,8 +137,8 @@ class KategoriaTranzakciokActivity : AppCompatActivity() {
                     transactionsAdapter = ArrayAdapter(this, android.R.layout.simple_list_item_1, transactionsList)
                     listView.adapter = transactionsAdapter
                 }
-                .addOnFailureListener {
-                    // Hibakezelés, pl. Toast üzenet
+                .addOnFailureListener { e ->
+                    Log.e(TAG, "Error loading documents for range $startDate to $endDate", e)
                 }
         }
     }

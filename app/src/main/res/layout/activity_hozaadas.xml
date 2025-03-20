@@ -1,80 +1,96 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
+<android.widget.ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/scrollView"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
+    android:fillViewport="true"
+    android:fitsSystemWindows="true">
 
-    <!-- Összeg input -->
-    <EditText
-        android:id="@+id/osszegInput"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:hint="Összeg"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        android:layout_margin="16dp" />
+    <androidx.constraintlayout.widget.ConstraintLayout
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:fitsSystemWindows="true">
 
-    <!-- Spinner a kategóriákhoz -->
-    <Spinner
-        android:id="@+id/kategoriakSpinner"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        app:layout_constraintTop_toBottomOf="@id/osszegInput"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        android:layout_margin="16dp" />
+        <!-- Tranzakció típus spinner (kiadás/bevétel) a tetején -->
+        <Spinner
+            android:id="@+id/tranzakcioTipusSpinner"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_margin="16dp"
+            android:layout_marginTop="32dp"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
 
-    <!-- GridView a kategóriákhoz és ikonjaikhoz -->
+        <!-- Összeg input -->
+        <EditText
+            android:id="@+id/osszegInput"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:hint="Összeg"
+            android:layout_margin="16dp"
+            app:layout_constraintTop_toBottomOf="@id/tranzakcioTipusSpinner"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
 
-    <!-- Leírás input -->
+        <!-- Kategóriák spinner helyettesítése egy Space elemmel -->
+        <Space
+            android:id="@+id/kategoriakPlaceholder"
+            android:layout_width="0dp"
+            android:layout_height="48dp"
+            android:layout_margin="16dp"
+            app:layout_constraintTop_toBottomOf="@id/osszegInput"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
 
-    <GridView
-        android:id="@+id/kategoriakGridView"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_margin="16dp"
-        android:layout_marginTop="4dp"
-        android:columnWidth="80dp"
-        android:gravity="center"
-        android:horizontalSpacing="16dp"
-        android:numColumns="3"
-        android:verticalSpacing="16dp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="1.0"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/osszegInput" />
+        <!-- HozzaadasGorgetesGridView a kategóriákhoz és ikonjaikhoz -->
+        <com.example.szemelyes_penzugyi_menedzser.HozzaadasGorgetesGridView
+            android:id="@+id/hozzaadasGorgetesGridView"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_margin="16dp"
+            android:layout_marginTop="4dp"
+            android:columnWidth="80dp"
+            android:gravity="center"
+            android:horizontalSpacing="16dp"
+            android:numColumns="3"
+            android:verticalSpacing="16dp"
+            app:layout_constraintTop_toBottomOf="@id/kategoriakPlaceholder"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
 
-    <EditText
-        android:id="@+id/leirasInput"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:hint="Leírás"
-        app:layout_constraintTop_toBottomOf="@id/kategoriakGridView"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        android:layout_margin="16dp" />
+        <!-- Leírás input -->
+        <EditText
+            android:id="@+id/leirasInput"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:hint="Leírás"
+            android:layout_margin="16dp"
+            app:layout_constraintTop_toBottomOf="@id/hozzaadasGorgetesGridView"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
 
-    <!-- Mentés gomb -->
-    <Button
-        android:id="@+id/mentesGomb"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Mentés"
-        app:layout_constraintTop_toBottomOf="@id/leirasInput"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        android:layout_margin="16dp" />
+        <!-- Mentés gomb -->
+        <Button
+            android:id="@+id/mentesGomb"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Mentés"
+            android:layout_margin="16dp"
+            app:layout_constraintTop_toBottomOf="@id/leirasInput"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
 
-    <!-- Tranzakció típus Spinner (kategória után) -->
-    <Spinner
-        android:id="@+id/tranzakcioTipusSpinner"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        app:layout_constraintTop_toBottomOf="@id/mentesGomb"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        android:layout_margin="16dp" />
+        <!-- Dummy nézet a scrollozás biztosításához -->
+        <View
+            android:id="@+id/dummyView"
+            android:layout_width="0dp"
+            android:layout_height="100dp"
+            app:layout_constraintTop_toBottomOf="@id/mentesGomb"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</android.widget.ScrollView>

@@ -1,19 +1,15 @@
-<?xml version="1.0" encoding="utf-8"?>
 <ScrollView
     xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/scrollView"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fillViewport="true">
 
     <LinearLayout
-        android:id="@+id/addCategoryContainer"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:padding="16dp">
 
-        <!-- Kategória név -->
         <EditText
             android:id="@+id/categoryNameEditText"
             android:layout_width="match_parent"
@@ -21,7 +17,6 @@
             android:hint="Kategória név"
             android:inputType="text" />
 
-        <!-- Típus választó (Bevétel / Kiadás) -->
         <RadioGroup
             android:id="@+id/typeRadioGroup"
             android:layout_width="match_parent"
@@ -44,27 +39,21 @@
                 android:layout_marginStart="16dp" />
         </RadioGroup>
 
-        <!-- Ikon kiválasztás címke -->
         <TextView
-            android:id="@+id/selectIconLabel"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Válassz egy ikont:"
             android:textSize="16sp"
             android:layout_marginTop="16dp" />
 
-        <!-- GridView az ikonokhoz (kb. 30 ikon) -->
-        <GridView
-            android:id="@+id/iconGridView"
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/iconRecyclerView"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:numColumns="5"
-            android:verticalSpacing="8dp"
-            android:horizontalSpacing="8dp"
-            android:stretchMode="columnWidth"
+            android:layout_height="200dp"
+            android:scrollbars="vertical"
+            android:nestedScrollingEnabled="false"
             android:layout_marginTop="8dp" />
 
-        <!-- Hozzáadás gomb -->
         <Button
             android:id="@+id/addCategoryButton"
             android:layout_width="match_parent"

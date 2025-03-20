@@ -18,6 +18,9 @@ import com.google.firebase.firestore.FirebaseFirestore
 import java.time.LocalDate
 import java.time.DayOfWeek
 import java.time.temporal.TemporalAdjusters
+import java.text.DecimalFormat
+import java.text.DecimalFormatSymbols
+import java.util.Locale
 
 // Data class az időszak elemekhez
 data class PeriodusElem(val megjelenitoSzoveg: String, val kezdoDatum: LocalDate, val zaroDatum: LocalDate)
@@ -361,8 +364,9 @@ class Kategoriak : AppCompatActivity() {
 
             totalIncomeTextView.visibility = View.VISIBLE
             totalExpenseTextView.visibility = View.VISIBLE
-            totalIncomeTextView.text = "Összbevétel: ${teljesBevetel.toInt()} Ft"
-            totalExpenseTextView.text = "Összkiadás: ${teljesKiadas.toInt()} Ft"
+            // Számok formázása 3 számjegyenként szóközzel
+            totalIncomeTextView.text = "Összbevétel: ${formatNumber(teljesBevetel.toInt())} Ft"
+            totalExpenseTextView.text = "Összkiadás: ${formatNumber(teljesKiadas.toInt())} Ft"
 
             val vegsoAdapter = KategoriakbaRendszerezesAdapter(
                 context = this,
@@ -457,7 +461,7 @@ class Kategoriak : AppCompatActivity() {
         return lista
     }
 
-    // Lekéri a tranzakciókat a megadott egyedi időszakra (kezdoDatum és zaroDatum formátumban)
+    // Lekéri az egyedi időszak tranzakcióit
     private fun tranzakciokBetolteseEgyedi(felhasznaloId: String, kezdoDatum: String, zaroDatum: String) {
         val firestore = FirebaseFirestore.getInstance()
         if (kezdoDatum == zaroDatum) {
@@ -512,7 +516,9 @@ class Kategoriak : AppCompatActivity() {
         }
     }
 
-    // Frissíti az egyedi időszak kiválasztó spinner–t a kiválasztott fő időszak alapján
+    /**
+     * Frissíti az egyedi időszak kiválasztó spinner–t a kiválasztott fő időszak alapján
+     */
     private fun frissitIdoszakValasztot(felhasznaloId: String) {
         val idoszakLista = generalPeriodLista(aktualisIdoszak)
         // Az adapterben most a saját spinner_item layoutot használjuk, amely középre igazítja a szöveget.
@@ -528,5 +534,14 @@ class Kategoriak : AppCompatActivity() {
             }
             override fun onNothingSelected(parent: AdapterView<*>) {}
         }
+    }
+
+    // Privát függvény a számok formázásához (3 számjegyenként szóköz)
+    private fun formatNumber(value: Int): String {
+        val df = DecimalFormat("#,###", DecimalFormatSymbols(Locale("hu", "HU")).apply {
+            groupingSeparator = ' '
+            decimalSeparator = '.'
+        })
+        return df.format(value)
     }
 }

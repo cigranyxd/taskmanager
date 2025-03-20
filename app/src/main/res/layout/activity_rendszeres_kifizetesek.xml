@@ -3,48 +3,62 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/paymentLayout"
+    android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:padding="16dp"
-    android:animateLayoutChanges="true"
     tools:context=".RendszeresKifizetesek">
 
-    <!-- Navigációs spinner a képernyő tetején, kevesebb marginTop-pal -->
+    <!-- Navigációs spinner a képernyő tetején -->
     <Spinner
         android:id="@+id/lenyilo_menu"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
-        android:layout_marginBottom="16dp"
-        android:spinnerMode="dropdown"
-        app:layout_constraintTop_toTopOf="parent"
+        android:layout_marginStart="6dp"
+        android:layout_marginTop="32dp"
+        android:layout_marginEnd="6dp"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <!-- Felirat a "periodSpinner" fölött -->
+    <TextView
+        android:id="@+id/frequencyLabel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="kifizetés gyakorisága"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        android:layout_marginTop="16dp"
+        app:layout_constraintTop_toBottomOf="@id/lenyilo_menu"
+        app:layout_constraintStart_toStartOf="parent" />
 
     <!-- Időszakválasztó spinner -->
     <Spinner
         android:id="@+id/periodSpinner"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="16dp"
-        app:layout_constraintTop_toBottomOf="@id/lenyilo_menu"
+        android:layout_marginStart="6dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="6dp"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
+        app:layout_constraintTop_toBottomOf="@id/frequencyLabel" />
 
-    <!-- Fő összeg kijelzése -->
+    <!-- Fő összeg kijelzése (3 karakterenként szóközzel) -->
     <TextView
         android:id="@+id/osszegTextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Fő összeg: 100000 Ft"
+        android:text="Fő összeg: 100 000 Ft"
         android:textSize="18sp"
         android:textStyle="bold"
+        android:layout_marginTop="16dp"
         android:layout_marginBottom="16dp"
         app:layout_constraintTop_toBottomOf="@id/periodSpinner"
         app:layout_constraintStart_toStartOf="parent" />
 
-    <!-- Név beviteli mező (alapértelmezett háttérrel) -->
+    <!-- Név beviteli mező -->
     <EditText
         android:id="@+id/nevEditText"
         android:layout_width="0dp"
@@ -56,7 +70,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 
-    <!-- Összeg beviteli mező (alapértelmezett háttérrel) -->
+    <!-- Összeg beviteli mező -->
     <EditText
         android:id="@+id/osszegEditText"
         android:layout_width="0dp"
@@ -91,7 +105,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 
-    <!-- Kifizetések lista RecyclerView, magyar animációs fájlokkal -->
+    <!-- Kifizetések lista RecyclerView -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerView"
         android:layout_width="0dp"

@@ -9,16 +9,19 @@
     tools:context=".ElemzesActivity">
 
     <!-- Spinner a tetején -->
+
+    <!-- Diagram: BarChart (oszlopDiagram) -->
     <Spinner
         android:id="@+id/lenyilo_menu"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_margin="16dp"
-        app:layout_constraintTop_toTopOf="parent"
+        android:layout_marginTop="16dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
+        app:layout_constraintTop_toTopOf="parent" />
 
-    <!-- Diagram: BarChart (oszlopDiagram) -->
     <com.github.mikephil.charting.charts.BarChart
         android:id="@+id/oszlopDiagram"
         android:layout_width="0dp"
@@ -87,9 +90,6 @@
             android:layout_marginEnd="16dp" />
     </LinearLayout>
 
-    <!-- FrameLayout a fragmentek számára -->
-
-
     <!-- ScrollView a kategóriák számára (görgethető lista) -->
     <android.widget.ScrollView
         android:id="@+id/CategoriesScrollView"
@@ -107,7 +107,6 @@
             android:orientation="vertical"
             android:padding="16dp"
             android:gravity="start">
-
 
         </LinearLayout>
     </android.widget.ScrollView>

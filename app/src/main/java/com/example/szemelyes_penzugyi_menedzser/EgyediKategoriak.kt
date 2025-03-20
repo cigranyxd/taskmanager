@@ -9,7 +9,6 @@ import com.google.gson.reflect.TypeToken
 private const val TAG = "EgyediKategoriak"
 
 
-
 // Singleton az egyedi kategóriák kezelésére
 object EgyediKategoriak {
     val kategoriak: MutableList<EgyediKategoria> = mutableListOf()
@@ -85,6 +84,27 @@ object EgyediKategoriak {
             }
             .addOnFailureListener { e ->
                 Log.e(TAG, "Hiba Firestore mentésénél: ${e.message}")
+            }
+    }
+
+    // Törli a kategóriát Firestore-ból és frissíti a lokális listát
+    fun torolKategoriat(context: Context, felhasznaloId: String, category: String, callback: (Boolean) -> Unit) {
+        val firestore = FirebaseFirestore.getInstance()
+        firestore.collection("users").document(felhasznaloId)
+            .collection("egyedi_kategoriak")
+            .document(category)
+            .delete()
+            .addOnSuccessListener {
+                // Töröljük a kategóriát a lokális listából is
+                kategoriak.removeAll { it.nev == category }
+                // Frissítjük a SharedPreferences-ben is az adatot
+                ment(context)
+                Log.d(TAG, "Kategória '$category' törölve Firestore-ból.")
+                callback(true)
+            }
+            .addOnFailureListener { e ->
+                Log.e(TAG, "Hiba a kategória törlésekor: ${e.message}")
+                callback(false)
             }
     }
 }

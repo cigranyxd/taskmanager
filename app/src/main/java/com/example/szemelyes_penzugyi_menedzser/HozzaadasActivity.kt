@@ -2,16 +2,21 @@ package com.example.szemelyes_penzugyi_menedzser
 
 import KategoriaAdapter
 import android.os.Bundle
+import android.text.Editable
+import android.text.TextWatcher
 import android.util.Log
 import android.view.View
 import android.widget.*
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import com.google.firebase.Timestamp
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import java.text.DecimalFormat
+import java.text.DecimalFormatSymbols
 import java.time.LocalDate
-import android.graphics.Color
 import android.text.InputType
+import java.util.Locale
 
 class HozzaadasActivity : AppCompatActivity() {
 
@@ -28,10 +33,46 @@ class HozzaadasActivity : AppCompatActivity() {
         val tranzakcioTipusSpinner = findViewById<Spinner>(R.id.tranzakcioTipusSpinner)
         val mentesGomb = findViewById<Button>(R.id.mentesGomb)
         val leirasInput = findViewById<EditText>(R.id.leirasInput)
-        val kategoriakGridView = findViewById<GridView>(R.id.kategoriakGridView)
+        // A grid view mostantól az új id-t használja
+        val hozzaadasGorgetesGridView = findViewById<GridView>(R.id.hozzaadasGorgetesGridView)
 
-        // Csak numerikus (decimal) billentyűzet megjelenítése az összeg bevitelénél
+        // Csak numerikus (decimal) billentyűzet az összeg beviteléhez
         osszegInput.inputType = InputType.TYPE_CLASS_NUMBER or InputType.TYPE_NUMBER_FLAG_DECIMAL
+
+        // TextWatcher az összeg formázásához (3 számjegyenként szóközökkel)
+        osszegInput.addTextChangedListener(object : TextWatcher {
+            var currentText = ""
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) { }
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) { }
+            override fun afterTextChanged(s: Editable?) {
+                val str = s.toString()
+                if (str == currentText) return
+
+                // Távolítsuk el a szóközöket
+                val cleanString = str.replace(" ", "")
+                if (cleanString.isEmpty()) {
+                    currentText = ""
+                    return
+                }
+                try {
+                    // Próbáljuk meg átalakítani Double-é
+                    val parsed = cleanString.toDouble()
+                    // Formázás: 3 számjegyenként csoportosítás, tizedesjegyek megmaradnak
+                    val symbols = DecimalFormatSymbols(Locale("hu", "HU"))
+                    symbols.groupingSeparator = ' '
+                    val formatter = DecimalFormat("#,###.##", symbols)
+                    val formatted = formatter.format(parsed)
+                    currentText = formatted
+                    // Az új formázott szöveg beállítása, majd a kurzor a végére
+                    osszegInput.removeTextChangedListener(this)
+                    osszegInput.setText(formatted)
+                    osszegInput.setSelection(formatted.length)
+                    osszegInput.addTextChangedListener(this)
+                } catch (e: Exception) {
+                    // Ha hiba történik, ne formázza újra
+                }
+            }
+        })
 
         // Spinner beállítása
         val tranzakcioTipusNevek = listOf("Bevétel", "Kiadás")
@@ -39,7 +80,7 @@ class HozzaadasActivity : AppCompatActivity() {
         spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         tranzakcioTipusSpinner.adapter = spinnerAdapter
 
-        // Alapértelmezett érték legyen "Bevétel"
+        // Alapértelmezett érték: "Bevétel"
         tranzakcioTipusSpinner.setSelection(0)
         tranzakcioTipus = "Bevétel"
 
@@ -57,17 +98,17 @@ class HozzaadasActivity : AppCompatActivity() {
             R.drawable.kozlekedes_icon, R.drawable.egyeb_icon
         )
 
-        // Inicializáljuk az adaptert a spinner alapértelmezett értékének megfelelően ("Bevétel").
+        // Adapter inicializálása a "Bevétel" típushoz
         val initialNames = defaultBevetelek + EgyediKategoriak.kategoriak.filter {
             it.tipus.equals("Bevétel", ignoreCase = true)
         }.map { it.nev }
         val initialIcons = defaultBevetelekIkonok + EgyediKategoriak.kategoriak.filter {
             it.tipus.equals("Bevétel", ignoreCase = true)
         }.map { it.ikon }
-        var kategoriakAdapter = KategoriaAdapter(this, initialNames, initialIcons)
-        kategoriakGridView.adapter = kategoriakAdapter
+        val kategoriakAdapter = KategoriaAdapter(this, initialNames, initialIcons)
+        hozzaadasGorgetesGridView.adapter = kategoriakAdapter
 
-        // Spinner eseménykezelő: csak akkor frissítjük az adaptert, ha a felhasználó vált.
+        // Spinner eseménykezelő: váltáskor frissítjük az adaptert
         var firstSelection = true
         tranzakcioTipusSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
@@ -83,9 +124,12 @@ class HozzaadasActivity : AppCompatActivity() {
             }
         }
 
-        // Ha be van jelentkezve, a Firestore-ból betöltjük a custom kategóriákat, majd frissítjük az adaptert
-        if (FirebaseAuth.getInstance().currentUser != null) {
-            EgyediKategoriak.betoltFirestore(this, FirebaseAuth.getInstance().currentUser!!.uid) {
+        // Custom kategóriák betöltése Firestore-ból, ha be van jelentkezve
+        val currentUser = FirebaseAuth.getInstance().currentUser
+        if (currentUser != null) {
+            val uid = currentUser.uid
+            // Az egyedi kategóriák a "users/{uid}/egyedi_kategoriak" collectionban találhatók
+            EgyediKategoriak.betoltFirestore(this, uid) {
                 val currentType = tranzakcioTipusSpinner.selectedItem?.toString() ?: "Bevétel"
                 updateAdapterFor(currentType)
             }
@@ -93,11 +137,10 @@ class HozzaadasActivity : AppCompatActivity() {
             EgyediKategoriak.betolt(this)
         }
 
-        // Kategória kiválasztásának kezelése: ha ugyanarra kattintunk, a kijelölést visszavonja
-        kategoriakGridView.setOnItemClickListener { parent, view, position, _ ->
-            (kategoriakGridView.adapter as? KategoriaAdapter)?.apply {
+        // Kategória kiválasztásának kezelése: ugyanarra kattintva visszavonás
+        hozzaadasGorgetesGridView.setOnItemClickListener { parent, view, position, _ ->
+            (hozzaadasGorgetesGridView.adapter as? KategoriaAdapter)?.apply {
                 if (selectedPosition == position) {
-                    // Ugyanarra kattintva visszavonjuk a kijelölést
                     selectedPosition = -1
                     kivalasztottKategoria = null
                 } else {
@@ -111,8 +154,47 @@ class HozzaadasActivity : AppCompatActivity() {
             }
         }
 
+        // Hosszú nyomás esemény hozzáadása az egyedi kategóriák törléséhez
+        hozzaadasGorgetesGridView.setOnItemLongClickListener { parent, view, position, _ ->
+            val category = parent.getItemAtPosition(position) as? String ?: return@setOnItemLongClickListener false
+
+            // Csak az egyedi kategóriák törölhetők; ellenőrizzük, hogy a kategória nem szerepel-e az alapértelmezett listákban
+            if (tranzakcioTipus.equals("Bevétel", ignoreCase = true) && defaultBevetelek.contains(category)) {
+                Toast.makeText(this, "Alapértelmezett kategóriát nem lehet törölni", Toast.LENGTH_SHORT).show()
+                return@setOnItemLongClickListener false
+            }
+            if (tranzakcioTipus.equals("Kiadás", ignoreCase = true) && defaultKiadasok.contains(category)) {
+                Toast.makeText(this, "Alapértelmezett kategóriát nem lehet törölni", Toast.LENGTH_SHORT).show()
+                return@setOnItemLongClickListener false
+            }
+
+            // Megerősítő párbeszédablak a törléshez
+            AlertDialog.Builder(this)
+                .setTitle("Kategória törlése")
+                .setMessage("Biztosan törlöd a kategóriát: $category?")
+                .setPositiveButton("Igen") { dialog, which ->
+                    // A törlésnél adjuk át az uid-t is, hogy a "users/{uid}/egyedi_kategoriak" collectionból töröljük
+                    val uid = FirebaseAuth.getInstance().currentUser?.uid
+                    if (uid != null) {
+                        EgyediKategoriak.torolKategoriat(this, uid, category) { success ->
+                            if (success) {
+                                Toast.makeText(this, "Kategória törölve", Toast.LENGTH_SHORT).show()
+                                // Frissítjük az adaptert
+                                updateAdapterFor(tranzakcioTipus ?: "Bevétel")
+                            } else {
+                                Toast.makeText(this, "Hiba a kategória törlése során", Toast.LENGTH_SHORT).show()
+                            }
+                        }
+                    }
+                }
+                .setNegativeButton("Mégse", null)
+                .show()
+
+            true
+        }
+
         mentesGomb.setOnClickListener {
-            val osszeg = osszegInput.text.toString().toDoubleOrNull()
+            val osszeg = osszegInput.text.toString().replace(" ", "").toDoubleOrNull()
             val leiras = leirasInput.text.toString()
             // Ha a leírás üres, alapértelmezetten "nincs leírás"
             val finalLeiras = if (leiras.isBlank()) "nincs leírás" else leiras
@@ -194,7 +276,8 @@ class HozzaadasActivity : AppCompatActivity() {
 
     // Frissíti az adapter tartalmát a megadott tranzakció típus alapján
     private fun updateAdapterFor(tipus: String) {
-        val kategoriakGridView = findViewById<GridView>(R.id.kategoriakGridView)
+        // Az új grid view referenciát használjuk
+        val hozzaadasGorgetesGridView = findViewById<GridView>(R.id.hozzaadasGorgetesGridView)
         val defaultBevetelek = listOf("Fizetési csekk", "Ajándékok", "Egyéb")
         val defaultBevetelekIkonok = listOf(R.drawable.szabadido_icon, R.drawable.ajandekok_icon, R.drawable.egyeb_icon)
         val defaultKiadasok = listOf(
@@ -212,12 +295,11 @@ class HozzaadasActivity : AppCompatActivity() {
             val finalNames = defaultBevetelek + customBevetel.map { it.nev }
             val finalIcons = defaultBevetelekIkonok + customBevetel.map { it.ikon }
             val newAdapter = KategoriaAdapter(this, finalNames, finalIcons)
-            // Ha már volt kiválasztott kategória, állítsuk be a kiválasztott pozíciót, ha megtalálható az új listában.
             val index = finalNames.indexOf(kivalasztottKategoria)
             if (index != -1) {
                 newAdapter.selectedPosition = index
             }
-            kategoriakGridView.adapter = newAdapter
+            hozzaadasGorgetesGridView.adapter = newAdapter
         } else {
             val customKiadas = EgyediKategoriak.kategoriak.filter { it.tipus.trim().toLowerCase() == "kiadás" }
             val finalNames = defaultKiadasok + customKiadas.map { it.nev }
@@ -227,7 +309,7 @@ class HozzaadasActivity : AppCompatActivity() {
             if (index != -1) {
                 newAdapter.selectedPosition = index
             }
-            kategoriakGridView.adapter = newAdapter
+            hozzaadasGorgetesGridView.adapter = newAdapter
         }
     }
 

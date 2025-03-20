@@ -1,5 +1,6 @@
 package com.example.szemelyes_penzugyi_menedzser
 
+import android.annotation.SuppressLint
 import android.app.DatePickerDialog
 import android.content.Context
 import android.content.Intent
@@ -19,10 +20,15 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.fragment.app.Fragment
 import com.github.mikephil.charting.charts.BarChart
+import com.github.mikephil.charting.components.XAxis
 import com.github.mikephil.charting.data.BarData
 import com.github.mikephil.charting.data.BarDataSet
 import com.github.mikephil.charting.data.BarEntry
+import com.github.mikephil.charting.formatter.ValueFormatter
 import com.google.firebase.firestore.FieldPath
+import java.text.DecimalFormat
+import java.text.DecimalFormatSymbols
+import java.text.NumberFormat
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.time.temporal.TemporalAdjusters
@@ -37,6 +43,16 @@ class ElemzesActivity : AppCompatActivity() {
     private lateinit var spinner: Spinner
     private val aktualisOldal = "Elemzés"
 
+    companion object {
+        fun formatNumber(value: Int): String {
+            val nf = NumberFormat.getIntegerInstance(Locale.US) as DecimalFormat
+            val symbols = nf.decimalFormatSymbols
+            symbols.groupingSeparator = ' '
+            nf.decimalFormatSymbols = symbols
+            return nf.format(value)
+        }
+    }
+
     @SuppressLint1("MissingInflatedId")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -47,6 +63,20 @@ class ElemzesActivity : AppCompatActivity() {
             startActivity(Intent(this, Bejelentkezes::class.java))
             finish()
             return
+        }
+
+        fun SzovegreKattint(view: View) {
+            val fragment: Fragment = when (view.id) {
+                R.id.NapFelirat -> NapFragment()
+                R.id.HetFelirat -> HetFragment()
+                R.id.HonapFelirat -> HonapFragment()
+                R.id.EvFelirat -> EvFragment()
+                R.id.IdoszakFelirat -> IdoszakFragment()
+                else -> DefaultFragment()
+            }
+            supportFragmentManager.beginTransaction()
+                .replace(R.id.oszlopDiagram, fragment)
+                .commit()
         }
 
         // Navigációs feliratok
@@ -73,6 +103,7 @@ class ElemzesActivity : AppCompatActivity() {
             startActivity(Intent(this, HozzaadasActivity::class.java))
         }
 
+        // Az Elemzés fül legyen az alapértelmezett, amikor az activity megnyílik
         spinner.setSelection(1)
         var elsoFutas = true
         spinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
@@ -104,7 +135,48 @@ class ElemzesActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
+        // Ha az Elemzés activity-be visszatérünk normál módon, akkor ez a fül marad Elemzés.
         spinner.setSelection(1)
+    }
+
+    // Grafikon stílusának beállítása, hogy az alsó tengely vonal folyamatos legyen
+    fun styleBarChart(chart: BarChart) {
+        chart.description.isEnabled = false
+        chart.setFitBars(true)
+        chart.animateY(1000)
+        chart.setScaleEnabled(false)
+        // Háttér és segédvonalak kikapcsolása
+        chart.setDrawGridBackground(false)
+        chart.setDrawBorders(false)
+        // Engedélyezzük az xAxis-t, hogy alsó vonal legyen látható
+        chart.xAxis.isEnabled = true
+        chart.xAxis.position = XAxis.XAxisPosition.BOTTOM
+        chart.xAxis.setDrawGridLines(false)
+        chart.xAxis.setDrawLabels(false)
+        chart.xAxis.setDrawAxisLine(true)
+        chart.xAxis.axisLineColor = Color.DKGRAY
+        chart.xAxis.axisLineWidth = 2f
+        // Eltávolítjuk az első/utolsó elem klippelését, hogy a vonal a teljes szélességet lefedje
+        chart.xAxis.setAvoidFirstLastClipping(false)
+        // Biztosítjuk, hogy a bal tengely 0-tól induljon
+        chart.axisLeft.axisMinimum = 0f
+        // Bal oldali tengely testreszabása
+        val leftAxis = chart.axisLeft
+        leftAxis.textColor = Color.DKGRAY
+        leftAxis.textSize = 12f
+        leftAxis.setDrawAxisLine(false)
+        leftAxis.setDrawGridLines(false)
+        // Jobb oldali tengely kikapcsolása
+        chart.axisRight.isEnabled = false
+
+        // Chart háttér és extra margók
+        chart.setBackgroundColor(Color.WHITE)
+        chart.setExtraOffsets(10f, 10f, 10f, 10f)
+
+        // Jelmagyarázat (legend) testreszabása
+        val legend = chart.legend
+        legend.textColor = Color.DKGRAY
+        legend.textSize = 14f
     }
 
     // Overlay eltávolítása a BarChart szülőjéből
@@ -235,9 +307,9 @@ class ElemzesActivity : AppCompatActivity() {
             gravity = Gravity.START
             setTextColor(if (type == "bevétel") Color.GREEN else if (type == "kiadás") Color.RED else Color.BLACK)
             text = when (type) {
-                "bevétel" -> "+ $amount"
-                "kiadás" -> "- $amount"
-                else -> "$amount"
+                "bevétel" -> "+ ${formatNumber(amount.toInt())}"
+                "kiadás" -> "- ${formatNumber(amount.toInt())}"
+                else -> formatNumber(amount.toInt())
             }
         }
         val amountParams = RelativeLayout.LayoutParams(
@@ -319,26 +391,15 @@ class ElemzesActivity : AppCompatActivity() {
         finish()
     }
 
-    @Suppress("MissingSuperCall")
+    // --- Módosított onBackPressed ---
+    // Ha a felhasználó a telefon vissza gombját nyomja, navigáljunk a Telefonszam activity-be.
+    @SuppressLint("MissingSuperCall")
     override fun onBackPressed() {
         val intent = Intent(this, Telefonszam::class.java)
-        intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK
+        intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
+        intent.putExtra("spinnerSelection", 0)
         startActivity(intent)
         finish()
-    }
-
-    fun SzovegreKattint(view: View) {
-        val fragment: Fragment = when (view.id) {
-            R.id.NapFelirat -> NapFragment()
-            R.id.HetFelirat -> HetFragment()
-            R.id.HonapFelirat -> HonapFragment()
-            R.id.EvFelirat -> EvFragment()
-            R.id.IdoszakFelirat -> IdoszakFragment()
-            else -> DefaultFragment()
-        }
-        supportFragmentManager.beginTransaction()
-            .replace(R.id.oszlopDiagram, fragment)
-            .commit()
     }
 
     // --- Fragmentek ---
@@ -411,21 +472,29 @@ class ElemzesActivity : AppCompatActivity() {
                             else if (type == "kiadás") totalExpense += amount
                         }
                     }
+                    // Always add both entries to maintain positions
                     val revenueEntry = BarEntry(0f, totalRevenue)
                     val expenseEntry = BarEntry(1f, totalExpense)
-                    val dataSet = BarDataSet(listOf(revenueEntry, expenseEntry), "Napi összesítés")
+                    val entries = listOf(revenueEntry, expenseEntry)
+                    val dataSet = BarDataSet(entries, "Napi összesítés")
                     dataSet.colors = listOf(Color.GREEN, Color.RED)
                     dataSet.valueTextColor = Color.BLACK
+                    dataSet.valueTextSize = 16f
+                    dataSet.valueFormatter = object : ValueFormatter() {
+                        override fun getBarLabel(barEntry: BarEntry?): String {
+                            return if (barEntry?.y == 0f) "" else ElemzesActivity.formatNumber(barEntry!!.y.toInt())
+                        }
+                    }
                     val barData = BarData(dataSet)
+                    barData.barWidth = 0.45f
                     chart.data = barData
-                    chart.description.isEnabled = false
-                    chart.setFitBars(true)
+                    (activity as? ElemzesActivity)?.styleBarChart(chart)
                     chart.invalidate()
                 }
         }
     }
 
-    // 2. HetFragment – Az aktuális hét adatai (implementáld hasonlóan)
+    // 2. HetFragment – Az aktuális hét adatai
     class HetFragment : Fragment() {
         private val firestore = FirebaseManager.firestore
         private val currentUser = FirebaseManager.auth.currentUser
@@ -433,7 +502,6 @@ class ElemzesActivity : AppCompatActivity() {
 
         @RequiresApi(Build.VERSION_CODES.O)
         override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-            // Ugyanazt a layoutot használjuk, mint a NapFragment
             return inflater.inflate(R.layout.fragment_empty, container, false)
         }
 
@@ -450,8 +518,6 @@ class ElemzesActivity : AppCompatActivity() {
                 return
             }
             val uid = currentUser.uid
-
-            // A hét kezdete (hétfő) és vége (vasárnap)
             val today = LocalDate.now()
             val weekStart = today.with(TemporalAdjusters.previousOrSame(java.time.DayOfWeek.MONDAY))
             val weekEnd = today.with(TemporalAdjusters.nextOrSame(java.time.DayOfWeek.SUNDAY))
@@ -482,7 +548,6 @@ class ElemzesActivity : AppCompatActivity() {
                     var totalRevenue = 0f
                     var totalExpense = 0f
 
-                    // Iterálunk az összes dokumentumon a jelenlegi hétből
                     for (doc in querySnapshot.documents) {
                         val transactions = doc.get("tranzakciok") as? List<Map<String, Any>> ?: emptyList()
                         val sortedTransactions = transactions.sortedByDescending { it["timestamp"] as? Long ?: 0L }
@@ -494,7 +559,6 @@ class ElemzesActivity : AppCompatActivity() {
                             }
                             val category = (trans["kategoria"] as? String)?.trim() ?: "Egyéb"
                             val type = (trans["tipus"] as? String)?.trim()?.toLowerCase(Locale.getDefault()) ?: ""
-                            // A tranzakciós nézet létrehozása az ElemzesActivity publikus metódusával
                             val transactionView = (activity as ElemzesActivity).createTransactionView(category, amount, type, trans, doc.id)
                             categoriesLayout.addView(transactionView)
                             if (type == "bevétel") totalRevenue += amount
@@ -503,18 +567,24 @@ class ElemzesActivity : AppCompatActivity() {
                     }
                     val revenueEntry = BarEntry(0f, totalRevenue)
                     val expenseEntry = BarEntry(1f, totalExpense)
-                    val dataSet = BarDataSet(listOf(revenueEntry, expenseEntry), "Heti összesítés")
+                    val entries = listOf(revenueEntry, expenseEntry)
+                    val dataSet = BarDataSet(entries, "Heti összesítés")
                     dataSet.colors = listOf(Color.GREEN, Color.RED)
                     dataSet.valueTextColor = Color.BLACK
+                    dataSet.valueTextSize = 16f
+                    dataSet.valueFormatter = object : ValueFormatter() {
+                        override fun getBarLabel(barEntry: BarEntry?): String {
+                            return if (barEntry?.y == 0f) "" else ElemzesActivity.formatNumber(barEntry!!.y.toInt())
+                        }
+                    }
                     val barData = BarData(dataSet)
+                    barData.barWidth = 0.45f
                     chart.data = barData
-                    chart.description.isEnabled = false
-                    chart.setFitBars(true)
+                    (activity as? ElemzesActivity)?.styleBarChart(chart)
                     chart.invalidate()
                 }
         }
     }
-
 
     // 3. HonapFragment – Az aktuális hónap adatai (csökkenő sorrendben)
     class HonapFragment : Fragment() {
@@ -584,10 +654,7 @@ class ElemzesActivity : AppCompatActivity() {
                             text = dateStr
                             textSize = 16f
                             setTextColor(Color.DKGRAY)
-                            layoutParams = LinearLayout.LayoutParams(
-                                LinearLayout.LayoutParams.WRAP_CONTENT,
-                                LinearLayout.LayoutParams.WRAP_CONTENT
-                            ).apply { setMargins(0, 8, 0, 4) }
+                            layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT).apply { setMargins(0, 8, 0, 4) }
                         }
                         categoriesLayout.addView(dateHeader, 0)
                         try {
@@ -614,13 +681,20 @@ class ElemzesActivity : AppCompatActivity() {
                     }
                     val revenueEntry = BarEntry(0f, totalRevenue)
                     val expenseEntry = BarEntry(1f, totalExpense)
-                    val dataSet = BarDataSet(listOf(revenueEntry, expenseEntry), "Havi összesítés")
+                    val entries = listOf(revenueEntry, expenseEntry)
+                    val dataSet = BarDataSet(entries, "Havi összesítés")
                     dataSet.colors = listOf(Color.GREEN, Color.RED)
                     dataSet.valueTextColor = Color.BLACK
+                    dataSet.valueTextSize = 16f
+                    dataSet.valueFormatter = object : ValueFormatter() {
+                        override fun getBarLabel(barEntry: BarEntry?): String {
+                            return if (barEntry?.y == 0f) "" else ElemzesActivity.formatNumber(barEntry!!.y.toInt())
+                        }
+                    }
                     val barData = BarData(dataSet)
+                    barData.barWidth = 0.45f
                     chart.data = barData
-                    chart.description.isEnabled = false
-                    chart.setFitBars(true)
+                    (activity as? ElemzesActivity)?.styleBarChart(chart)
                     chart.invalidate()
                 }
         }
@@ -716,13 +790,20 @@ class ElemzesActivity : AppCompatActivity() {
                     }
                     val revenueEntry = BarEntry(0f, totalRevenue)
                     val expenseEntry = BarEntry(1f, totalExpense)
-                    val dataSet = BarDataSet(listOf(revenueEntry, expenseEntry), "Év összesítés")
+                    val entries = listOf(revenueEntry, expenseEntry)
+                    val dataSet = BarDataSet(entries, "Év összesítés")
                     dataSet.colors = listOf(Color.GREEN, Color.RED)
                     dataSet.valueTextColor = Color.BLACK
+                    dataSet.valueTextSize = 16f
+                    dataSet.valueFormatter = object : ValueFormatter() {
+                        override fun getBarLabel(barEntry: BarEntry?): String {
+                            return if (barEntry?.y == 0f) "" else ElemzesActivity.formatNumber(barEntry!!.y.toInt())
+                        }
+                    }
                     val barData = BarData(dataSet)
+                    barData.barWidth = 0.45f
                     chart.data = barData
-                    chart.description.isEnabled = false
-                    chart.setFitBars(true)
+                    (activity as? ElemzesActivity)?.styleBarChart(chart)
                     chart.invalidate()
                 }
                 .addOnFailureListener { e ->
@@ -806,7 +887,6 @@ class ElemzesActivity : AppCompatActivity() {
                 .addOnSuccessListener { querySnapshot ->
                     if (querySnapshot.isEmpty) {
                         if (categoriesLayout.findViewWithTag<View>("noDataOverlay") == null) {
-                            // Használjuk az ElemzesActivity showNoDataOverlay metódusát
                             (activity as? ElemzesActivity)?.showNoDataOverlay("Nincs megjeleníthető adat a választott időszakra.", chart, categoriesLayout)
                             chart.visibility = View.INVISIBLE
                         }
@@ -856,13 +936,20 @@ class ElemzesActivity : AppCompatActivity() {
                     }
                     val revenueEntry = BarEntry(0f, totalRevenue)
                     val expenseEntry = BarEntry(1f, totalExpense)
-                    val dataSet = BarDataSet(listOf(revenueEntry, expenseEntry), "Időszak összesítés")
+                    val entries = listOf(revenueEntry, expenseEntry)
+                    val dataSet = BarDataSet(entries, "Időszak összesítés")
                     dataSet.colors = listOf(Color.GREEN, Color.RED)
                     dataSet.valueTextColor = Color.BLACK
+                    dataSet.valueTextSize = 16f
+                    dataSet.valueFormatter = object : ValueFormatter() {
+                        override fun getBarLabel(barEntry: BarEntry?): String {
+                            return if (barEntry?.y == 0f) "" else ElemzesActivity.formatNumber(barEntry!!.y.toInt())
+                        }
+                    }
                     val barData = BarData(dataSet)
+                    barData.barWidth = 0.45f
                     chart.data = barData
-                    chart.description.isEnabled = false
-                    chart.setFitBars(true)
+                    (activity as? ElemzesActivity)?.styleBarChart(chart)
                     chart.invalidate()
                 }
                 .addOnFailureListener { e ->
@@ -901,7 +988,6 @@ class ElemzesActivity : AppCompatActivity() {
             val napDocRef = userDocRef.collection("nap").document(docId)
             val napSnapshot = trans.get(napDocRef)
             val currentTransactions = napSnapshot.get("tranzakciok") as? List<Map<String, Any>> ?: emptyList()
-            // Tranzakció legfontosabb mezőinek összehasonlítása
             val newTransactions = currentTransactions.filterNot {
                 (it["timestamp"] == transaction["timestamp"]) &&
                         (it["mennyiseg"] == transaction["mennyiseg"]) &&

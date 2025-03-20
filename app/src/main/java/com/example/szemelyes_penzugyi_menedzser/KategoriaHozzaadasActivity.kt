@@ -1,6 +1,5 @@
 package com.example.szemelyes_penzugyi_menedzser
 
-import KategoriaAdapter
 import android.graphics.Color
 import android.os.Bundle
 import android.text.Editable
@@ -8,16 +7,17 @@ import android.text.TextWatcher
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
+import androidx.recyclerview.widget.GridLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.google.firebase.auth.FirebaseAuth
 
 class KategoriaHozzaadasActivity : AppCompatActivity() {
 
     private lateinit var kategoriaNevEditText: EditText
     private lateinit var tipusRadioGroup: RadioGroup
-    private lateinit var ikonGridView: GridView
+    private lateinit var ikonRecyclerView: RecyclerView
     private lateinit var hozzadasGomb: Button
 
-    // Például 21 ikon resource ID
     private val ikonLista = listOf(
         R.drawable.ikon1, R.drawable.ikon2, R.drawable.ikon3, R.drawable.ikon4,
         R.drawable.ikon5, R.drawable.ikon6, R.drawable.ikon7, R.drawable.ikon8,
@@ -28,8 +28,7 @@ class KategoriaHozzaadasActivity : AppCompatActivity() {
     )
 
     private var kivalasztottIkonResId: Int? = null
-    // Tároljuk a kiválasztott ikon pozícióját; ha nincs kiválasztva, -1
-    private var selectedIconPosition: Int = -1
+    private lateinit var ikonAdapter: EgyediIkonAdapter
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -37,10 +36,9 @@ class KategoriaHozzaadasActivity : AppCompatActivity() {
 
         kategoriaNevEditText = findViewById(R.id.categoryNameEditText)
         tipusRadioGroup = findViewById(R.id.typeRadioGroup)
-        ikonGridView = findViewById(R.id.iconGridView)
+        ikonRecyclerView = findViewById(R.id.iconRecyclerView)
         hozzadasGomb = findViewById(R.id.addCategoryButton)
 
-        // Custom kategóriák betöltése Firestore-ból, ha be van jelentkezve
         val currentUser = FirebaseAuth.getInstance().currentUser
         if (currentUser != null) {
             EgyediKategoriak.betoltFirestore(this, currentUser.uid)
@@ -48,24 +46,19 @@ class KategoriaHozzaadasActivity : AppCompatActivity() {
             EgyediKategoriak.betolt(this)
         }
 
-        // Az adapterben csak az ikonok jelennek meg, a nevek üresek, mivel a felhasználó írja be a kategória nevet.
-        val adapter = KategoriaAdapter(this, List(ikonLista.size) { "" }, ikonLista)
-        ikonGridView.adapter = adapter
-
-        ikonGridView.setOnItemClickListener { parent, view, position, _ ->
-            // Ha ugyanarra az elemre kattintanak, visszavonjuk a kijelölést
-            if (selectedIconPosition == position) {
-                selectedIconPosition = -1
-                kivalasztottIkonResId = null
-            } else {
-                selectedIconPosition = position
-                kivalasztottIkonResId = ikonLista[position]
-            }
-            // Frissítjük az adapter kiválasztott pozícióját
-            adapter.selectedPosition = selectedIconPosition
-            adapter.notifyDataSetChanged()
+        ikonAdapter = EgyediIkonAdapter(this, ikonLista) { selectedIcon ->
+            kivalasztottIkonResId = selectedIcon
             ellenorizMezok()
         }
+
+        // GridLayoutManager beállítása 4 oszloppal
+        val layoutManager = GridLayoutManager(this, 4) // 4 oszlop egy sorban
+        layoutManager.orientation = RecyclerView.VERTICAL
+        ikonRecyclerView.layoutManager = layoutManager
+        ikonRecyclerView.setHasFixedSize(true)
+        ikonRecyclerView.isNestedScrollingEnabled = false
+
+        ikonRecyclerView.adapter = ikonAdapter
 
         kategoriaNevEditText.addTextChangedListener(object : TextWatcher {
             override fun afterTextChanged(s: Editable?) {
@@ -75,9 +68,7 @@ class KategoriaHozzaadasActivity : AppCompatActivity() {
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
         })
 
-        tipusRadioGroup.setOnCheckedChangeListener { _, _ ->
-            ellenorizMezok()
-        }
+        tipusRadioGroup.setOnCheckedChangeListener { _, _ -> ellenorizMezok() }
 
         hozzadasGomb.setOnClickListener {
             val kategoriaNev = kategoriaNevEditText.text.toString().trim()
@@ -91,6 +82,8 @@ class KategoriaHozzaadasActivity : AppCompatActivity() {
                 val ujKategoria = EgyediKategoria(kategoriaNev, kivalasztottIkonResId!!, kategoriaTipus)
                 EgyediKategoriak.kategoriak.add(ujKategoria)
                 EgyediKategoriak.ment(this)
+
+                val currentUser = FirebaseAuth.getInstance().currentUser
                 if (currentUser != null) {
                     EgyediKategoriak.mentFirestore(this, currentUser.uid) {
                         Toast.makeText(this, "Kategória hozzáadva: $kategoriaNev, $kategoriaTipus", Toast.LENGTH_SHORT).show()
@@ -110,7 +103,11 @@ class KategoriaHozzaadasActivity : AppCompatActivity() {
         val isNevValid = kategoriaNevEditText.text.toString().trim().isNotEmpty()
         val isIkonKivalasztva = kivalasztottIkonResId != null
         hozzadasGomb.isEnabled = isNevValid && isIkonKivalasztva
-        val colorRes = if (isNevValid && isIkonKivalasztva) android.R.color.holo_red_dark else android.R.color.darker_gray
-        hozzadasGomb.setBackgroundColor(ContextCompat.getColor(this, colorRes))
+        hozzadasGomb.setBackgroundColor(
+            ContextCompat.getColor(this, if (isNevValid && isIkonKivalasztva) android.R.color.holo_red_dark else android.R.color.darker_gray)
+        )
     }
 }
+
+
+
