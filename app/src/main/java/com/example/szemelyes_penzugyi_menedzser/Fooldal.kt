@@ -53,8 +53,8 @@ class Telefonszam : AppCompatActivity() {
             insets
         }
 
-        // Betöltjük az aktuális egyenleget
-        checkAndLoadBalance()
+        // Indítsuk el a valós idejű figyelést az aktuális egyenlegre!
+        listenToBalance()
 
         // Spinner beállítása (az intent extra alapján)
         setupSpinner()
@@ -117,37 +117,29 @@ class Telefonszam : AppCompatActivity() {
         }
     }
 
-    private fun checkAndLoadBalance() {
-        val uid = FirebaseManager.getCurrentUserUID()
-        if (uid != null) {
-            FirebaseManager.loadBalance(
-                uid,
-                onComplete = { balance ->
-                    GlobalData.setAktualisPenz(balance)
-                    aktualisPenz = balance
-                    PenzosszegFrissites()
-                },
-                onError = { exception ->
-                    Log.e("Firestore", "Hiba az egyenleg betöltésekor: ", exception)
-                }
-            )
+    /**
+     * A snapshot listener, amely a Firestore-ban lévő felhasználói dokumentumot figyeli,
+     * és az "aktualisPenz" mező változásakor frissíti az aktuális egyenleget.
+     */
+    private fun listenToBalance() {
+        val uid = FirebaseManager.getCurrentUserUID() ?: return
+        val userDocRef = FirebaseFirestore.getInstance().collection("users").document(uid)
+        userDocRef.addSnapshotListener { snapshot, error ->
+            if (error != null) {
+                Log.e("Telefonszam", "Hiba az egyenleg frissítésének figyelésekor: ${error.message}")
+                return@addSnapshotListener
+            }
+            if (snapshot != null && snapshot.exists()) {
+                val newBalance = snapshot.getDouble("aktualisPenz") ?: 0.0
+                aktualisPenz = newBalance
+                PenzosszegFrissites()
+            }
         }
     }
 
-    private fun saveBalanceToFirestore(amount: Double) {
-        val uid = FirebaseManager.getCurrentUserUID()
-        if (uid != null) {
-            FirebaseManager.saveBalance(
-                uid,
-                amount,
-                onComplete = { GlobalData.setAktualisPenz(amount) },
-                onError = { exception ->
-                    Log.e("Firestore", "Hiba a mentés során: ", exception)
-                }
-            )
-        }
-    }
-
+    /**
+     * A meglévő mentett egyenleg megjelenítése formázva.
+     */
     private fun PenzosszegFrissites() {
         val df = DecimalFormat("#,###", DecimalFormatSymbols().apply {
             groupingSeparator = ' '
@@ -157,6 +149,26 @@ class Telefonszam : AppCompatActivity() {
         AktualisPenzEditText.setText(formattedAmount)
     }
 
+    /**
+     * Az aktuális egyenleg Firestore-ba mentése.
+     */
+    private fun saveBalanceToFirestore(amount: Double) {
+        val uid = FirebaseManager.getCurrentUserUID()
+        if (uid != null) {
+            FirebaseManager.saveBalance(
+                uid,
+                amount,
+                onComplete = { /* Ha szükséges, frissíthetjük a globális értéket is */ },
+                onError = { exception ->
+                    Log.e("Firestore", "Hiba a mentés során: ", exception)
+                }
+            )
+        }
+    }
+
+    /**
+     * Spinner beállítása és navigáció.
+     */
     private fun setupSpinner() {
         val lehetosegek = listOf("Főoldal", "Elemzés", "Kategóriák", "Rendszeres kifizetések", "Beállítások", "Kijelentkezés")
         val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, lehetosegek)
@@ -191,6 +203,9 @@ class Telefonszam : AppCompatActivity() {
         }
     }
 
+    /**
+     * Kijelentkezés és a mentett beállítások törlése.
+     */
     private fun Kijelentkezes() {
         FirebaseManager.signOut()
         getSharedPreferences("UserPreferences", Context.MODE_PRIVATE)
@@ -201,7 +216,9 @@ class Telefonszam : AppCompatActivity() {
         finish()
     }
 
-    // Segédfüggvény az összegek formázásához: 3 számjegyenként szóközzel
+    /**
+     * Segédfüggvény az összegek formázásához: 3 számjegyenként szóközzel.
+     */
     private fun formatAmount(amount: Double): String {
         val df = DecimalFormat("#,###", DecimalFormatSymbols(Locale("hu", "HU")).apply {
             groupingSeparator = ' '
@@ -210,7 +227,9 @@ class Telefonszam : AppCompatActivity() {
         return df.format(amount)
     }
 
-    // Segédfüggvény a tranzakciós elem megjelenítéséhez
+    /**
+     * Segédfüggvény a tranzakciós elem megjelenítéséhez.
+     */
     private fun createTransactionView(
         category: String,
         amount: Float,
@@ -254,6 +273,9 @@ class Telefonszam : AppCompatActivity() {
         return containerLayout
     }
 
+    /**
+     * Az utolsó 5 tranzakció betöltése a Firestore-ból.
+     */
     private fun loadRecentTransactions(userId: String) {
         val db = FirebaseFirestore.getInstance()
         db.collection("users").document(userId)
@@ -290,5 +312,4 @@ class Telefonszam : AppCompatActivity() {
                 Log.e("Telefonszam", "Error loading transactions", e)
             }
     }
-
 }

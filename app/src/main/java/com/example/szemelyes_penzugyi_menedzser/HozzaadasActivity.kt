@@ -278,11 +278,11 @@ class HozzaadasActivity : AppCompatActivity() {
     private fun updateAdapterFor(tipus: String) {
         // Az új grid view referenciát használjuk
         val hozzaadasGorgetesGridView = findViewById<GridView>(R.id.hozzaadasGorgetesGridView)
-        val defaultBevetelek = listOf("Fizetési csekk", "Ajándékok", "Egyéb")
+        val defaultBevetelek = listOf("Fizetés", "Ajándékok", "Egyéb")
         val defaultBevetelekIkonok = listOf(R.drawable.szabadido_icon, R.drawable.ajandekok_icon, R.drawable.egyeb_icon)
         val defaultKiadasok = listOf(
             "Egészség", "Szabadidő", "Otthon", "Kávézó", "Oktatás", "Ajándékok",
-            "Élelmiszerek", "Család", "Edzés", "Közlekedés", "Egyéb"
+            "Élelmiszerek", "Család", "Sport", "Közlekedés", "Egyéb"
         )
         val defaultKiadasokIkonok = listOf(
             R.drawable.egeszseg_icon, R.drawable.szabadido_icon, R.drawable.otthon_icon,

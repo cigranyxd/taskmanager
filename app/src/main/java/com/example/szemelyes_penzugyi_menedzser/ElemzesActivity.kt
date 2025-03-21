@@ -966,7 +966,9 @@ class ElemzesActivity : AppCompatActivity() {
         }
     }
 
-    // --- Delete Transaction metódus ---
+    // --- Módosított deleteTransaction metódus ---
+    // Ha több azonos tranzakció van, csak az első példány kerül törlésre,
+    // és a fő összeg csak egyszer módosul.
     fun deleteTransaction(
         docId: String,
         transaction: Map<String, Any>,
@@ -988,16 +990,22 @@ class ElemzesActivity : AppCompatActivity() {
             val napDocRef = userDocRef.collection("nap").document(docId)
             val napSnapshot = trans.get(napDocRef)
             val currentTransactions = napSnapshot.get("tranzakciok") as? List<Map<String, Any>> ?: emptyList()
-            val newTransactions = currentTransactions.filterNot {
+
+            // Csak az első egyező tranzakció törlése
+            val mutableTransactions = currentTransactions.toMutableList()
+            val indexToRemove = mutableTransactions.indexOfFirst {
                 (it["timestamp"] == transaction["timestamp"]) &&
                         (it["mennyiseg"] == transaction["mennyiseg"]) &&
                         (it["kategoria"] == transaction["kategoria"]) &&
                         (it["tipus"] == transaction["tipus"])
             }
-            if (newTransactions.isEmpty()) {
+            if (indexToRemove != -1) {
+                mutableTransactions.removeAt(indexToRemove)
+            }
+            if (mutableTransactions.isEmpty()) {
                 trans.delete(napDocRef)
             } else {
-                trans.update(napDocRef, "tranzakciok", newTransactions)
+                trans.update(napDocRef, "tranzakciok", mutableTransactions)
             }
             val currentBalance = userSnapshot.getDouble("aktualisPenz") ?: 0.0
             val newBalance = currentBalance + delta
@@ -1008,6 +1016,57 @@ class ElemzesActivity : AppCompatActivity() {
             onSuccess()
         }.addOnFailureListener { e ->
             Log.e("ElemzesActivity", "Failed to delete transaction: ${e.message}")
+            onFailure(e)
+        }
+    }
+
+    // --- Új addTransaction metódus ---
+    // Ez a metódus felelős egy új tranzakció hozzáadásáért, és a fő egyenleg (aktualisPenz) megfelelő frissítéséért.
+    // A delta kiszámítása itt fordított: ha a tranzakció típusa "bevétel", akkor a tranzakció összegét hozzáadjuk,
+    // ha "kiadás", akkor levonjuk.
+    fun addTransaction(
+        docId: String,
+        transaction: Map<String, Any>,
+        onSuccess: () -> Unit,
+        onFailure: (Exception) -> Unit
+    ) {
+        val uid = FirebaseAuth.getInstance().currentUser?.uid ?: return
+        val userDocRef = FirebaseFirestore.getInstance().collection("users").document(uid)
+        val amount = when (val a = transaction["mennyiseg"]) {
+            is Double -> a.toFloat()
+            is Long -> a.toFloat()
+            else -> 0f
+        }
+        val type = (transaction["tipus"] as? String)?.trim()?.toLowerCase(Locale.getDefault()) ?: ""
+        // Itt: bevétel esetén hozzáadjuk, kiadás esetén levonjuk
+        val delta = if (type == "bevétel") amount else if (type == "kiadás") -amount else 0f
+
+        FirebaseFirestore.getInstance().runTransaction { trans ->
+            val userSnapshot = trans.get(userDocRef)
+            val napDocRef = userDocRef.collection("nap").document(docId)
+            // Próbáljuk lekérdezni a meglévő tranzakciókat (ha létezik a dokumentum)
+            val napSnapshot = try {
+                trans.get(napDocRef)
+            } catch (e: Exception) {
+                null
+            }
+            val currentTransactions = napSnapshot?.get("tranzakciok") as? List<Map<String, Any>> ?: emptyList()
+            val mutableTransactions = currentTransactions.toMutableList()
+            mutableTransactions.add(transaction)
+            if (currentTransactions.isEmpty()) {
+                trans.set(napDocRef, mapOf("tranzakciok" to mutableTransactions))
+            } else {
+                trans.update(napDocRef, "tranzakciok", mutableTransactions)
+            }
+            val currentBalance = userSnapshot.getDouble("aktualisPenz") ?: 0.0
+            val newBalance = currentBalance + delta
+            trans.update(userDocRef, "aktualisPenz", newBalance)
+            newBalance
+        }.addOnSuccessListener { newBalance ->
+            Log.d("ElemzesActivity", "Main balance updated to $newBalance after addition")
+            onSuccess()
+        }.addOnFailureListener { e ->
+            Log.e("ElemzesActivity", "Failed to add transaction: ${e.message}")
             onFailure(e)
         }
     }

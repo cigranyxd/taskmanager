@@ -15,6 +15,7 @@ import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.Query
 import java.time.LocalDate
 import java.time.DayOfWeek
 import java.time.temporal.TemporalAdjusters
@@ -37,10 +38,10 @@ class Kategoriak : AppCompatActivity() {
         "ajándékok" to R.drawable.ajandekok_icon,
         "élelmiszerek" to R.drawable.elelmiszerek_icon,
         "család" to R.drawable.csalad_icon,
-        "edzés" to R.drawable.edzes_icon,
+        "sport" to R.drawable.edzes_icon,
         "közlekedés" to R.drawable.kozlekedes_icon,
         "egyéb" to R.drawable.egyeb_icon,
-        "fizetési csekk" to R.drawable.szabadido_icon
+        "fizetés" to R.drawable.szabadido_icon
     )
 
     // Az aktuális oldal neve (ez az Activity célja)
@@ -293,7 +294,10 @@ class Kategoriak : AppCompatActivity() {
         return Pair(bevetelMap, kiadasMap)
     }
 
+    // A megjelenítő név visszaadása – módosítva, hogy "fizetési csekk" -> "Fizetés" és "edzés" -> "Sport"
     private fun megjelenitoNev(normalizaltNev: String): String {
+        if(normalizaltNev == "fizetési csekk") return "Fizetés"
+        if(normalizaltNev == "edzés") return "Sport"
         val custom = EgyediKategoriak.kategoriak.find { it.nev.trim().toLowerCase() == normalizaltNev }
         if (custom != null) return custom.nev
         for (orig in kategoriaIkonTerkep.keys) {
@@ -302,7 +306,10 @@ class Kategoriak : AppCompatActivity() {
         return normalizaltNev.capitalize()
     }
 
+    // Az ikon visszaadása a kategória nevéhez – módosítva, hogy "fizetési csekk" -> "fizetés" és "edzés" -> "sport"
     private fun ikonKulcsra(normalizaltNev: String): Int {
+        if(normalizaltNev == "fizetési csekk") return kategoriaIkonTerkep["fizetés"] ?: R.drawable.placeholder_icon
+        if(normalizaltNev == "edzés") return kategoriaIkonTerkep["sport"] ?: R.drawable.placeholder_icon
         val custom = EgyediKategoriak.kategoriak.find { it.nev.trim().toLowerCase() == normalizaltNev }
         if (custom != null) return custom.ikon
         for ((orig, ikon) in kategoriaIkonTerkep) {
@@ -313,7 +320,7 @@ class Kategoriak : AppCompatActivity() {
 
     /**
      * Megjeleníti az összegzett adatokat.
-     * @param period Az aktuális időszak ("Nap", "Het", stb.)
+     * @param period Az aktuális időszak ("Nap", "Het", "Kiadás", stb.)
      */
     fun osszegzettAdatokMegjelenitese(period: String, bevetelMap: Map<String, Float>, kiadasMap: Map<String, Float>) {
         val teljesBevetel = bevetelMap.values.sum()
@@ -364,7 +371,6 @@ class Kategoriak : AppCompatActivity() {
 
             totalIncomeTextView.visibility = View.VISIBLE
             totalExpenseTextView.visibility = View.VISIBLE
-            // Számok formázása 3 számjegyenként szóközzel
             totalIncomeTextView.text = "Összbevétel: ${formatNumber(teljesBevetel.toInt())} Ft"
             totalExpenseTextView.text = "Összkiadás: ${formatNumber(teljesKiadas.toInt())} Ft"
 
@@ -380,7 +386,6 @@ class Kategoriak : AppCompatActivity() {
             listaNezet.adapter = vegsoAdapter
             vegsoAdapter.notifyDataSetChanged()
 
-            // Kattinthatóság: kattintáskor elküldjük a kiválasztott kategória nevét és az aktuális időszakot
             listaNezet.setOnItemClickListener { parent, view, position, id ->
                 val selectedCategory = vegsoKategoriaNevek[position]
                 val intent = Intent(this, KategoriaTranzakciokActivity::class.java)
@@ -393,7 +398,6 @@ class Kategoriak : AppCompatActivity() {
 
     // --- SEGÉLFÜGGVÉNYEK AZ EGYEDI IDŐSZAK KIVÁLASZTÁSÁHOZ ---
 
-    // Lekéri a letöltés dátumát (ha nincs, akkor a 2024.10.01-et állítja be)
     private fun getLetoltesDatum(): LocalDate {
         val alapDatum = LocalDate.of(2024, 10, 1)
         val prefs = getSharedPreferences("UserPreferences", Context.MODE_PRIVATE)
@@ -401,7 +405,6 @@ class Kategoriak : AppCompatActivity() {
         return alapDatum
     }
 
-    // Generálja az időszak listát a kiválasztott típus alapján ("Nap", "Het", "Honap", "Ev")
     private fun generalPeriodLista(period: String): List<PeriodusElem> {
         val lista = mutableListOf<PeriodusElem>()
         val letoltesDatum = getLetoltesDatum()
@@ -425,7 +428,6 @@ class Kategoriak : AppCompatActivity() {
             "Honap" -> {
                 var honapKezdo = ma.withDayOfMonth(1)
                 val letoltesHonapKezdo = letoltesDatum.withDayOfMonth(1)
-                // Magyar hónap nevek térképe: hónap száma -> név
                 val honapNevek = mapOf(
                     1 to "január",
                     2 to "február",
@@ -461,7 +463,6 @@ class Kategoriak : AppCompatActivity() {
         return lista
     }
 
-    // Lekéri az egyedi időszak tranzakcióit
     private fun tranzakciokBetolteseEgyedi(felhasznaloId: String, kezdoDatum: String, zaroDatum: String) {
         val firestore = FirebaseFirestore.getInstance()
         if (kezdoDatum == zaroDatum) {
@@ -521,7 +522,6 @@ class Kategoriak : AppCompatActivity() {
      */
     private fun frissitIdoszakValasztot(felhasznaloId: String) {
         val idoszakLista = generalPeriodLista(aktualisIdoszak)
-        // Az adapterben most a saját spinner_item layoutot használjuk, amely középre igazítja a szöveget.
         val adapter = ArrayAdapter(this, R.layout.spinner_item, idoszakLista.map { it.megjelenitoSzoveg })
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         idoszakValasztoSpinner.adapter = adapter
@@ -529,7 +529,6 @@ class Kategoriak : AppCompatActivity() {
         idoszakValasztoSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(parent: AdapterView<*>, view: View?, position: Int, id: Long) {
                 val kiválasztottElem = idoszakLista[position]
-                // A kiválasztott időszak dátumai alapján lekéri a tranzakciókat
                 tranzakciokBetolteseEgyedi(felhasznaloId, kiválasztottElem.kezdoDatum.toString(), kiválasztottElem.zaroDatum.toString())
             }
             override fun onNothingSelected(parent: AdapterView<*>) {}
