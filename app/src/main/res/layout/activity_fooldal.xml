@@ -6,39 +6,57 @@
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:padding="24dp"
+    android:background="@color/gray"
     tools:context=".Telefonszam">
 
-    <!-- Lenyíló menü (navigációs spinner) -->
+    <!-- Guideline bal oldalon 24dp-re a szélétől -->
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/guideline_left"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintGuide_begin="24dp"
+        android:orientation="vertical" />
+
+    <!-- Guideline jobb oldalon 24dp-re a szélétől -->
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/guideline_right"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintGuide_end="24dp"
+        android:orientation="vertical" />
+
+    <!-- Navigációs spinner -->
     <Spinner
         android:id="@+id/lenyilo_menu"
-        android:layout_width="match_parent"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="24dp"
         android:background="@drawable/spinner_bg"
         android:spinnerMode="dropdown"
+        android:forceDarkAllowed="false"
+        android:popupBackground="@drawable/spinner_lenyitott_bg"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
+        app:layout_constraintStart_toStartOf="@id/guideline_left"
+        app:layout_constraintEnd_toEndOf="@id/guideline_right" />
 
     <!-- Jelenlegi egyenleg szöveg -->
     <TextView
         android:id="@+id/JelenlegiText"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="32dp"
         android:text="Jelenlegi egyenleg:"
         android:textSize="20sp"
         android:textStyle="bold"
-        android:textColor="@color/black"
+        android:textColor="@android:color/black"
         app:layout_constraintTop_toBottomOf="@id/lenyilo_menu"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
+        app:layout_constraintStart_toStartOf="@id/guideline_left"
+        app:layout_constraintEnd_toEndOf="@id/guideline_right" />
 
     <!-- Aktuális pénz mező -->
     <EditText
         android:id="@+id/Aktualis_penz"
-        android:layout_width="match_parent"
+        android:layout_width="0dp"
         android:layout_height="56dp"
         android:layout_marginTop="12dp"
         android:background="@drawable/input_bg"
@@ -46,25 +64,28 @@
         android:textSize="22sp"
         android:hint="0 Ft"
         android:gravity="center"
+        android:focusable="false"
+        android:focusableInTouchMode="false"
+        android:cursorVisible="false"
         android:inputType="numberDecimal"
+        android:textColor="@android:color/black"
+        android:textColorHint="@android:color/black"
         app:layout_constraintTop_toBottomOf="@id/JelenlegiText"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
+        app:layout_constraintStart_toStartOf="@id/guideline_left"
+        app:layout_constraintEnd_toEndOf="@id/guideline_right" />
 
-    <!-- Konténer a tranzakciók számára, kerettel, középre igazítva és horizontálisan kisebb -->
+    <!-- Tranzakciókat tartalmazó konténer -->
     <LinearLayout
         android:id="@+id/transactionsContainer"
-        android:layout_width="match_parent"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:gravity="center_horizontal"
         android:layout_marginTop="16dp"
-        android:layout_marginStart="16dp"
-        android:layout_marginEnd="16dp"
-        android:background="@drawable/border"
+        android:background="@drawable/tranzakcio_kontener"
         app:layout_constraintTop_toBottomOf="@id/Aktualis_penz"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent">
+        app:layout_constraintStart_toStartOf="@id/guideline_left"
+        app:layout_constraintEnd_toEndOf="@id/guideline_right">
 
         <!-- Header felirat -->
         <TextView
@@ -75,7 +96,8 @@
             android:textSize="18sp"
             android:textStyle="bold"
             android:gravity="center"
-            android:padding="8dp" />
+            android:padding="8dp"
+            android:textColor="@android:color/black" />
 
         <!-- Konténer a tranzakciók számára -->
         <LinearLayout

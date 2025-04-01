@@ -1,9 +1,36 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
-    <!-- Base application theme. -->
+    <!-- Alap alkalmazás téma -->
     <style name="Base.Theme.Szemelyes_penzugyi_menedzser" parent="Theme.Material3.DayNight.NoActionBar">
-        <!-- Customize your light theme here. -->
-        <!-- <item name="colorPrimary">@color/my_light_primary</item> -->
+        <!-- Állítsuk át a status bar (értesítési sáv) színét szürkére -->
+        <item name="android:statusBarColor">@color/gray</item>
+        <!-- Ha világos ikonokat szeretnénk a status baron -->
+        <item name="android:windowLightStatusBar">true</item>
+    </style>
+
+    <style name="BlackDatePickerTheme" parent="Theme.MaterialComponents.Light">
+        <item name="android:textColorPrimary">#000000</item>
+        <item name="android:textColorHint">#000000</item>
     </style>
 
     <style name="Theme.Szemelyes_penzugyi_menedzser" parent="Base.Theme.Szemelyes_penzugyi_menedzser" />
+
+    <style name="BlackRadioButton" parent="Widget.AppCompat.CompoundButton.RadioButton">
+        <item name="android:buttonTint">@android:color/black</item>
+    </style>
+    <style name="MyEditTextStyle" parent="Widget.AppCompat.EditText">
+        <!-- A kurzor drawable–t alkalmazzuk -->
+        <item name="android:textCursorDrawable">@drawable/edit_text_cursor</item>
+        <!-- Egyéb stílusbeállítások (opcionális) -->
+        <item name="android:textColor">@android:color/black</item>
+        <item name="android:textColorHint">@android:color/black</item>
+        <item name="android:backgroundTint">@android:color/black</item>
+    </style>
+
+
+    <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
+        <!-- Egyéb téma beállítások -->
+        <item name="android:editTextStyle">@style/MyEditTextStyle</item>
+    </style>
+
+
 </resources>

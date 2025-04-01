@@ -75,9 +75,12 @@ class HozzaadasActivity : AppCompatActivity() {
 
         // Spinner beállítása
         val tranzakcioTipusNevek = listOf("Bevétel", "Kiadás")
-        val spinnerAdapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, tranzakcioTipusNevek)
-        spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        val spinnerAdapter = ArrayAdapter(this, R.layout.spinner_item, tranzakcioTipusNevek)
+        spinnerAdapter.setDropDownViewResource(R.layout.spinner_item)
         tranzakcioTipusSpinner.adapter = spinnerAdapter
+        tranzakcioTipusSpinner.setPopupBackgroundResource(R.drawable.spinner_lenyitott_bg)
+
+
 
         // Alapértelmezett érték: "Bevétel"
         tranzakcioTipusSpinner.setSelection(0)

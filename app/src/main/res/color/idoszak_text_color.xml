@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Ha a TextView selected -->
+    <item android:state_selected="true" android:color="#FFFFFF" />
+    <!-- Alapesetben (nem selected) fekete -->
+    <item android:color="@color/black" />
+</selector>

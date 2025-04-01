@@ -7,14 +7,19 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:padding="16dp"
+    android:background="@color/gray"
     tools:context=".Kategoriak">
 
     <!-- Lenyíló menü (spinner) a navigációhoz -->
     <Spinner
         android:id="@+id/lenyilo_menu"
-        android:layout_width="0dp"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginTop="24dp"
+        android:background="@drawable/spinner_bg"
         android:spinnerMode="dropdown"
+        android:forceDarkAllowed="false"
+        android:popupBackground="@drawable/spinner_lenyitott_bg"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
@@ -40,6 +45,7 @@
             android:textSize="18sp"
             android:gravity="center"
             android:padding="8dp"
+            android:textColor="@android:color/black"
             android:background="?attr/selectableItemBackground"
             android:clickable="true"
             android:focusable="true" />
@@ -53,6 +59,7 @@
             android:textSize="18sp"
             android:gravity="center"
             android:padding="8dp"
+            android:textColor="@android:color/black"
             android:background="?attr/selectableItemBackground"
             android:clickable="true"
             android:focusable="true" />
@@ -66,6 +73,7 @@
             android:textSize="18sp"
             android:gravity="center"
             android:padding="8dp"
+            android:textColor="@android:color/black"
             android:background="?attr/selectableItemBackground"
             android:clickable="true"
             android:focusable="true" />
@@ -79,6 +87,7 @@
             android:textSize="18sp"
             android:gravity="center"
             android:padding="8dp"
+            android:textColor="@android:color/black"
             android:background="?attr/selectableItemBackground"
             android:clickable="true"
             android:focusable="true" />
@@ -87,7 +96,7 @@
     <!-- Egyedi időszak kiválasztó sor -->
     <LinearLayout
         android:id="@+id/idoszakKivalaszto"
-        android:layout_width="0dp"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:gravity="center"
@@ -106,14 +115,15 @@
             android:contentDescription="Vissza"
             android:background="?attr/selectableItemBackgroundBorderless" />
 
-        <!-- Egyedi időszak spinner -->
+        <!-- Egyedi időszak spinner: a szélessége csak a benne lévő szöveghez igazodik -->
         <Spinner
             android:id="@+id/idoszakValasztoSpinner"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_height="48dp"
+            android:background="@drawable/spinner_bg"
             android:spinnerMode="dropdown"
-            android:layout_marginStart="16dp"
-            android:layout_marginEnd="16dp" />
+            android:forceDarkAllowed="false"
+            android:popupBackground="@drawable/spinner_lenyitott_bg" />
 
         <!-- Jobb oldali nyíl -->
         <ImageButton
@@ -134,6 +144,7 @@
         android:text="Nincs adat a kiválasztott időszakra"
         android:textSize="16sp"
         android:gravity="center"
+        android:textColor="@android:color/black"
         android:layout_marginTop="16dp"
         android:visibility="gone"
         app:layout_constraintTop_toBottomOf="@id/idoszakKivalaszto"
@@ -186,12 +197,14 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintBottom_toTopOf="@id/ujKategoriaHozzaadasa" />
 
-    <!-- Gomb: Új kategória hozzáadása -->
+    <!-- Gomb: Új kategória hozzáadása - fehér háttér -->
     <Button
         android:id="@+id/ujKategoriaHozzaadasa"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:text="Új kategória hozzáadása"
+        android:textColor="@android:color/black"
+        android:backgroundTint="@android:color/white"
         android:layout_marginTop="16dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"

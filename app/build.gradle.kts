@@ -6,12 +6,12 @@ plugins {
 
 android {
     namespace = "com.example.szemelyes_penzugyi_menedzser"
-    compileSdk = 34  // Csak stabil verziókat használj!
+    compileSdk = 35  // Frissítve: használj API 35-öt!
 
     defaultConfig {
         applicationId = "com.example.szemelyes_penzugyi_menedzser"
         minSdk = 26
-        targetSdk = 34  // Csak stabil verziót!
+        targetSdk = 35
         versionCode = 1
         versionName = "1.0"
 
@@ -83,6 +83,7 @@ dependencies {
 
     // JSON kezeléshez
     implementation("com.google.code.gson:gson:2.10.1")
+    implementation(libs.androidx.work.runtime.ktx)
 
     // Teszteléshez
     testImplementation("junit:junit:4.13.2")

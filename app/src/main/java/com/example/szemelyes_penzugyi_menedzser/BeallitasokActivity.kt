@@ -58,8 +58,9 @@ class BeallitasokActivity : AppCompatActivity() {
         // Spinner inicializálása
         spinner = findViewById(R.id.lenyilo_menu)
         val lehetosegek = listOf("Főoldal", "Elemzés", "Kategóriák", "Rendszeres kifizetések", "Beállítások", "Kijelentkezés")
-        val spinnerAdapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, lehetosegek)
-        spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        // Használjuk az egyéni spinner_item dizájnt
+        val spinnerAdapter = ArrayAdapter(this, R.layout.spinner_item, lehetosegek)
+        spinnerAdapter.setDropDownViewResource(R.layout.spinner_item)
         spinner.adapter = spinnerAdapter
 
         // Ebben az Activity-ben az aktuális oldal "Beállítások", tehát index 4

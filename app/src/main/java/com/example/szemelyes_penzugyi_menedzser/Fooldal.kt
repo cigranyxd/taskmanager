@@ -9,6 +9,7 @@ import android.text.TextWatcher
 import android.util.Log
 import android.view.Gravity
 import android.view.View
+import android.view.ViewGroup
 import android.widget.*
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
@@ -56,7 +57,7 @@ class Telefonszam : AppCompatActivity() {
         // Indítsuk el a valós idejű figyelést az aktuális egyenlegre!
         listenToBalance()
 
-        // Spinner beállítása (az intent extra alapján)
+        // Spinner beállítása (a spinner_item.xml dizájn szerint)
         setupSpinner()
 
         // Szövegmező figyelése: ha módosul az érték, frissítjük az adatbázist
@@ -167,12 +168,13 @@ class Telefonszam : AppCompatActivity() {
     }
 
     /**
-     * Spinner beállítása és navigáció.
+     * Spinner beállítása és navigáció, a spinner_item.xml dizájn szerint.
      */
     private fun setupSpinner() {
         val lehetosegek = listOf("Főoldal", "Elemzés", "Kategóriák", "Rendszeres kifizetések", "Beállítások", "Kijelentkezés")
-        val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, lehetosegek)
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        // Használjuk a saját spinner_item layoutot a megjelenítéshez
+        val adapter = ArrayAdapter(this, R.layout.spinner_item, lehetosegek)
+        adapter.setDropDownViewResource(R.layout.spinner_item)
         spinner.adapter = adapter
 
         // Az intent extra alapján állítsuk be a spinner értékét; alapértelmezett: 0 ("Főoldal")

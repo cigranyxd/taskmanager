@@ -102,8 +102,8 @@ class Kategoriak : AppCompatActivity() {
         // Navigációs spinner inicializálása (Főoldal, Elemzés, stb.)
         navigaciosSpinner = findViewById(R.id.lenyilo_menu)
         val lehetosegek = listOf("Főoldal", "Elemzés", "Kategóriák", "Rendszeres kifizetések", "Beállítások", "Kijelentkezés")
-        val spinnerAdapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, lehetosegek)
-        spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        val spinnerAdapter = ArrayAdapter(this, R.layout.spinner_item, lehetosegek)
+        spinnerAdapter.setDropDownViewResource(R.layout.spinner_item)
         navigaciosSpinner.adapter = spinnerAdapter
 
         // Az aktuális oldal beállítása
@@ -523,7 +523,7 @@ class Kategoriak : AppCompatActivity() {
     private fun frissitIdoszakValasztot(felhasznaloId: String) {
         val idoszakLista = generalPeriodLista(aktualisIdoszak)
         val adapter = ArrayAdapter(this, R.layout.spinner_item, idoszakLista.map { it.megjelenitoSzoveg })
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        adapter.setDropDownViewResource(R.layout.spinner_item)
         idoszakValasztoSpinner.adapter = adapter
 
         idoszakValasztoSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {

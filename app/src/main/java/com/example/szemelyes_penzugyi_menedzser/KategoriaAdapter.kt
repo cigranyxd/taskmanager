@@ -16,34 +16,29 @@ class KategoriaAdapter(
 
     private val inflater: LayoutInflater = LayoutInflater.from(context)
 
-    override fun getCount(): Int {
-        return kategoriakNevek.size
-    }
+    override fun getCount(): Int = kategoriakNevek.size
 
-    override fun getItem(position: Int): Any {
-        return kategoriakNevek[position]
-    }
+    override fun getItem(position: Int): Any = kategoriakNevek[position]
 
-    override fun getItemId(position: Int): Long {
-        return position.toLong()
-    }
+    override fun getItemId(position: Int): Long = position.toLong()
+
     // Változó a kiválasztott pozíció tárolására, alapértelmezett: nincs kiválasztva (-1)
     var selectedPosition: Int = -1
 
     override fun getView(position: Int, convertView: View?, parent: ViewGroup?): View {
-        // Inflate-oljuk a nézetet, ha szükséges
-        val view = convertView ?: inflater.inflate(R.layout.kategoria_item_elemzeshez, parent, false)
-
+        val view: View = convertView ?: inflater.inflate(R.layout.kategoria_item_elemzeshez, parent, false)
         val categoryImage = view.findViewById<ImageView>(R.id.categoryIcon)
         val categoryName = view.findViewById<TextView>(R.id.categoryName)
 
-        // Állítsuk be az ikonokat és a neveket
+        // Ikon és név beállítása
         categoryImage.setImageResource(kategoriakIkonok[position])
         categoryName.text = kategoriakNevek[position]
+        // Kényszerítjük a fekete színt a kategória nevéhez
+        categoryName.setTextColor(Color.BLACK)
 
-        // Ha ez a pozíció van kiválasztva, világosszürke háttér, egyébként átlátszó
+        // Ha ez a pozíció van kiválasztva, állítsuk például világosszürkére a háttérszínt, egyébként átlátszóra
         if (position == selectedPosition) {
-            view.setBackgroundColor(Color.RED)
+            view.setBackgroundColor(Color.LTGRAY)
         } else {
             view.setBackgroundColor(Color.TRANSPARENT)
         }

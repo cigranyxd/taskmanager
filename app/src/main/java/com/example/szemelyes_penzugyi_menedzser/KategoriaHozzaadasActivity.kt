@@ -1,5 +1,6 @@
 package com.example.szemelyes_penzugyi_menedzser
 
+import android.content.res.ColorStateList
 import android.graphics.Color
 import android.os.Bundle
 import android.text.Editable
@@ -39,6 +40,12 @@ class KategoriaHozzaadasActivity : AppCompatActivity() {
         ikonRecyclerView = findViewById(R.id.iconRecyclerView)
         hozzadasGomb = findViewById(R.id.addCategoryButton)
 
+        // Programozottan beállítjuk a radio button tintjét feketének
+        val incomeRadioButton = findViewById<RadioButton>(R.id.incomeRadioButton)
+        val expenseRadioButton = findViewById<RadioButton>(R.id.expenseRadioButton)
+        incomeRadioButton.buttonTintList = ColorStateList.valueOf(Color.BLACK)
+        expenseRadioButton.buttonTintList = ColorStateList.valueOf(Color.BLACK)
+
         val currentUser = FirebaseAuth.getInstance().currentUser
         if (currentUser != null) {
             EgyediKategoriak.betoltFirestore(this, currentUser.uid)
@@ -52,12 +59,11 @@ class KategoriaHozzaadasActivity : AppCompatActivity() {
         }
 
         // GridLayoutManager beállítása 4 oszloppal
-        val layoutManager = GridLayoutManager(this, 4) // 4 oszlop egy sorban
+        val layoutManager = GridLayoutManager(this, 4)
         layoutManager.orientation = RecyclerView.VERTICAL
         ikonRecyclerView.layoutManager = layoutManager
         ikonRecyclerView.setHasFixedSize(true)
         ikonRecyclerView.isNestedScrollingEnabled = false
-
         ikonRecyclerView.adapter = ikonAdapter
 
         kategoriaNevEditText.addTextChangedListener(object : TextWatcher {
@@ -104,10 +110,11 @@ class KategoriaHozzaadasActivity : AppCompatActivity() {
         val isIkonKivalasztva = kivalasztottIkonResId != null
         hozzadasGomb.isEnabled = isNevValid && isIkonKivalasztva
         hozzadasGomb.setBackgroundColor(
-            ContextCompat.getColor(this, if (isNevValid && isIkonKivalasztva) android.R.color.holo_red_dark else android.R.color.darker_gray)
+            ContextCompat.getColor(
+                this,
+                if (isNevValid && isIkonKivalasztva) android.R.color.white
+                else android.R.color.darker_gray
+            )
         )
     }
 }
-
-
-

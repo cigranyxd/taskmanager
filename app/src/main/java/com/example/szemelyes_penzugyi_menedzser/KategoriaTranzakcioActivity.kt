@@ -1,9 +1,13 @@
 package com.example.szemelyes_penzugyi_menedzser
 
+import android.graphics.Color
 import android.os.Bundle
 import android.util.Log
+import android.view.View
+import android.view.ViewGroup
 import android.widget.ArrayAdapter
 import android.widget.ListView
+import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FieldPath
@@ -101,7 +105,13 @@ class KategoriaTranzakciokActivity : AppCompatActivity() {
                     if (transactionsList.isEmpty()) {
                         transactionsList.add("Nincs tranzakció a kiválasztott napra.")
                     }
-                    transactionsAdapter = ArrayAdapter(this, android.R.layout.simple_list_item_1, transactionsList)
+                    transactionsAdapter = object : ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, transactionsList) {
+                        override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
+                            val view = super.getView(position, convertView, parent)
+                            (view as TextView).setTextColor(Color.BLACK)
+                            return view
+                        }
+                    }
                     listView.adapter = transactionsAdapter
                 }
                 .addOnFailureListener { e ->
@@ -134,7 +144,13 @@ class KategoriaTranzakciokActivity : AppCompatActivity() {
                     if (transactionsList.isEmpty()) {
                         transactionsList.add("Nincs tranzakció a kiválasztott időszakban.")
                     }
-                    transactionsAdapter = ArrayAdapter(this, android.R.layout.simple_list_item_1, transactionsList)
+                    transactionsAdapter = object : ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, transactionsList) {
+                        override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
+                            val view = super.getView(position, convertView, parent)
+                            (view as TextView).setTextColor(Color.BLACK)
+                            return view
+                        }
+                    }
                     listView.adapter = transactionsAdapter
                 }
                 .addOnFailureListener { e ->

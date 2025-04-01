@@ -44,11 +44,15 @@ class ElemzesActivity : AppCompatActivity() {
     private val aktualisOldal = "Elemzés"
 
     companion object {
-        fun formatNumber(value: Int): String {
-            val nf = NumberFormat.getIntegerInstance(Locale.US) as DecimalFormat
+        fun formatNumber(value: Double): String {
+            // Itt getNumberInstance használata, hogy tizedesjegyeket is megjelenítsen
+            val nf = NumberFormat.getNumberInstance(Locale.US) as DecimalFormat
             val symbols = nf.decimalFormatSymbols
             symbols.groupingSeparator = ' '
             nf.decimalFormatSymbols = symbols
+            // Ha szükséges, itt beállítható a minimum/maximum tizedesjegyek száma
+            nf.minimumFractionDigits = 0
+            nf.maximumFractionDigits = 2
             return nf.format(value)
         }
     }
@@ -66,6 +70,21 @@ class ElemzesActivity : AppCompatActivity() {
         }
 
         fun SzovegreKattint(view: View) {
+            // Töröljük az összes időszak TextView kiválasztottságát
+            val ids = listOf(
+                R.id.NapFelirat,
+                R.id.HetFelirat,
+                R.id.HonapFelirat,
+                R.id.EvFelirat,
+                R.id.IdoszakFelirat
+            )
+            for (id in ids) {
+                findViewById<TextView>(id).isSelected = false
+            }
+            // Az aktuálisan megnyomott TextView legyen selected
+            (view as? TextView)?.isSelected = true
+
+            // Fragment váltás a kiválasztott elem alapján
             val fragment: Fragment = when (view.id) {
                 R.id.NapFelirat -> NapFragment()
                 R.id.HetFelirat -> HetFragment()
@@ -92,11 +111,10 @@ class ElemzesActivity : AppCompatActivity() {
             insets
         }
 
-        // Spinner inicializálása
         spinner = findViewById(R.id.lenyilo_menu)
         val lehetosegek = listOf("Főoldal", "Elemzés", "Kategóriák", "Rendszeres kifizetések", "Beállítások", "Kijelentkezés")
-        val spinnerAdapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, lehetosegek)
-        spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        val spinnerAdapter = ArrayAdapter(this, R.layout.spinner_item, lehetosegek)
+        spinnerAdapter.setDropDownViewResource(R.layout.spinner_item)
         spinner.adapter = spinnerAdapter
 
         findViewById<Button>(R.id.hozzaadasGomb).setOnClickListener {
@@ -139,16 +157,14 @@ class ElemzesActivity : AppCompatActivity() {
         spinner.setSelection(1)
     }
 
-    // Grafikon stílusának beállítása, hogy az alsó tengely vonal folyamatos legyen
+    // Grafikon stílusának beállítása
     fun styleBarChart(chart: BarChart) {
         chart.description.isEnabled = false
         chart.setFitBars(true)
         chart.animateY(1000)
         chart.setScaleEnabled(false)
-        // Háttér és segédvonalak kikapcsolása
         chart.setDrawGridBackground(false)
         chart.setDrawBorders(false)
-        // Engedélyezzük az xAxis-t, hogy alsó vonal legyen látható
         chart.xAxis.isEnabled = true
         chart.xAxis.position = XAxis.XAxisPosition.BOTTOM
         chart.xAxis.setDrawGridLines(false)
@@ -156,30 +172,21 @@ class ElemzesActivity : AppCompatActivity() {
         chart.xAxis.setDrawAxisLine(true)
         chart.xAxis.axisLineColor = Color.DKGRAY
         chart.xAxis.axisLineWidth = 2f
-        // Eltávolítjuk az első/utolsó elem klippelését, hogy a vonal a teljes szélességet lefedje
         chart.xAxis.setAvoidFirstLastClipping(false)
-        // Biztosítjuk, hogy a bal tengely 0-tól induljon
         chart.axisLeft.axisMinimum = 0f
-        // Bal oldali tengely testreszabása
         val leftAxis = chart.axisLeft
         leftAxis.textColor = Color.DKGRAY
         leftAxis.textSize = 12f
         leftAxis.setDrawAxisLine(false)
         leftAxis.setDrawGridLines(false)
-        // Jobb oldali tengely kikapcsolása
         chart.axisRight.isEnabled = false
-
-        // Chart háttér és extra margók
         chart.setBackgroundColor(Color.WHITE)
         chart.setExtraOffsets(10f, 10f, 10f, 10f)
-
-        // Jelmagyarázat (legend) testreszabása
         val legend = chart.legend
         legend.textColor = Color.DKGRAY
         legend.textSize = 14f
     }
 
-    // Overlay eltávolítása a BarChart szülőjéből
     fun removeNoDataOverlay(chart: BarChart) {
         val parent = chart.parent as? ViewGroup ?: return
         for (i in parent.childCount - 1 downTo 0) {
@@ -191,7 +198,6 @@ class ElemzesActivity : AppCompatActivity() {
         chart.visibility = View.VISIBLE
     }
 
-    // showNoDataOverlay metódus, amit fragmentek hívhatnak
     fun showNoDataOverlay(message: String, chart: BarChart, container: LinearLayout) {
         if (!this.isFinishing) {
             val parent = chart.parent as? ViewGroup ?: return
@@ -241,10 +247,10 @@ class ElemzesActivity : AppCompatActivity() {
         return overlay
     }
 
-    // Public függvény a tranzakciós nézet létrehozásához
+    // A tranzakciós nézet létrehozása – amount paraméter Double típusú
     fun createTransactionView(
         category: String,
-        amount: Float,
+        amount: Double,
         type: String,
         transaction: Map<String, Any>,
         docId: String
@@ -264,10 +270,16 @@ class ElemzesActivity : AppCompatActivity() {
                 gravity = Gravity.CENTER_VERTICAL
                 setMargins(8, 0, 8, 0)
             }
-            setOnClickListener {
+            setOnClickListener { view ->
+                // Az első kattintás után letiltjuk a gombot
+                view.isEnabled = false
                 deleteTransaction(docId, transaction, {
+                    // Siker esetén eltávolítjuk a tranzakció nézetét
+                    (containerLayout.parent as? ViewGroup)?.removeView(containerLayout)
                     Toast.makeText(ctx, "Tranzakció törölve", Toast.LENGTH_SHORT).show()
                 }, { e ->
+                    // Hiba esetén újra engedélyezzük a gombot
+                    view.isEnabled = true
                     Toast.makeText(ctx, "Törlési hiba: ${e.message}", Toast.LENGTH_SHORT).show()
                 })
             }
@@ -305,11 +317,17 @@ class ElemzesActivity : AppCompatActivity() {
             id = View.generateViewId()
             textSize = 16f
             gravity = Gravity.START
-            setTextColor(if (type == "bevétel") Color.GREEN else if (type == "kiadás") Color.RED else Color.BLACK)
+            setTextColor(
+                when (type) {
+                    "bevétel" -> Color.GREEN
+                    "kiadás" -> Color.RED
+                    else -> Color.BLACK
+                }
+            )
             text = when (type) {
-                "bevétel" -> "+ ${formatNumber(amount.toInt())}"
-                "kiadás" -> "- ${formatNumber(amount.toInt())}"
-                else -> formatNumber(amount.toInt())
+                "bevétel" -> "+ ${formatNumber(amount)}"
+                "kiadás" -> "- ${formatNumber(amount)}"
+                else -> formatNumber(amount)
             }
         }
         val amountParams = RelativeLayout.LayoutParams(
@@ -356,7 +374,6 @@ class ElemzesActivity : AppCompatActivity() {
         return containerLayout
     }
 
-    // Kategória ikon visszaadása
     fun getIconResForCategory(category: String): Int {
         val norm = category.trim().toLowerCase(Locale.getDefault())
         return when (norm) {
@@ -391,8 +408,6 @@ class ElemzesActivity : AppCompatActivity() {
         finish()
     }
 
-    // --- Módosított onBackPressed ---
-    // Ha a felhasználó a telefon vissza gombját nyomja, navigáljunk a Telefonszam activity-be.
     @SuppressLint("MissingSuperCall")
     override fun onBackPressed() {
         val intent = Intent(this, Telefonszam::class.java)
@@ -452,29 +467,30 @@ class ElemzesActivity : AppCompatActivity() {
                         return@addSnapshotListener
                     }
                     (activity as? ElemzesActivity)?.removeNoDataOverlay(chart)
-                    var totalRevenue = 0f
-                    var totalExpense = 0f
+
+                    var totalRevenue = 0.0
+                    var totalExpense = 0.0
 
                     for (doc in querySnapshot.documents) {
                         val transactions = doc.get("tranzakciok") as? List<Map<String, Any>> ?: emptyList()
                         val sortedTransactions = transactions.sortedByDescending { it["timestamp"] as? Long ?: 0L }
                         for (trans in sortedTransactions) {
                             val amount = when (val a = trans["mennyiseg"]) {
-                                is Double -> a.toFloat()
-                                is Long -> a.toFloat()
-                                else -> 0f
+                                is Double -> a
+                                is Long -> a.toDouble()
+                                else -> 0.0
                             }
                             val category = (trans["kategoria"] as? String)?.trim() ?: "Egyéb"
                             val type = (trans["tipus"] as? String)?.trim()?.toLowerCase(Locale.getDefault()) ?: ""
-                            val transactionView = (activity as ElemzesActivity).createTransactionView(category, amount, type, trans, doc.id)
+                            val transactionView = (activity as ElemzesActivity)
+                                .createTransactionView(category, amount, type, trans, doc.id)
                             categoriesLayout.addView(transactionView)
                             if (type == "bevétel") totalRevenue += amount
                             else if (type == "kiadás") totalExpense += amount
                         }
                     }
-                    // Always add both entries to maintain positions
-                    val revenueEntry = BarEntry(0f, totalRevenue)
-                    val expenseEntry = BarEntry(1f, totalExpense)
+                    val revenueEntry = BarEntry(0f, totalRevenue.toFloat())
+                    val expenseEntry = BarEntry(1f, totalExpense.toFloat())
                     val entries = listOf(revenueEntry, expenseEntry)
                     val dataSet = BarDataSet(entries, "Napi összesítés")
                     dataSet.colors = listOf(Color.GREEN, Color.RED)
@@ -482,7 +498,7 @@ class ElemzesActivity : AppCompatActivity() {
                     dataSet.valueTextSize = 16f
                     dataSet.valueFormatter = object : ValueFormatter() {
                         override fun getBarLabel(barEntry: BarEntry?): String {
-                            return if (barEntry?.y == 0f) "" else ElemzesActivity.formatNumber(barEntry!!.y.toInt())
+                            return if (barEntry?.y == 0f) "" else ElemzesActivity.formatNumber(barEntry!!.y.toDouble())
                         }
                     }
                     val barData = BarData(dataSet)
@@ -545,28 +561,29 @@ class ElemzesActivity : AppCompatActivity() {
                         return@addSnapshotListener
                     }
                     (activity as? ElemzesActivity)?.removeNoDataOverlay(chart)
-                    var totalRevenue = 0f
-                    var totalExpense = 0f
+                    var totalRevenue = 0.0
+                    var totalExpense = 0.0
 
                     for (doc in querySnapshot.documents) {
                         val transactions = doc.get("tranzakciok") as? List<Map<String, Any>> ?: emptyList()
                         val sortedTransactions = transactions.sortedByDescending { it["timestamp"] as? Long ?: 0L }
                         for (trans in sortedTransactions) {
                             val amount = when (val a = trans["mennyiseg"]) {
-                                is Double -> a.toFloat()
-                                is Long -> a.toFloat()
-                                else -> 0f
+                                is Double -> a
+                                is Long -> a.toDouble()
+                                else -> 0.0
                             }
                             val category = (trans["kategoria"] as? String)?.trim() ?: "Egyéb"
                             val type = (trans["tipus"] as? String)?.trim()?.toLowerCase(Locale.getDefault()) ?: ""
-                            val transactionView = (activity as ElemzesActivity).createTransactionView(category, amount, type, trans, doc.id)
+                            val transactionView = (activity as ElemzesActivity)
+                                .createTransactionView(category, amount, type, trans, doc.id)
                             categoriesLayout.addView(transactionView)
                             if (type == "bevétel") totalRevenue += amount
                             else if (type == "kiadás") totalExpense += amount
                         }
                     }
-                    val revenueEntry = BarEntry(0f, totalRevenue)
-                    val expenseEntry = BarEntry(1f, totalExpense)
+                    val revenueEntry = BarEntry(0f, totalRevenue.toFloat())
+                    val expenseEntry = BarEntry(1f, totalExpense.toFloat())
                     val entries = listOf(revenueEntry, expenseEntry)
                     val dataSet = BarDataSet(entries, "Heti összesítés")
                     dataSet.colors = listOf(Color.GREEN, Color.RED)
@@ -574,7 +591,7 @@ class ElemzesActivity : AppCompatActivity() {
                     dataSet.valueTextSize = 16f
                     dataSet.valueFormatter = object : ValueFormatter() {
                         override fun getBarLabel(barEntry: BarEntry?): String {
-                            return if (barEntry?.y == 0f) "" else ElemzesActivity.formatNumber(barEntry!!.y.toInt())
+                            return if (barEntry?.y == 0f) "" else ElemzesActivity.formatNumber(barEntry!!.y.toDouble())
                         }
                     }
                     val barData = BarData(dataSet)
@@ -638,8 +655,8 @@ class ElemzesActivity : AppCompatActivity() {
                         return@addSnapshotListener
                     }
                     (activity as? ElemzesActivity)?.removeNoDataOverlay(chart)
-                    var totalRevenue = 0f
-                    var totalExpense = 0f
+                    var totalRevenue = 0.0
+                    var totalExpense = 0.0
 
                     val sortedDocs = querySnapshot.documents.sortedByDescending { LocalDate.parse(it.id, formatter) }
                     for (doc in sortedDocs) {
@@ -654,7 +671,9 @@ class ElemzesActivity : AppCompatActivity() {
                             text = dateStr
                             textSize = 16f
                             setTextColor(Color.DKGRAY)
-                            layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT).apply { setMargins(0, 8, 0, 4) }
+                            layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT).apply {
+                                setMargins(0, 8, 0, 4)
+                            }
                         }
                         categoriesLayout.addView(dateHeader, 0)
                         try {
@@ -664,9 +683,9 @@ class ElemzesActivity : AppCompatActivity() {
 
                             for (trans in sortedTransactions) {
                                 val amount = when (val a = trans["mennyiseg"]) {
-                                    is Double -> a.toFloat()
-                                    is Long -> a.toFloat()
-                                    else -> 0f
+                                    is Double -> a
+                                    is Long -> a.toDouble()
+                                    else -> 0.0
                                 }
                                 val category = (trans["kategoria"] as? String)?.trim() ?: "Egyéb"
                                 val type = (trans["tipus"] as? String)?.trim()?.toLowerCase(Locale.getDefault()) ?: ""
@@ -679,8 +698,8 @@ class ElemzesActivity : AppCompatActivity() {
                             Log.e("FirestoreDebug", "Error processing doc $dateStr: ${e.message}")
                         }
                     }
-                    val revenueEntry = BarEntry(0f, totalRevenue)
-                    val expenseEntry = BarEntry(1f, totalExpense)
+                    val revenueEntry = BarEntry(0f, totalRevenue.toFloat())
+                    val expenseEntry = BarEntry(1f, totalExpense.toFloat())
                     val entries = listOf(revenueEntry, expenseEntry)
                     val dataSet = BarDataSet(entries, "Havi összesítés")
                     dataSet.colors = listOf(Color.GREEN, Color.RED)
@@ -688,7 +707,7 @@ class ElemzesActivity : AppCompatActivity() {
                     dataSet.valueTextSize = 16f
                     dataSet.valueFormatter = object : ValueFormatter() {
                         override fun getBarLabel(barEntry: BarEntry?): String {
-                            return if (barEntry?.y == 0f) "" else ElemzesActivity.formatNumber(barEntry!!.y.toInt())
+                            return if (barEntry?.y == 0f) "" else ElemzesActivity.formatNumber(barEntry!!.y.toDouble())
                         }
                     }
                     val barData = BarData(dataSet)
@@ -747,8 +766,8 @@ class ElemzesActivity : AppCompatActivity() {
                         return@addOnSuccessListener
                     }
                     (activity as? ElemzesActivity)?.removeNoDataOverlay(chart)
-                    var totalRevenue = 0f
-                    var totalExpense = 0f
+                    var totalRevenue = 0.0
+                    var totalExpense = 0.0
 
                     val sortedDocs = querySnapshot.documents.sortedByDescending { LocalDate.parse(it.id, formatter) }
                     for (doc in sortedDocs) {
@@ -763,7 +782,9 @@ class ElemzesActivity : AppCompatActivity() {
                             text = dateStr
                             textSize = 16f
                             setTextColor(Color.DKGRAY)
-                            layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT).apply { setMargins(0, 8, 0, 4) }
+                            layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT).apply {
+                                setMargins(0, 8, 0, 4)
+                            }
                         }
                         categoriesLayout.addView(dateHeader, 0)
                         try {
@@ -773,9 +794,9 @@ class ElemzesActivity : AppCompatActivity() {
 
                             for (trans in sortedTransactions) {
                                 val amount = when (val a = trans["mennyiseg"]) {
-                                    is Double -> a.toFloat()
-                                    is Long -> a.toFloat()
-                                    else -> 0f
+                                    is Double -> a
+                                    is Long -> a.toDouble()
+                                    else -> 0.0
                                 }
                                 val category = (trans["kategoria"] as? String)?.trim() ?: "Egyéb"
                                 val type = (trans["tipus"] as? String)?.trim()?.toLowerCase(Locale.getDefault()) ?: ""
@@ -788,8 +809,8 @@ class ElemzesActivity : AppCompatActivity() {
                             Log.e("FirestoreDebug", "Error processing doc $dateStr: ${e.message}")
                         }
                     }
-                    val revenueEntry = BarEntry(0f, totalRevenue)
-                    val expenseEntry = BarEntry(1f, totalExpense)
+                    val revenueEntry = BarEntry(0f, totalRevenue.toFloat())
+                    val expenseEntry = BarEntry(1f, totalExpense.toFloat())
                     val entries = listOf(revenueEntry, expenseEntry)
                     val dataSet = BarDataSet(entries, "Év összesítés")
                     dataSet.colors = listOf(Color.GREEN, Color.RED)
@@ -797,7 +818,7 @@ class ElemzesActivity : AppCompatActivity() {
                     dataSet.valueTextSize = 16f
                     dataSet.valueFormatter = object : ValueFormatter() {
                         override fun getBarLabel(barEntry: BarEntry?): String {
-                            return if (barEntry?.y == 0f) "" else ElemzesActivity.formatNumber(barEntry!!.y.toInt())
+                            return if (barEntry?.y == 0f) "" else ElemzesActivity.formatNumber(barEntry!!.y.toDouble())
                         }
                     }
                     val barData = BarData(dataSet)
@@ -893,8 +914,8 @@ class ElemzesActivity : AppCompatActivity() {
                         return@addOnSuccessListener
                     }
                     (activity as? ElemzesActivity)?.removeNoDataOverlay(chart)
-                    var totalRevenue = 0f
-                    var totalExpense = 0f
+                    var totalRevenue = 0.0
+                    var totalExpense = 0.0
 
                     val sortedDocs = querySnapshot.documents.sortedByDescending { LocalDate.parse(it.id) }
                     for (doc in sortedDocs) {
@@ -909,7 +930,9 @@ class ElemzesActivity : AppCompatActivity() {
                             text = dateStr
                             textSize = 16f
                             setTextColor(Color.DKGRAY)
-                            layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT).apply { setMargins(0, 8, 0, 4) }
+                            layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT).apply {
+                                setMargins(0, 8, 0, 4)
+                            }
                         }
                         categoriesLayout.addView(dateHeader)
                         try {
@@ -919,9 +942,9 @@ class ElemzesActivity : AppCompatActivity() {
 
                             for (trans in sortedTransactions) {
                                 val amount = when (val a = trans["mennyiseg"]) {
-                                    is Double -> a.toFloat()
-                                    is Long -> a.toFloat()
-                                    else -> 0f
+                                    is Double -> a
+                                    is Long -> a.toDouble()
+                                    else -> 0.0
                                 }
                                 val category = (trans["kategoria"] as? String)?.trim() ?: "Egyéb"
                                 val type = (trans["tipus"] as? String)?.trim()?.toLowerCase(Locale.getDefault()) ?: ""
@@ -934,8 +957,8 @@ class ElemzesActivity : AppCompatActivity() {
                             Log.e("FirestoreDebug", "Error processing doc $dateStr: ${e.message}")
                         }
                     }
-                    val revenueEntry = BarEntry(0f, totalRevenue)
-                    val expenseEntry = BarEntry(1f, totalExpense)
+                    val revenueEntry = BarEntry(0f, totalRevenue.toFloat())
+                    val expenseEntry = BarEntry(1f, totalExpense.toFloat())
                     val entries = listOf(revenueEntry, expenseEntry)
                     val dataSet = BarDataSet(entries, "Időszak összesítés")
                     dataSet.colors = listOf(Color.GREEN, Color.RED)
@@ -943,7 +966,7 @@ class ElemzesActivity : AppCompatActivity() {
                     dataSet.valueTextSize = 16f
                     dataSet.valueFormatter = object : ValueFormatter() {
                         override fun getBarLabel(barEntry: BarEntry?): String {
-                            return if (barEntry?.y == 0f) "" else ElemzesActivity.formatNumber(barEntry!!.y.toInt())
+                            return if (barEntry?.y == 0f) "" else ElemzesActivity.formatNumber(barEntry!!.y.toDouble())
                         }
                     }
                     val barData = BarData(dataSet)
@@ -967,8 +990,6 @@ class ElemzesActivity : AppCompatActivity() {
     }
 
     // --- Módosított deleteTransaction metódus ---
-    // Ha több azonos tranzakció van, csak az első példány kerül törlésre,
-    // és a fő összeg csak egyszer módosul.
     fun deleteTransaction(
         docId: String,
         transaction: Map<String, Any>,
@@ -978,12 +999,16 @@ class ElemzesActivity : AppCompatActivity() {
         val uid = FirebaseAuth.getInstance().currentUser?.uid ?: return
         val userDocRef = FirebaseFirestore.getInstance().collection("users").document(uid)
         val amount = when (val a = transaction["mennyiseg"]) {
-            is Double -> a.toFloat()
-            is Long -> a.toFloat()
-            else -> 0f
+            is Double -> a
+            is Long -> a.toDouble()
+            else -> 0.0
         }
         val type = (transaction["tipus"] as? String)?.trim()?.toLowerCase(Locale.getDefault()) ?: ""
-        val delta = if (type == "bevétel") -amount else if (type == "kiadás") amount else 0f
+        val delta = when (type) {
+            "bevétel" -> -amount
+            "kiadás" -> amount
+            else -> 0.0
+        }
 
         FirebaseFirestore.getInstance().runTransaction { trans ->
             val userSnapshot = trans.get(userDocRef)
@@ -991,7 +1016,6 @@ class ElemzesActivity : AppCompatActivity() {
             val napSnapshot = trans.get(napDocRef)
             val currentTransactions = napSnapshot.get("tranzakciok") as? List<Map<String, Any>> ?: emptyList()
 
-            // Csak az első egyező tranzakció törlése
             val mutableTransactions = currentTransactions.toMutableList()
             val indexToRemove = mutableTransactions.indexOfFirst {
                 (it["timestamp"] == transaction["timestamp"]) &&
@@ -1021,9 +1045,6 @@ class ElemzesActivity : AppCompatActivity() {
     }
 
     // --- Új addTransaction metódus ---
-    // Ez a metódus felelős egy új tranzakció hozzáadásáért, és a fő egyenleg (aktualisPenz) megfelelő frissítéséért.
-    // A delta kiszámítása itt fordított: ha a tranzakció típusa "bevétel", akkor a tranzakció összegét hozzáadjuk,
-    // ha "kiadás", akkor levonjuk.
     fun addTransaction(
         docId: String,
         transaction: Map<String, Any>,
@@ -1033,18 +1054,20 @@ class ElemzesActivity : AppCompatActivity() {
         val uid = FirebaseAuth.getInstance().currentUser?.uid ?: return
         val userDocRef = FirebaseFirestore.getInstance().collection("users").document(uid)
         val amount = when (val a = transaction["mennyiseg"]) {
-            is Double -> a.toFloat()
-            is Long -> a.toFloat()
-            else -> 0f
+            is Double -> a
+            is Long -> a.toDouble()
+            else -> 0.0
         }
         val type = (transaction["tipus"] as? String)?.trim()?.toLowerCase(Locale.getDefault()) ?: ""
-        // Itt: bevétel esetén hozzáadjuk, kiadás esetén levonjuk
-        val delta = if (type == "bevétel") amount else if (type == "kiadás") -amount else 0f
+        val delta = when (type) {
+            "bevétel" -> amount
+            "kiadás" -> -amount
+            else -> 0.0
+        }
 
         FirebaseFirestore.getInstance().runTransaction { trans ->
             val userSnapshot = trans.get(userDocRef)
             val napDocRef = userDocRef.collection("nap").document(docId)
-            // Próbáljuk lekérdezni a meglévő tranzakciókat (ha létezik a dokumentum)
             val napSnapshot = try {
                 trans.get(napDocRef)
             } catch (e: Exception) {
