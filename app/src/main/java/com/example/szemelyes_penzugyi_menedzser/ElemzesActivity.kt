@@ -29,6 +29,7 @@ import com.google.firebase.firestore.FieldPath
 import java.text.DecimalFormat
 import java.text.DecimalFormatSymbols
 import java.text.NumberFormat
+import java.math.RoundingMode
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.time.temporal.TemporalAdjusters
@@ -36,6 +37,7 @@ import java.util.Locale
 import com.example.szemelyes_penzugyi_menedzser.FirebaseManager
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.auth.FirebaseAuth
+import java.math.BigDecimal
 import android.annotation.SuppressLint as SuppressLint1
 
 class ElemzesActivity : AppCompatActivity() {
@@ -45,15 +47,75 @@ class ElemzesActivity : AppCompatActivity() {
 
     companion object {
         fun formatNumber(value: Double): String {
-            // Itt getNumberInstance használata, hogy tizedesjegyeket is megjelenítsen
             val nf = NumberFormat.getNumberInstance(Locale.US) as DecimalFormat
             val symbols = nf.decimalFormatSymbols
             symbols.groupingSeparator = ' '
             nf.decimalFormatSymbols = symbols
-            // Ha szükséges, itt beállítható a minimum/maximum tizedesjegyek száma
             nf.minimumFractionDigits = 0
             nf.maximumFractionDigits = 2
             return nf.format(value)
+        }
+
+        fun scaleValueForChart(value: Double): Float {
+            return (value / 1_000_000).toFloat()
+        }
+
+        fun unscaleValueForLabel(value: Float): Double {
+            return value.toDouble() * 1_000_000
+        }
+
+
+        fun addTransaction(
+            context: Context,
+            docId: String,
+            transaction: Map<String, Any>,
+            onSuccess: () -> Unit,
+            onFailure: (Exception) -> Unit
+        ) {
+            val uid = FirebaseAuth.getInstance().currentUser?.uid ?: return
+            val userDocRef = FirebaseFirestore.getInstance().collection("users").document(uid)
+            val amount = when (val a = transaction["mennyiseg"]) {
+                is Double -> BigDecimal.valueOf(a)
+                is Long -> BigDecimal.valueOf(a.toDouble())
+                is String -> BigDecimal(a)
+                else -> BigDecimal.ZERO
+            }
+            val type = (transaction["tipus"] as? String)?.trim()?.lowercase(Locale.getDefault()) ?: ""
+            val delta = when (type) {
+                "bevétel" -> amount
+                "kiadás" -> amount.negate()
+                else -> BigDecimal.ZERO
+            }
+
+            FirebaseFirestore.getInstance().runTransaction { trans ->
+                val userSnapshot = trans.get(userDocRef)
+                val napDocRef = userDocRef.collection("nap").document(docId)
+                val napSnapshot = try {
+                    trans.get(napDocRef)
+                } catch (e: Exception) {
+                    null
+                }
+
+                val currentTransactions = napSnapshot?.get("tranzakciok") as? List<Map<String, Any>> ?: emptyList()
+                val mutableTransactions = currentTransactions.toMutableList()
+                mutableTransactions.add(transaction)
+                if (currentTransactions.isEmpty()) {
+                    trans.set(napDocRef, mapOf("tranzakciok" to mutableTransactions))
+                } else {
+                    trans.update(napDocRef, "tranzakciok", mutableTransactions)
+                }
+
+                val currentBalance = BigDecimal.valueOf(userSnapshot.getDouble("aktualisPenz") ?: 0.0)
+                val newBalance = currentBalance.add(delta)
+                trans.update(userDocRef, "aktualisPenz", newBalance.toDouble())
+                newBalance
+            }.addOnSuccessListener {
+                Log.d("ElemzesActivity", "Main balance updated successfully.")
+                onSuccess()
+            }.addOnFailureListener { e ->
+                Log.e("ElemzesActivity", "Failed to add transaction: ${e.message}")
+                onFailure(e)
+            }
         }
     }
 
@@ -185,6 +247,8 @@ class ElemzesActivity : AppCompatActivity() {
         val legend = chart.legend
         legend.textColor = Color.DKGRAY
         legend.textSize = 14f
+
+
     }
 
     fun removeNoDataOverlay(chart: BarChart) {
@@ -375,18 +439,19 @@ class ElemzesActivity : AppCompatActivity() {
     }
 
     fun getIconResForCategory(category: String): Int {
-        val norm = category.trim().toLowerCase(Locale.getDefault())
-        return when (norm) {
-            "ajándékok", "ajandekok" -> R.drawable.ajandekok_icon
-            "családi kiadás", "csalad kiadás", "családi kiadas", "csalad kiadas" -> R.drawable.csalad_icon
-            "edzés", "edzes" -> R.drawable.edzes_icon
-            "egészség", "egeszseg" -> R.drawable.egeszseg_icon
-            "élelmiszerek", "elelmiszerek" -> R.drawable.elelmiszerek_icon
-            "kávézó", "kavezo" -> R.drawable.kavezo_icon
-            "közlekedés", "kozelekedes" -> R.drawable.kozlekedes_icon
-            "oktatás", "oktatas" -> R.drawable.oktatas_icon
-            "otthon" -> R.drawable.otthon_icon
-            "szabadidő", "szabadido", "fizetési csekk" -> R.drawable.szabadido_icon
+        val norm = category.trim().lowercase(Locale.getDefault())
+        return when {
+            norm.contains("ajándék") -> R.drawable.ajandekok_icon
+            norm.contains("családi") || norm.contains("csalad") -> R.drawable.csalad_icon
+            norm.contains("edzés") || norm.contains("edzes") || norm.contains("sport") -> R.drawable.edzes_icon
+            norm.contains("egészség") || norm.contains("egeszseg") -> R.drawable.egeszseg_icon
+            norm.contains("élelmiszer") || norm.contains("elelmiszer") -> R.drawable.elelmiszerek_icon
+            norm.contains("kávézó") || norm.contains("kavezo") -> R.drawable.kavezo_icon
+            norm.contains("közlekedés") || norm.contains("kozlekedes") -> R.drawable.kozlekedes_icon
+            norm.contains("oktatás") || norm.contains("oktatas") -> R.drawable.oktatas_icon
+            norm.contains("otthon") -> R.drawable.otthon_icon
+            norm.contains("szabadidő") || norm.contains("szabadido") || norm.contains("csekk") -> R.drawable.szabadido_icon
+            norm.contains("fizetés") || norm.contains("fizetes") -> R.drawable.szabadido_icon
             else -> R.drawable.egyeb_icon
         }
     }
@@ -421,6 +486,7 @@ class ElemzesActivity : AppCompatActivity() {
 
     // 1. NapFragment – Egy adott nap adatai
     class NapFragment : Fragment() {
+        private val scale = 1_000_000.0
         private val firestore = FirebaseManager.firestore
         private val currentUser = FirebaseManager.auth.currentUser
         private val formatter = DateTimeFormatter.ISO_LOCAL_DATE
@@ -489,16 +555,20 @@ class ElemzesActivity : AppCompatActivity() {
                             else if (type == "kiadás") totalExpense += amount
                         }
                     }
-                    val revenueEntry = BarEntry(0f, totalRevenue.toFloat())
-                    val expenseEntry = BarEntry(1f, totalExpense.toFloat())
+                    val revenueEntry = BarEntry(0f, (totalRevenue / scale).toFloat())
+                    val expenseEntry = BarEntry(1f, (totalExpense / scale).toFloat())
                     val entries = listOf(revenueEntry, expenseEntry)
-                    val dataSet = BarDataSet(entries, "Napi összesítés")
+                    val dataSet = BarDataSet(listOf(revenueEntry, expenseEntry), "Napi összesítés")
                     dataSet.colors = listOf(Color.GREEN, Color.RED)
                     dataSet.valueTextColor = Color.BLACK
                     dataSet.valueTextSize = 16f
                     dataSet.valueFormatter = object : ValueFormatter() {
                         override fun getBarLabel(barEntry: BarEntry?): String {
-                            return if (barEntry?.y == 0f) "" else ElemzesActivity.formatNumber(barEntry!!.y.toDouble())
+                            return when (barEntry?.x?.toInt()) {
+                                0 -> ElemzesActivity.formatNumber(totalRevenue)
+                                1 -> ElemzesActivity.formatNumber(totalExpense)
+                                else -> ""
+                            }
                         }
                     }
                     val barData = BarData(dataSet)
@@ -512,6 +582,7 @@ class ElemzesActivity : AppCompatActivity() {
 
     // 2. HetFragment – Az aktuális hét adatai
     class HetFragment : Fragment() {
+        private val scale = 1_000_000.0
         private val firestore = FirebaseManager.firestore
         private val currentUser = FirebaseManager.auth.currentUser
         private val formatter = DateTimeFormatter.ISO_LOCAL_DATE
@@ -582,16 +653,20 @@ class ElemzesActivity : AppCompatActivity() {
                             else if (type == "kiadás") totalExpense += amount
                         }
                     }
-                    val revenueEntry = BarEntry(0f, totalRevenue.toFloat())
-                    val expenseEntry = BarEntry(1f, totalExpense.toFloat())
+                    val revenueEntry = BarEntry(0f, (totalRevenue / scale).toFloat())
+                    val expenseEntry = BarEntry(1f, (totalExpense / scale).toFloat())
                     val entries = listOf(revenueEntry, expenseEntry)
-                    val dataSet = BarDataSet(entries, "Heti összesítés")
+                    val dataSet = BarDataSet(listOf(revenueEntry, expenseEntry), "Napi összesítés")
                     dataSet.colors = listOf(Color.GREEN, Color.RED)
                     dataSet.valueTextColor = Color.BLACK
                     dataSet.valueTextSize = 16f
                     dataSet.valueFormatter = object : ValueFormatter() {
                         override fun getBarLabel(barEntry: BarEntry?): String {
-                            return if (barEntry?.y == 0f) "" else ElemzesActivity.formatNumber(barEntry!!.y.toDouble())
+                            return when (barEntry?.x?.toInt()) {
+                                0 -> ElemzesActivity.formatNumber(totalRevenue)
+                                1 -> ElemzesActivity.formatNumber(totalExpense)
+                                else -> ""
+                            }
                         }
                     }
                     val barData = BarData(dataSet)
@@ -605,6 +680,7 @@ class ElemzesActivity : AppCompatActivity() {
 
     // 3. HonapFragment – Az aktuális hónap adatai (csökkenő sorrendben)
     class HonapFragment : Fragment() {
+        private val scale = 1_000_000.0
         private val firestore = FirebaseManager.firestore
         private val currentUser = FirebaseManager.auth.currentUser
         private val formatter = DateTimeFormatter.ISO_LOCAL_DATE
@@ -698,16 +774,20 @@ class ElemzesActivity : AppCompatActivity() {
                             Log.e("FirestoreDebug", "Error processing doc $dateStr: ${e.message}")
                         }
                     }
-                    val revenueEntry = BarEntry(0f, totalRevenue.toFloat())
-                    val expenseEntry = BarEntry(1f, totalExpense.toFloat())
+                    val revenueEntry = BarEntry(0f, (totalRevenue / scale).toFloat())
+                    val expenseEntry = BarEntry(1f, (totalExpense / scale).toFloat())
                     val entries = listOf(revenueEntry, expenseEntry)
-                    val dataSet = BarDataSet(entries, "Havi összesítés")
+                    val dataSet = BarDataSet(listOf(revenueEntry, expenseEntry), "Napi összesítés")
                     dataSet.colors = listOf(Color.GREEN, Color.RED)
                     dataSet.valueTextColor = Color.BLACK
                     dataSet.valueTextSize = 16f
                     dataSet.valueFormatter = object : ValueFormatter() {
                         override fun getBarLabel(barEntry: BarEntry?): String {
-                            return if (barEntry?.y == 0f) "" else ElemzesActivity.formatNumber(barEntry!!.y.toDouble())
+                            return when (barEntry?.x?.toInt()) {
+                                0 -> ElemzesActivity.formatNumber(totalRevenue)
+                                1 -> ElemzesActivity.formatNumber(totalExpense)
+                                else -> ""
+                            }
                         }
                     }
                     val barData = BarData(dataSet)
@@ -721,6 +801,7 @@ class ElemzesActivity : AppCompatActivity() {
 
     // 4. EvFragment – Az aktuális év adatai (csökkenő sorrendben)
     class EvFragment : Fragment() {
+        private val scale = 1_000_000.0
         private val firestore = FirebaseManager.firestore
         private val currentUser = FirebaseManager.auth.currentUser
         private val formatter = DateTimeFormatter.ISO_LOCAL_DATE
@@ -809,33 +890,35 @@ class ElemzesActivity : AppCompatActivity() {
                             Log.e("FirestoreDebug", "Error processing doc $dateStr: ${e.message}")
                         }
                     }
-                    val revenueEntry = BarEntry(0f, totalRevenue.toFloat())
-                    val expenseEntry = BarEntry(1f, totalExpense.toFloat())
+                    val revenueEntry = BarEntry(0f, (totalRevenue / scale).toFloat())
+                    val expenseEntry = BarEntry(1f, (totalExpense / scale).toFloat())
                     val entries = listOf(revenueEntry, expenseEntry)
-                    val dataSet = BarDataSet(entries, "Év összesítés")
+                    val dataSet = BarDataSet(listOf(revenueEntry, expenseEntry), "Napi összesítés")
                     dataSet.colors = listOf(Color.GREEN, Color.RED)
                     dataSet.valueTextColor = Color.BLACK
                     dataSet.valueTextSize = 16f
                     dataSet.valueFormatter = object : ValueFormatter() {
                         override fun getBarLabel(barEntry: BarEntry?): String {
-                            return if (barEntry?.y == 0f) "" else ElemzesActivity.formatNumber(barEntry!!.y.toDouble())
+                            return when (barEntry?.x?.toInt()) {
+                                0 -> ElemzesActivity.formatNumber(totalRevenue)
+                                1 -> ElemzesActivity.formatNumber(totalExpense)
+                                else -> ""
+                            }
                         }
                     }
+
                     val barData = BarData(dataSet)
                     barData.barWidth = 0.45f
                     chart.data = barData
                     (activity as? ElemzesActivity)?.styleBarChart(chart)
                     chart.invalidate()
                 }
-                .addOnFailureListener { e ->
-                    Log.e("FirestoreDebug", "Hiba az éves adatok lekérdezése során: ${e.message}")
-                    Toast.makeText(context, "Hiba az éves adatok lekérdezése során.", Toast.LENGTH_SHORT).show()
-                }
         }
     }
 
     // 5. IdoszakFragment – Egy egyedi időszak adatai (csökkenő sorrendben)
     class IdoszakFragment : Fragment() {
+        private val scale = 1_000_000.0
         private val firestore = FirebaseManager.firestore
         private val currentUser = FirebaseManager.auth.currentUser
 
@@ -957,24 +1040,30 @@ class ElemzesActivity : AppCompatActivity() {
                             Log.e("FirestoreDebug", "Error processing doc $dateStr: ${e.message}")
                         }
                     }
-                    val revenueEntry = BarEntry(0f, totalRevenue.toFloat())
-                    val expenseEntry = BarEntry(1f, totalExpense.toFloat())
+                    val revenueEntry = BarEntry(0f, (totalRevenue / scale).toFloat())
+                    val expenseEntry = BarEntry(1f, (totalExpense / scale).toFloat())
                     val entries = listOf(revenueEntry, expenseEntry)
-                    val dataSet = BarDataSet(entries, "Időszak összesítés")
+                    val dataSet = BarDataSet(listOf(revenueEntry, expenseEntry), "Napi összesítés")
                     dataSet.colors = listOf(Color.GREEN, Color.RED)
                     dataSet.valueTextColor = Color.BLACK
                     dataSet.valueTextSize = 16f
                     dataSet.valueFormatter = object : ValueFormatter() {
                         override fun getBarLabel(barEntry: BarEntry?): String {
-                            return if (barEntry?.y == 0f) "" else ElemzesActivity.formatNumber(barEntry!!.y.toDouble())
+                            return when (barEntry?.x?.toInt()) {
+                                0 -> ElemzesActivity.formatNumber(totalRevenue)
+                                1 -> ElemzesActivity.formatNumber(totalExpense)
+                                else -> ""
+                            }
                         }
                     }
+
                     val barData = BarData(dataSet)
                     barData.barWidth = 0.45f
                     chart.data = barData
                     (activity as? ElemzesActivity)?.styleBarChart(chart)
                     chart.invalidate()
                 }
+
                 .addOnFailureListener { e ->
                     Log.e("FirestoreDebug", "Hiba az időszaki adatok lekérdezése során: ${e.message}")
                     Toast.makeText(context, "Hiba az időszaki adatok lekérdezése során.", Toast.LENGTH_SHORT).show()
@@ -999,15 +1088,16 @@ class ElemzesActivity : AppCompatActivity() {
         val uid = FirebaseAuth.getInstance().currentUser?.uid ?: return
         val userDocRef = FirebaseFirestore.getInstance().collection("users").document(uid)
         val amount = when (val a = transaction["mennyiseg"]) {
-            is Double -> a
-            is Long -> a.toDouble()
-            else -> 0.0
+            is Double -> BigDecimal.valueOf(a)
+            is Long -> BigDecimal.valueOf(a.toDouble())
+            is String -> BigDecimal(a)
+            else -> BigDecimal.ZERO
         }
         val type = (transaction["tipus"] as? String)?.trim()?.toLowerCase(Locale.getDefault()) ?: ""
         val delta = when (type) {
-            "bevétel" -> -amount
-            "kiadás" -> amount
-            else -> 0.0
+            "bevétel" -> amount.negate() // levonjuk a bevételt
+            "kiadás" -> amount // visszaadjuk a kiadást
+            else -> BigDecimal.ZERO
         }
 
         FirebaseFirestore.getInstance().runTransaction { trans ->
@@ -1031,9 +1121,9 @@ class ElemzesActivity : AppCompatActivity() {
             } else {
                 trans.update(napDocRef, "tranzakciok", mutableTransactions)
             }
-            val currentBalance = userSnapshot.getDouble("aktualisPenz") ?: 0.0
-            val newBalance = currentBalance + delta
-            trans.update(userDocRef, "aktualisPenz", newBalance)
+            val currentBalance = BigDecimal.valueOf(userSnapshot.getDouble("aktualisPenz") ?: 0.0)
+            val newBalance = currentBalance.add(delta)
+            trans.update(userDocRef, "aktualisPenz", newBalance.toDouble())
             newBalance
         }.addOnSuccessListener { newBalance ->
             Log.d("ElemzesActivity", "Main balance updated to $newBalance after deletion")
@@ -1054,15 +1144,16 @@ class ElemzesActivity : AppCompatActivity() {
         val uid = FirebaseAuth.getInstance().currentUser?.uid ?: return
         val userDocRef = FirebaseFirestore.getInstance().collection("users").document(uid)
         val amount = when (val a = transaction["mennyiseg"]) {
-            is Double -> a
-            is Long -> a.toDouble()
-            else -> 0.0
+            is Double -> BigDecimal.valueOf(a)
+            is Long -> BigDecimal.valueOf(a.toDouble())
+            is String -> BigDecimal(a)
+            else -> BigDecimal.ZERO
         }
         val type = (transaction["tipus"] as? String)?.trim()?.toLowerCase(Locale.getDefault()) ?: ""
         val delta = when (type) {
             "bevétel" -> amount
-            "kiadás" -> -amount
-            else -> 0.0
+            "kiadás" -> amount.negate()
+            else -> BigDecimal.ZERO
         }
 
         FirebaseFirestore.getInstance().runTransaction { trans ->
@@ -1073,6 +1164,7 @@ class ElemzesActivity : AppCompatActivity() {
             } catch (e: Exception) {
                 null
             }
+
             val currentTransactions = napSnapshot?.get("tranzakciok") as? List<Map<String, Any>> ?: emptyList()
             val mutableTransactions = currentTransactions.toMutableList()
             mutableTransactions.add(transaction)
@@ -1081,9 +1173,10 @@ class ElemzesActivity : AppCompatActivity() {
             } else {
                 trans.update(napDocRef, "tranzakciok", mutableTransactions)
             }
-            val currentBalance = userSnapshot.getDouble("aktualisPenz") ?: 0.0
-            val newBalance = currentBalance + delta
-            trans.update(userDocRef, "aktualisPenz", newBalance)
+
+            val currentBalance = BigDecimal.valueOf(userSnapshot.getDouble("aktualisPenz") ?: 0.0)
+            val newBalance = currentBalance.add(delta)
+            trans.update(userDocRef, "aktualisPenz", newBalance.toDouble())
             newBalance
         }.addOnSuccessListener { newBalance ->
             Log.d("ElemzesActivity", "Main balance updated to $newBalance after addition")
