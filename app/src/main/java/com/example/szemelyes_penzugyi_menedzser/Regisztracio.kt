@@ -17,7 +17,7 @@ import android.view.ViewGroup
 import android.widget.TextView
 import com.google.firebase.auth.FirebaseAuthUserCollisionException
 
-class Regisztracio : AppCompatActivity() {
+class Regisztracio :  BaseActivity() {
 
     private lateinit var mAuth: FirebaseAuth
 

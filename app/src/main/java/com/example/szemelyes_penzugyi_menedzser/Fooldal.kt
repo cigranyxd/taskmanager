@@ -25,7 +25,7 @@ import java.text.DecimalFormat
 import java.text.DecimalFormatSymbols
 import java.util.Locale
 
-class Telefonszam : AppCompatActivity() {
+class Telefonszam :  BaseActivity() {
 
     companion object {
         var aktualisOldalIndex = 0
@@ -132,7 +132,7 @@ class Telefonszam : AppCompatActivity() {
     }
 
     private fun PenzosszegFrissites() {
-        AktualisPenzEditText.setText(formatAmount(aktualisPenz))
+        AktualisPenzEditText.setText("${formatAmount(aktualisPenz)} Ft")
     }
 
     private fun saveBalanceToFirestore(amount: BigDecimal) {
@@ -149,7 +149,7 @@ class Telefonszam : AppCompatActivity() {
 
     private fun setupSpinner() {
         val lehetosegek = listOf("Főoldal", "Elemzés", "Kategóriák", "Rendszeres kifizetések", "Beállítások", "Kijelentkezés")
-        val adapter = ArrayAdapter(this, R.layout.spinner_item, lehetosegek)
+        val adapter = CustomFontSizeSpinnerAdapter(this, R.layout.spinner_item, lehetosegek)
         adapter.setDropDownViewResource(R.layout.spinner_item)
         spinner.adapter = adapter
 

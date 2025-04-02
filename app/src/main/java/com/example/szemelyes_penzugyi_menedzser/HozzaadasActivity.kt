@@ -18,7 +18,7 @@ import java.text.DecimalFormatSymbols
 import java.time.LocalDate
 import java.util.Locale
 
-class HozzaadasActivity : AppCompatActivity() {
+class HozzaadasActivity :  BaseActivity() {
 
     private var kivalasztottKategoria: String? = null
     private var tranzakcioTipus: String? = null

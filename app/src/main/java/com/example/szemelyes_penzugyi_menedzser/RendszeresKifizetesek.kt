@@ -37,7 +37,7 @@ import java.util.Locale
 import java.util.concurrent.TimeUnit
 
 @Suppress("DEPRECATION")
-class RendszeresKifizetesek : AppCompatActivity() {
+class RendszeresKifizetesek :  BaseActivity() {
 
     private lateinit var adatbazis: FirebaseFirestore
     private lateinit var auth: FirebaseAuth
@@ -86,7 +86,7 @@ class RendszeresKifizetesek : AppCompatActivity() {
         // Navigációs Spinner beállítása a saját spinner_item dizájnnal
         navigaciosSpinner = findViewById(R.id.lenyilo_menu)
         val lehetosegek = listOf("Főoldal", "Elemzés", "Kategóriák", "Rendszeres kifizetések", "Beállítások", "Kijelentkezés")
-        val navigaciosAdapter = ArrayAdapter(this, R.layout.spinner_item, lehetosegek)
+        val navigaciosAdapter = CustomFontSizeSpinnerAdapter(this, R.layout.spinner_item, lehetosegek)
         navigaciosAdapter.setDropDownViewResource(R.layout.spinner_item)
         navigaciosSpinner.adapter = navigaciosAdapter
         navigaciosSpinner.setSelection(3)
@@ -113,7 +113,7 @@ class RendszeresKifizetesek : AppCompatActivity() {
         // Időszakválasztó Spinner beállítása, szintén a saját spinner_item dizájnnal
         idoszakSpinner = findViewById(R.id.periodSpinner)
         val idoszakOpciók = listOf("Naponta", "Hetente", "Havonta", "Évente")
-        val idoszakAdapter = ArrayAdapter(this, R.layout.spinner_item, idoszakOpciók)
+        val idoszakAdapter = CustomFontSizeSpinnerAdapter(this, R.layout.spinner_item, idoszakOpciók)
         idoszakAdapter.setDropDownViewResource(R.layout.spinner_item)
         idoszakSpinner.adapter = idoszakAdapter
         idoszakSpinner.setSelection(2)

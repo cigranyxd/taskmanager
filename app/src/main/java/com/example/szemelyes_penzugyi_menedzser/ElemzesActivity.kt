@@ -40,7 +40,7 @@ import com.google.firebase.auth.FirebaseAuth
 import java.math.BigDecimal
 import android.annotation.SuppressLint as SuppressLint1
 
-class ElemzesActivity : AppCompatActivity() {
+class ElemzesActivity : BaseActivity() {
 
     private lateinit var spinner: Spinner
     private val aktualisOldal = "Elemzés"
@@ -123,6 +123,7 @@ class ElemzesActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_elemzes)
+        applyFontSizeToCurrentActivity()
 
         val currentUser = FirebaseManager.auth.currentUser
         if (currentUser == null) {
@@ -175,7 +176,7 @@ class ElemzesActivity : AppCompatActivity() {
 
         spinner = findViewById(R.id.lenyilo_menu)
         val lehetosegek = listOf("Főoldal", "Elemzés", "Kategóriák", "Rendszeres kifizetések", "Beállítások", "Kijelentkezés")
-        val spinnerAdapter = ArrayAdapter(this, R.layout.spinner_item, lehetosegek)
+        val spinnerAdapter = CustomFontSizeSpinnerAdapter(this, R.layout.spinner_item, lehetosegek)
         spinnerAdapter.setDropDownViewResource(R.layout.spinner_item)
         spinner.adapter = spinnerAdapter
 
@@ -211,6 +212,8 @@ class ElemzesActivity : AppCompatActivity() {
         supportFragmentManager.beginTransaction()
             .replace(R.id.oszlopDiagram, NapFragment())
             .commit()
+
+
     }
 
     override fun onResume() {
@@ -550,7 +553,7 @@ class ElemzesActivity : AppCompatActivity() {
                             val type = (trans["tipus"] as? String)?.trim()?.toLowerCase(Locale.getDefault()) ?: ""
                             val transactionView = (activity as ElemzesActivity)
                                 .createTransactionView(category, amount, type, trans, doc.id)
-                            categoriesLayout.addView(transactionView)
+                            categoriesLayout.addView(transactionView, 0)
                             if (type == "bevétel") totalRevenue += amount
                             else if (type == "kiadás") totalExpense += amount
                         }
@@ -648,7 +651,7 @@ class ElemzesActivity : AppCompatActivity() {
                             val type = (trans["tipus"] as? String)?.trim()?.toLowerCase(Locale.getDefault()) ?: ""
                             val transactionView = (activity as ElemzesActivity)
                                 .createTransactionView(category, amount, type, trans, doc.id)
-                            categoriesLayout.addView(transactionView)
+                            categoriesLayout.addView(transactionView, 0)
                             if (type == "bevétel") totalRevenue += amount
                             else if (type == "kiadás") totalExpense += amount
                         }
@@ -1017,7 +1020,7 @@ class ElemzesActivity : AppCompatActivity() {
                                 setMargins(0, 8, 0, 4)
                             }
                         }
-                        categoriesLayout.addView(dateHeader)
+                        categoriesLayout.addView(dateHeader, 0)
                         try {
                             val sortedTransactions = if (transactions.isNotEmpty() && transactions[0].containsKey("timestamp"))
                                 transactions.sortedByDescending { it["timestamp"] as? Long ?: 0L }

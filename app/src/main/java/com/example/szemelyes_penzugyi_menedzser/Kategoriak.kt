@@ -26,7 +26,7 @@ import java.util.Locale
 // Data class az időszak elemekhez
 data class PeriodusElem(val megjelenitoSzoveg: String, val kezdoDatum: LocalDate, val zaroDatum: LocalDate)
 
-class Kategoriak : AppCompatActivity() {
+class Kategoriak :  BaseActivity() {
 
     // A beépített kategória ikon térkép – a kulcsokat normalizáljuk (kisbetűs, trim)
     val kategoriaIkonTerkep = mapOf(
@@ -102,7 +102,7 @@ class Kategoriak : AppCompatActivity() {
         // Navigációs spinner inicializálása (Főoldal, Elemzés, stb.)
         navigaciosSpinner = findViewById(R.id.lenyilo_menu)
         val lehetosegek = listOf("Főoldal", "Elemzés", "Kategóriák", "Rendszeres kifizetések", "Beállítások", "Kijelentkezés")
-        val spinnerAdapter = ArrayAdapter(this, R.layout.spinner_item, lehetosegek)
+        val spinnerAdapter = CustomFontSizeSpinnerAdapter(this, R.layout.spinner_item, lehetosegek)
         spinnerAdapter.setDropDownViewResource(R.layout.spinner_item)
         navigaciosSpinner.adapter = spinnerAdapter
 

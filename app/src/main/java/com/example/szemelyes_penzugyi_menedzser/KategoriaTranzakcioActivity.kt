@@ -17,7 +17,7 @@ import java.time.LocalDate
 import java.time.temporal.TemporalAdjusters
 import java.util.Locale
 
-class KategoriaTranzakciokActivity : AppCompatActivity() {
+class KategoriaTranzakciokActivity :  BaseActivity() {
 
     private lateinit var auth: FirebaseAuth
     private lateinit var firestore: FirebaseFirestore

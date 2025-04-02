@@ -14,7 +14,7 @@ import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import com.google.firebase.auth.FirebaseAuth
 
-class Bejelentkezes : AppCompatActivity() {
+class Bejelentkezes : BaseActivity() {
 
     private lateinit var auth: FirebaseAuth
 

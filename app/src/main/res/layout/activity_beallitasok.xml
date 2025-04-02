@@ -33,16 +33,6 @@
         android:backgroundTint="@android:color/white"
         android:textColor="@android:color/black" />
 
-    <!-- Nyelv gomb -->
-    <Button
-        android:id="@+id/nyelv_button"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Nyelv"
-        android:layout_marginBottom="8dp"
-        android:backgroundTint="@android:color/white"
-        android:textColor="@android:color/black" />
-
     <!-- Jelszó változtatás gomb -->
     <Button
         android:id="@+id/jelszo_button"
