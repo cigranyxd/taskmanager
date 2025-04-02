@@ -3,6 +3,8 @@ package com.example.szemelyes_penzugyi_menedzser
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.text.Editable
+import android.text.TextWatcher
 import android.text.method.PasswordTransformationMethod
 import android.util.Patterns
 import android.view.View
@@ -23,7 +25,6 @@ class Bejelentkezes : AppCompatActivity() {
 
         auth = FirebaseAuth.getInstance()
 
-        // Ellenőrizzük, hogy a felhasználó már be van-e jelentkezve
         val sharedPreferences = getSharedPreferences("UserPreferences", Context.MODE_PRIVATE)
         val isLoggedIn = sharedPreferences.getBoolean("isLoggedIn", false)
         if (isLoggedIn) {
@@ -32,14 +33,38 @@ class Bejelentkezes : AppCompatActivity() {
             finish()
         }
 
-        // Eredeti bejelentkezési elemek
         val email = findViewById<EditText>(R.id.Email)
         val jelszo = findViewById<EditText>(R.id.Jelszo)
         val loginButton = findViewById<Button>(R.id.Bejelentkezes_gomb)
         val regisztracioGomb = findViewById<Button>(R.id.Regisztracio_gomb_atvezeto)
         val togglePasswordButton = findViewById<ImageButton>(R.id.togglePasswordButton)
 
-        // Alapértelmezett: a jelszó rejtett
+        val szurkeSzin = getColor(R.color.gray)
+        val feketeSzin = getColor(android.R.color.black)
+
+        email.setTextColor(szurkeSzin)
+        jelszo.setTextColor(szurkeSzin)
+
+        fun setupEditTextColorChange(editText: EditText) {
+            editText.setOnFocusChangeListener { _, hasFocus ->
+                if (hasFocus || editText.text.isNotEmpty()) {
+                    editText.setTextColor(feketeSzin)
+                }
+            }
+
+            editText.addTextChangedListener(object : TextWatcher {
+                override fun afterTextChanged(s: Editable?) {
+                    editText.setTextColor(if (s.isNullOrEmpty()) szurkeSzin else feketeSzin)
+                }
+
+                override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+                override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+            })
+        }
+
+        setupEditTextColorChange(email)
+        setupEditTextColorChange(jelszo)
+
         jelszo.transformationMethod = PasswordTransformationMethod.getInstance()
         var passwordVisible = false
 
@@ -53,7 +78,6 @@ class Bejelentkezes : AppCompatActivity() {
                 togglePasswordButton.setImageResource(R.drawable.visibility)
                 passwordVisible = true
             }
-            // Cursor pozíció megtartása
             jelszo.setSelection(jelszo.text.length)
         }
 
@@ -61,7 +85,6 @@ class Bejelentkezes : AppCompatActivity() {
             val emailText = email.text.toString()
             val jelszoText = jelszo.text.toString()
 
-            // E-mail formátum ellenőrzése
             if (!Patterns.EMAIL_ADDRESS.matcher(emailText).matches()) {
                 Toast.makeText(this, "Kérjük, adjon meg egy érvényes e-mail címet.", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
@@ -71,7 +94,6 @@ class Bejelentkezes : AppCompatActivity() {
                 auth.signInWithEmailAndPassword(emailText, jelszoText)
                     .addOnCompleteListener { task ->
                         if (task.isSuccessful) {
-                            // Ellenőrizzük, hogy az e-mail cím hitelesítve van-e
                             val user = auth.currentUser
                             if (user != null && user.isEmailVerified) {
                                 sharedPreferences.edit().putBoolean("isLoggedIn", true).apply()
@@ -96,7 +118,6 @@ class Bejelentkezes : AppCompatActivity() {
             startActivity(intent)
         }
 
-        // Forgot Password elemek
         val forgotPasswordText = findViewById<TextView>(R.id.elfelejtettemJelszavam)
         val forgotPasswordLayout = findViewById<View>(R.id.forgotPasswordLayout)
         val resetPasswordPrompt = findViewById<TextView>(R.id.resetPasswordPrompt)
@@ -105,11 +126,8 @@ class Bejelentkezes : AppCompatActivity() {
         val confirmationMessage = findViewById<TextView>(R.id.confirmationMessage)
         val backToLoginText = findViewById<TextView>(R.id.backToLoginText)
 
-        // A jelszó visszaállító felület alapértelmezett állapotban rejtve van
         forgotPasswordLayout.visibility = View.GONE
 
-        // "Elfelejtettem a jelszavam" gombra kattintva az eredeti elemek eltűnnek,
-        // és megjelenik a jelszó visszaállító felület
         forgotPasswordText.setOnClickListener {
             email.visibility = View.GONE
             jelszo.visibility = View.GONE
@@ -122,7 +140,6 @@ class Bejelentkezes : AppCompatActivity() {
             forgotPasswordLayout.visibility = View.VISIBLE
         }
 
-        // Jelszó visszaállítása gomb
         resetPasswordButton.setOnClickListener {
             val resetEmail = resetEmailInput.text.toString()
             if (!Patterns.EMAIL_ADDRESS.matcher(resetEmail).matches()) {
@@ -142,7 +159,6 @@ class Bejelentkezes : AppCompatActivity() {
             }
         }
 
-        // Vissza a kezdőképernyőre felirat
         backToLoginText.setOnClickListener {
             confirmationMessage.visibility = View.GONE
             backToLoginText.visibility = View.GONE
@@ -165,22 +181,9 @@ class Bejelentkezes : AppCompatActivity() {
         applyFontSizeToCurrentActivity()
     }
 
-    // Az XML-ből meghívható forgot password metódus
-    fun onForgotPasswordClick(view: View) {
-        findViewById<EditText>(R.id.Email).visibility = View.GONE
-        findViewById<EditText>(R.id.Jelszo).visibility = View.GONE
-        findViewById<TextView>(R.id.elfelejtettemJelszavam).visibility = View.GONE
-        findViewById<CheckBox>(R.id.Maradjak_bejelentkezve).visibility = View.GONE
-        findViewById<Button>(R.id.Bejelentkezes_gomb).visibility = View.GONE
-        findViewById<Button>(R.id.Regisztracio_gomb_atvezeto).visibility = View.GONE
-        findViewById<ImageButton>(R.id.togglePasswordButton).visibility = View.GONE
-
-        findViewById<View>(R.id.forgotPasswordLayout).visibility = View.VISIBLE
-    }
-
     private fun applyFontSizeToCurrentActivity() {
         val prefs = getSharedPreferences("UserPreferences", Context.MODE_PRIVATE)
-        val fontSize = prefs.getString("betumeret", "Közepes") ?: "Közepes"
+        val fontSize = prefs.getString("betumeret", "Kozepes") ?: "Kozepes"
         val size = when (fontSize) {
             "Kicsi" -> 12f
             "Nagy" -> 20f
