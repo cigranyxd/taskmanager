@@ -132,7 +132,7 @@ class Telefonszam :  BaseActivity() {
     }
 
     private fun PenzosszegFrissites() {
-        AktualisPenzEditText.setText("${formatAmount(aktualisPenz)} Ft")
+        AktualisPenzEditText.setText("${formatAmount(aktualisPenz)} ")
     }
 
     private fun saveBalanceToFirestore(amount: BigDecimal) {
@@ -192,7 +192,7 @@ class Telefonszam :  BaseActivity() {
             decimalSeparator = '.'
         }
         val formatter = DecimalFormat("#,###", symbols)
-        return formatter.format(amount)
+        return formatter.format(amount) + " Ft"
     }
 
     private fun createTransactionView(

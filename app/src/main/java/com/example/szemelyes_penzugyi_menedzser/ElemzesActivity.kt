@@ -53,7 +53,7 @@ class ElemzesActivity : BaseActivity() {
             nf.decimalFormatSymbols = symbols
             nf.minimumFractionDigits = 0
             nf.maximumFractionDigits = 2
-            return nf.format(value)
+            return nf.format(value) + " Ft"
         }
 
         fun scaleValueForChart(value: Double): Float {
@@ -543,7 +543,9 @@ class ElemzesActivity : BaseActivity() {
                     for (doc in querySnapshot.documents) {
                         val transactions = doc.get("tranzakciok") as? List<Map<String, Any>> ?: emptyList()
                         val sortedTransactions = transactions.sortedByDescending { it["timestamp"] as? Long ?: 0L }
-                        for (trans in sortedTransactions) {
+
+                        // Fordított sorrendű tranzakciók feldolgozása
+                        for (trans in sortedTransactions.reversed()) {
                             val amount = when (val a = trans["mennyiseg"]) {
                                 is Double -> a
                                 is Long -> a.toDouble()
@@ -582,6 +584,7 @@ class ElemzesActivity : BaseActivity() {
                 }
         }
     }
+
 
     // 2. HetFragment – Az aktuális hét adatai
     class HetFragment : Fragment() {
@@ -602,6 +605,7 @@ class ElemzesActivity : BaseActivity() {
             val categoriesLayout = requireActivity().findViewById<LinearLayout>(R.id.CategoriesLinearLayout)
             categoriesLayout.visibility = View.VISIBLE
             chart.visibility = View.VISIBLE
+            categoriesLayout.removeAllViews()
 
             if (currentUser == null) {
                 Toast.makeText(context, "Nincs bejelentkezett felhasználó!", Toast.LENGTH_SHORT).show()
@@ -614,32 +618,51 @@ class ElemzesActivity : BaseActivity() {
 
             firestore.collection("users").document(uid)
                 .collection("nap")
-                .whereGreaterThanOrEqualTo(FieldPath.documentId(), weekStart.toString())
-                .whereLessThanOrEqualTo(FieldPath.documentId(), weekEnd.toString())
-                .addSnapshotListener { querySnapshot, e ->
-                    if (!isAdded) return@addSnapshotListener
-                    categoriesLayout.removeAllViews()
-                    if (e != null) {
-                        Log.e("FirestoreDebug", "Hiba a heti adatok lekérdezése során: ${e.message}")
-                        Toast.makeText(context, "Hiba a heti adatok lekérdezése során.", Toast.LENGTH_SHORT).show()
-                        return@addSnapshotListener
+                .whereGreaterThanOrEqualTo(FieldPath.documentId(), weekStart.format(formatter))
+                .whereLessThanOrEqualTo(FieldPath.documentId(), weekEnd.format(formatter))
+                .get()
+                .addOnSuccessListener { querySnapshot ->
+                    if (!isAdded) return@addOnSuccessListener
+
+                    if (querySnapshot.isEmpty) {
+                        (activity as? ElemzesActivity)?.showNoDataOverlay(
+                            "Nincs megjeleníthető adat a választott időszakra.", chart, categoriesLayout
+                        )
+                        chart.visibility = View.INVISIBLE
+                        return@addOnSuccessListener
                     }
-                    if (querySnapshot == null || querySnapshot.isEmpty) {
-                        if (categoriesLayout.findViewWithTag<View>("noDataOverlay") == null) {
-                            (activity as? ElemzesActivity)?.showNoDataOverlay(
-                                "Nincs megjeleníthető adat a választott időszakra.",
-                                chart, categoriesLayout
-                            )
-                            chart.visibility = View.INVISIBLE
-                        }
-                        return@addSnapshotListener
-                    }
+
                     (activity as? ElemzesActivity)?.removeNoDataOverlay(chart)
                     var totalRevenue = 0.0
                     var totalExpense = 0.0
 
-                    for (doc in querySnapshot.documents) {
+                    val sortedDocs = querySnapshot.documents.sortedByDescending { LocalDate.parse(it.id, formatter) }
+
+                    for (doc in sortedDocs) {
                         val transactions = doc.get("tranzakciok") as? List<Map<String, Any>> ?: emptyList()
+                        if (transactions.isEmpty()) continue
+
+                        val dateStr = doc.id
+                        val dailyContainer = LinearLayout(requireContext()).apply {
+                            orientation = LinearLayout.VERTICAL
+                            layoutParams = LinearLayout.LayoutParams(
+                                LinearLayout.LayoutParams.MATCH_PARENT,
+                                LinearLayout.LayoutParams.WRAP_CONTENT
+                            ).apply { setMargins(0, 12, 0, 12) }
+                            tag = "container_$dateStr"
+                        }
+
+                        val dateHeader = TextView(requireContext()).apply {
+                            text = dateStr
+                            textSize = 16f
+                            setTextColor(Color.DKGRAY)
+                            layoutParams = LinearLayout.LayoutParams(
+                                LinearLayout.LayoutParams.WRAP_CONTENT,
+                                LinearLayout.LayoutParams.WRAP_CONTENT
+                            ).apply { setMargins(0, 0, 0, 8) }
+                        }
+                        dailyContainer.addView(dateHeader)
+
                         val sortedTransactions = transactions.sortedByDescending { it["timestamp"] as? Long ?: 0L }
                         for (trans in sortedTransactions) {
                             val amount = when (val a = trans["mennyiseg"]) {
@@ -648,18 +671,20 @@ class ElemzesActivity : BaseActivity() {
                                 else -> 0.0
                             }
                             val category = (trans["kategoria"] as? String)?.trim() ?: "Egyéb"
-                            val type = (trans["tipus"] as? String)?.trim()?.toLowerCase(Locale.getDefault()) ?: ""
-                            val transactionView = (activity as ElemzesActivity)
-                                .createTransactionView(category, amount, type, trans, doc.id)
-                            categoriesLayout.addView(transactionView, 0)
+                            val type = (trans["tipus"] as? String)?.trim()?.lowercase(Locale.getDefault()) ?: ""
+                            val transactionView = (activity as ElemzesActivity).createTransactionView(category, amount, type, trans, doc.id)
+                            dailyContainer.addView(transactionView)
+
                             if (type == "bevétel") totalRevenue += amount
                             else if (type == "kiadás") totalExpense += amount
                         }
+
+                        categoriesLayout.addView(dailyContainer)
                     }
+
                     val revenueEntry = BarEntry(0f, (totalRevenue / scale).toFloat())
                     val expenseEntry = BarEntry(1f, (totalExpense / scale).toFloat())
-                    val entries = listOf(revenueEntry, expenseEntry)
-                    val dataSet = BarDataSet(listOf(revenueEntry, expenseEntry), "Napi összesítés")
+                    val dataSet = BarDataSet(listOf(revenueEntry, expenseEntry), "Heti összesítés")
                     dataSet.colors = listOf(Color.GREEN, Color.RED)
                     dataSet.valueTextColor = Color.BLACK
                     dataSet.valueTextSize = 16f
@@ -680,6 +705,7 @@ class ElemzesActivity : BaseActivity() {
                 }
         }
     }
+
 
     // 3. HonapFragment – Az aktuális hónap adatai (csökkenő sorrendben)
     class HonapFragment : Fragment() {
@@ -697,15 +723,18 @@ class ElemzesActivity : BaseActivity() {
         override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
             super.onViewCreated(view, savedInstanceState)
             if (!isAdded) return
+
             val chart = requireActivity().findViewById<BarChart>(R.id.oszlopDiagram)
             val categoriesLayout = requireActivity().findViewById<LinearLayout>(R.id.CategoriesLinearLayout)
             categoriesLayout.visibility = View.VISIBLE
             chart.visibility = View.VISIBLE
+            categoriesLayout.removeAllViews()
 
             if (currentUser == null) {
                 Toast.makeText(context, "Nincs bejelentkezett felhasználó!", Toast.LENGTH_SHORT).show()
                 return
             }
+
             val uid = currentUser.uid
             val today = LocalDate.now()
             val monthStart = today.withDayOfMonth(1)
@@ -715,72 +744,69 @@ class ElemzesActivity : BaseActivity() {
                 .collection("nap")
                 .whereGreaterThanOrEqualTo(FieldPath.documentId(), monthStart.format(formatter))
                 .whereLessThanOrEqualTo(FieldPath.documentId(), monthEnd.format(formatter))
-                .addSnapshotListener { querySnapshot, e ->
-                    if (!isAdded) return@addSnapshotListener
-                    categoriesLayout.removeAllViews()
-                    if (e != null) {
-                        Log.e("FirestoreDebug", "Hiba a havi adatok lekérdezése során: ${e.message}")
-                        Toast.makeText(context, "Hiba a havi adatok lekérdezése során.", Toast.LENGTH_SHORT).show()
-                        return@addSnapshotListener
+                .get()
+                .addOnSuccessListener { querySnapshot ->
+                    if (!isAdded) return@addOnSuccessListener
+
+                    if (querySnapshot.isEmpty) {
+                        (activity as? ElemzesActivity)?.showNoDataOverlay(
+                            "Nincs megjeleníthető adat a választott időszakra.",
+                            chart, categoriesLayout
+                        )
+                        chart.visibility = View.INVISIBLE
+                        return@addOnSuccessListener
                     }
-                    if (querySnapshot == null || querySnapshot.isEmpty) {
-                        if (categoriesLayout.findViewWithTag<View>("noDataOverlay") == null) {
-                            (activity as? ElemzesActivity)?.showNoDataOverlay(
-                                "Nincs megjeleníthető adat a választott időszakra.",
-                                chart, categoriesLayout
-                            )
-                            chart.visibility = View.INVISIBLE
-                        }
-                        return@addSnapshotListener
-                    }
+
                     (activity as? ElemzesActivity)?.removeNoDataOverlay(chart)
                     var totalRevenue = 0.0
                     var totalExpense = 0.0
 
                     val sortedDocs = querySnapshot.documents.sortedByDescending { LocalDate.parse(it.id, formatter) }
+
                     for (doc in sortedDocs) {
                         val transactions = doc.get("tranzakciok") as? List<Map<String, Any>> ?: emptyList()
-                        if (transactions.isEmpty()) {
-                            firestore.collection("users").document(uid)
-                                .collection("nap").document(doc.id).delete()
-                            continue
-                        }
+                        if (transactions.isEmpty()) continue
+
                         val dateStr = doc.id
+                        val dailyContainer = LinearLayout(requireContext()).apply {
+                            orientation = LinearLayout.VERTICAL
+                            layoutParams = LinearLayout.LayoutParams(
+                                LinearLayout.LayoutParams.MATCH_PARENT,
+                                LinearLayout.LayoutParams.WRAP_CONTENT
+                            ).apply { setMargins(0, 12, 0, 12) }
+                        }
+
                         val dateHeader = TextView(requireContext()).apply {
                             text = dateStr
                             textSize = 16f
                             setTextColor(Color.DKGRAY)
-                            layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT).apply {
-                                setMargins(0, 8, 0, 4)
-                            }
+                            layoutParams = LinearLayout.LayoutParams(
+                                LinearLayout.LayoutParams.WRAP_CONTENT,
+                                LinearLayout.LayoutParams.WRAP_CONTENT
+                            ).apply { setMargins(0, 0, 0, 8) }
                         }
-                        categoriesLayout.addView(dateHeader, 0)
-                        try {
-                            val sortedTransactions = if (transactions.isNotEmpty() && transactions[0].containsKey("timestamp"))
-                                transactions.sortedByDescending { it["timestamp"] as? Long ?: 0L }
-                            else transactions.reversed()
+                        dailyContainer.addView(dateHeader)
 
-                            for (trans in sortedTransactions) {
-                                val amount = when (val a = trans["mennyiseg"]) {
-                                    is Double -> a
-                                    is Long -> a.toDouble()
-                                    else -> 0.0
-                                }
-                                val category = (trans["kategoria"] as? String)?.trim() ?: "Egyéb"
-                                val type = (trans["tipus"] as? String)?.trim()?.toLowerCase(Locale.getDefault()) ?: ""
-                                val transactionView = (activity as ElemzesActivity).createTransactionView(category, amount, type, trans, doc.id)
-                                categoriesLayout.addView(transactionView, 0)
-                                if (type == "bevétel") totalRevenue += amount
-                                else if (type == "kiadás") totalExpense += amount
+                        val sortedTransactions = transactions.sortedByDescending { it["timestamp"] as? Long ?: 0L }
+                        for (trans in sortedTransactions) {
+                            val amount = when (val a = trans["mennyiseg"]) {
+                                is Double -> a
+                                is Long -> a.toDouble()
+                                else -> 0.0
                             }
-                        } catch (e: Exception) {
-                            Log.e("FirestoreDebug", "Error processing doc $dateStr: ${e.message}")
+                            val category = (trans["kategoria"] as? String)?.trim() ?: "Egyéb"
+                            val type = (trans["tipus"] as? String)?.trim()?.lowercase(Locale.getDefault()) ?: ""
+                            val transactionView = (activity as ElemzesActivity).createTransactionView(category, amount, type, trans, doc.id)
+                            dailyContainer.addView(transactionView)
+
+                            if (type == "bevétel") totalRevenue += amount else if (type == "kiadás") totalExpense += amount
                         }
+                        categoriesLayout.addView(dailyContainer)
                     }
+
                     val revenueEntry = BarEntry(0f, (totalRevenue / scale).toFloat())
                     val expenseEntry = BarEntry(1f, (totalExpense / scale).toFloat())
-                    val entries = listOf(revenueEntry, expenseEntry)
-                    val dataSet = BarDataSet(listOf(revenueEntry, expenseEntry), "Napi összesítés")
+                    val dataSet = BarDataSet(listOf(revenueEntry, expenseEntry), "Havi összesítés")
                     dataSet.colors = listOf(Color.GREEN, Color.RED)
                     dataSet.valueTextColor = Color.BLACK
                     dataSet.valueTextSize = 16f
@@ -793,6 +819,7 @@ class ElemzesActivity : BaseActivity() {
                             }
                         }
                     }
+
                     val barData = BarData(dataSet)
                     barData.barWidth = 0.45f
                     chart.data = barData
@@ -801,6 +828,10 @@ class ElemzesActivity : BaseActivity() {
                 }
         }
     }
+
+
+
+
 
     // 4. EvFragment – Az aktuális év adatai (csökkenő sorrendben)
     class EvFragment : Fragment() {
@@ -818,6 +849,7 @@ class ElemzesActivity : BaseActivity() {
         override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
             super.onViewCreated(view, savedInstanceState)
             if (!isAdded) return
+
             val chart = requireActivity().findViewById<BarChart>(R.id.oszlopDiagram)
             val categoriesLayout = requireActivity().findViewById<LinearLayout>(R.id.CategoriesLinearLayout)
             categoriesLayout.visibility = View.VISIBLE
@@ -828,6 +860,7 @@ class ElemzesActivity : BaseActivity() {
                 Toast.makeText(context, "Nincs bejelentkezett felhasználó!", Toast.LENGTH_SHORT).show()
                 return
             }
+
             val uid = currentUser.uid
             val yearStart = LocalDate.of(LocalDate.now().year, 1, 1)
             val yearEnd = LocalDate.of(LocalDate.now().year, 12, 31)
@@ -839,64 +872,63 @@ class ElemzesActivity : BaseActivity() {
                 .get()
                 .addOnSuccessListener { querySnapshot ->
                     if (!isAdded) return@addOnSuccessListener
+
                     if (querySnapshot.isEmpty) {
-                        if (categoriesLayout.findViewWithTag<View>("noDataOverlay") == null) {
-                            (activity as? ElemzesActivity)?.showNoDataOverlay(
-                                "Nincs megjeleníthető adat a választott időszakra.",
-                                chart, categoriesLayout
-                            )
-                            chart.visibility = View.INVISIBLE
-                        }
+                        (activity as? ElemzesActivity)?.showNoDataOverlay("Nincs megjeleníthető adat a választott időszakra.", chart, categoriesLayout)
+                        chart.visibility = View.INVISIBLE
                         return@addOnSuccessListener
                     }
+
                     (activity as? ElemzesActivity)?.removeNoDataOverlay(chart)
                     var totalRevenue = 0.0
                     var totalExpense = 0.0
 
                     val sortedDocs = querySnapshot.documents.sortedByDescending { LocalDate.parse(it.id, formatter) }
+
                     for (doc in sortedDocs) {
                         val transactions = doc.get("tranzakciok") as? List<Map<String, Any>> ?: emptyList()
-                        if (transactions.isEmpty()) {
-                            firestore.collection("users").document(uid)
-                                .collection("nap").document(doc.id).delete()
-                            continue
-                        }
+                        if (transactions.isEmpty()) continue
+
                         val dateStr = doc.id
+                        val dailyContainer = LinearLayout(requireContext()).apply {
+                            orientation = LinearLayout.VERTICAL
+                            layoutParams = LinearLayout.LayoutParams(
+                                LinearLayout.LayoutParams.MATCH_PARENT,
+                                LinearLayout.LayoutParams.WRAP_CONTENT
+                            ).apply { setMargins(0, 12, 0, 12) }
+                        }
+
                         val dateHeader = TextView(requireContext()).apply {
                             text = dateStr
                             textSize = 16f
                             setTextColor(Color.DKGRAY)
-                            layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT).apply {
-                                setMargins(0, 8, 0, 4)
-                            }
+                            layoutParams = LinearLayout.LayoutParams(
+                                LinearLayout.LayoutParams.WRAP_CONTENT,
+                                LinearLayout.LayoutParams.WRAP_CONTENT
+                            ).apply { setMargins(0, 0, 0, 8) }
                         }
-                        categoriesLayout.addView(dateHeader, 0)
-                        try {
-                            val sortedTransactions = if (transactions.isNotEmpty() && transactions[0].containsKey("timestamp"))
-                                transactions.sortedByDescending { it["timestamp"] as? Long ?: 0L }
-                            else transactions.reversed()
+                        dailyContainer.addView(dateHeader)
 
-                            for (trans in sortedTransactions) {
-                                val amount = when (val a = trans["mennyiseg"]) {
-                                    is Double -> a
-                                    is Long -> a.toDouble()
-                                    else -> 0.0
-                                }
-                                val category = (trans["kategoria"] as? String)?.trim() ?: "Egyéb"
-                                val type = (trans["tipus"] as? String)?.trim()?.toLowerCase(Locale.getDefault()) ?: ""
-                                val transactionView = (activity as ElemzesActivity).createTransactionView(category, amount, type, trans, doc.id)
-                                categoriesLayout.addView(transactionView, 0)
-                                if (type == "bevétel") totalRevenue += amount
-                                else if (type == "kiadás") totalExpense += amount
+                        val sortedTransactions = transactions.sortedByDescending { it["timestamp"] as? Long ?: 0L }
+                        for (trans in sortedTransactions) {
+                            val amount = when (val a = trans["mennyiseg"]) {
+                                is Double -> a
+                                is Long -> a.toDouble()
+                                else -> 0.0
                             }
-                        } catch (e: Exception) {
-                            Log.e("FirestoreDebug", "Error processing doc $dateStr: ${e.message}")
+                            val category = (trans["kategoria"] as? String)?.trim() ?: "Egyéb"
+                            val type = (trans["tipus"] as? String)?.trim()?.lowercase(Locale.getDefault()) ?: ""
+                            val transactionView = (activity as ElemzesActivity).createTransactionView(category, amount, type, trans, doc.id)
+                            dailyContainer.addView(transactionView)
+
+                            if (type == "bevétel") totalRevenue += amount else if (type == "kiadás") totalExpense += amount
                         }
+                        categoriesLayout.addView(dailyContainer)
                     }
+
                     val revenueEntry = BarEntry(0f, (totalRevenue / scale).toFloat())
                     val expenseEntry = BarEntry(1f, (totalExpense / scale).toFloat())
-                    val entries = listOf(revenueEntry, expenseEntry)
-                    val dataSet = BarDataSet(listOf(revenueEntry, expenseEntry), "Napi összesítés")
+                    val dataSet = BarDataSet(listOf(revenueEntry, expenseEntry), "Éves összesítés")
                     dataSet.colors = listOf(Color.GREEN, Color.RED)
                     dataSet.valueTextColor = Color.BLACK
                     dataSet.valueTextSize = 16f
@@ -918,6 +950,8 @@ class ElemzesActivity : BaseActivity() {
                 }
         }
     }
+
+
 
     // 5. IdoszakFragment – Egy egyedi időszak adatai (csökkenő sorrendben)
     class IdoszakFragment : Fragment() {
@@ -962,16 +996,12 @@ class ElemzesActivity : BaseActivity() {
                                 Toast.makeText(context, "A végdátum nem lehet korábbi a kezdőnél!", Toast.LENGTH_SHORT).show()
                             }
                         },
-                        today.year,
-                        today.monthValue - 1,
-                        today.dayOfMonth
+                        today.year, today.monthValue - 1, today.dayOfMonth
                     )
                     endPicker.setTitle("Válassza ki a végdátumot")
                     endPicker.show()
                 },
-                today.year,
-                today.monthValue - 1,
-                today.dayOfMonth
+                today.year, today.monthValue - 1, today.dayOfMonth
             )
             startPicker.setTitle("Válassza ki a kezdő dátumot")
             startPicker.show()
@@ -993,60 +1023,63 @@ class ElemzesActivity : BaseActivity() {
                 .get()
                 .addOnSuccessListener { querySnapshot ->
                     if (querySnapshot.isEmpty) {
-                        if (categoriesLayout.findViewWithTag<View>("noDataOverlay") == null) {
-                            (activity as? ElemzesActivity)?.showNoDataOverlay("Nincs megjeleníthető adat a választott időszakra.", chart, categoriesLayout)
-                            chart.visibility = View.INVISIBLE
-                        }
+                        (activity as? ElemzesActivity)?.showNoDataOverlay("Nincs megjeleníthető adat a választott időszakra.", chart, categoriesLayout)
+                        chart.visibility = View.INVISIBLE
                         return@addOnSuccessListener
                     }
                     (activity as? ElemzesActivity)?.removeNoDataOverlay(chart)
+
                     var totalRevenue = 0.0
                     var totalExpense = 0.0
 
+                    // Fordított sorrendbe rakjuk a dokumentumokat, hogy a legújabbak legyenek elöl
                     val sortedDocs = querySnapshot.documents.sortedByDescending { LocalDate.parse(it.id) }
+
                     for (doc in sortedDocs) {
                         val transactions = doc.get("tranzakciok") as? List<Map<String, Any>> ?: emptyList()
-                        if (transactions.isEmpty()) {
-                            firestore.collection("users").document(uid)
-                                .collection("nap").document(doc.id).delete()
-                            continue
-                        }
+                        if (transactions.isEmpty()) continue
+
                         val dateStr = doc.id
+                        val dailyContainer = LinearLayout(requireContext()).apply {
+                            orientation = LinearLayout.VERTICAL
+                            layoutParams = LinearLayout.LayoutParams(
+                                LinearLayout.LayoutParams.MATCH_PARENT,
+                                LinearLayout.LayoutParams.WRAP_CONTENT
+                            ).apply { setMargins(0, 12, 0, 12) }
+                        }
+
                         val dateHeader = TextView(requireContext()).apply {
                             text = dateStr
                             textSize = 16f
                             setTextColor(Color.DKGRAY)
-                            layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT).apply {
-                                setMargins(0, 8, 0, 4)
-                            }
+                            layoutParams = LinearLayout.LayoutParams(
+                                LinearLayout.LayoutParams.WRAP_CONTENT,
+                                LinearLayout.LayoutParams.WRAP_CONTENT
+                            ).apply { setMargins(0, 0, 0, 8) }
                         }
-                        categoriesLayout.addView(dateHeader, 0)
-                        try {
-                            val sortedTransactions = if (transactions.isNotEmpty() && transactions[0].containsKey("timestamp"))
-                                transactions.sortedByDescending { it["timestamp"] as? Long ?: 0L }
-                            else transactions.reversed()
+                        dailyContainer.addView(dateHeader)
 
-                            for (trans in sortedTransactions) {
-                                val amount = when (val a = trans["mennyiseg"]) {
-                                    is Double -> a
-                                    is Long -> a.toDouble()
-                                    else -> 0.0
-                                }
-                                val category = (trans["kategoria"] as? String)?.trim() ?: "Egyéb"
-                                val type = (trans["tipus"] as? String)?.trim()?.toLowerCase(Locale.getDefault()) ?: ""
-                                val transactionView = (activity as ElemzesActivity).createTransactionView(category, amount, type, trans, doc.id)
-                                categoriesLayout.addView(transactionView, 0)
-                                if (type == "bevétel") totalRevenue += amount
-                                else if (type == "kiadás") totalExpense += amount
+                        // A tranzakciók rendezése a legújabb tranzakcióval elöl
+                        val sortedTransactions = transactions.sortedByDescending { it["timestamp"] as? Long ?: 0L }
+                        for (trans in sortedTransactions) {
+                            val amount = when (val a = trans["mennyiseg"]) {
+                                is Double -> a
+                                is Long -> a.toDouble()
+                                else -> 0.0
                             }
-                        } catch (e: Exception) {
-                            Log.e("FirestoreDebug", "Error processing doc $dateStr: ${e.message}")
+                            val category = (trans["kategoria"] as? String)?.trim() ?: "Egyéb"
+                            val type = (trans["tipus"] as? String)?.trim()?.lowercase(Locale.getDefault()) ?: ""
+                            val transactionView = (activity as ElemzesActivity).createTransactionView(category, amount, type, trans, doc.id)
+                            dailyContainer.addView(transactionView)
+
+                            if (type == "bevétel") totalRevenue += amount else if (type == "kiadás") totalExpense += amount
                         }
+                        categoriesLayout.addView(dailyContainer)
                     }
+
                     val revenueEntry = BarEntry(0f, (totalRevenue / scale).toFloat())
                     val expenseEntry = BarEntry(1f, (totalExpense / scale).toFloat())
-                    val entries = listOf(revenueEntry, expenseEntry)
-                    val dataSet = BarDataSet(listOf(revenueEntry, expenseEntry), "Napi összesítés")
+                    val dataSet = BarDataSet(listOf(revenueEntry, expenseEntry), "Időszaki összesítés")
                     dataSet.colors = listOf(Color.GREEN, Color.RED)
                     dataSet.valueTextColor = Color.BLACK
                     dataSet.valueTextSize = 16f
@@ -1066,13 +1099,14 @@ class ElemzesActivity : BaseActivity() {
                     (activity as? ElemzesActivity)?.styleBarChart(chart)
                     chart.invalidate()
                 }
-
                 .addOnFailureListener { e ->
                     Log.e("FirestoreDebug", "Hiba az időszaki adatok lekérdezése során: ${e.message}")
                     Toast.makeText(context, "Hiba az időszaki adatok lekérdezése során.", Toast.LENGTH_SHORT).show()
                 }
         }
     }
+
+
 
     // 6. DefaultFragment – fallback elrendezés
     inner class DefaultFragment : Fragment() {
@@ -1098,8 +1132,8 @@ class ElemzesActivity : BaseActivity() {
         }
         val type = (transaction["tipus"] as? String)?.trim()?.toLowerCase(Locale.getDefault()) ?: ""
         val delta = when (type) {
-            "bevétel" -> amount.negate() // levonjuk a bevételt
-            "kiadás" -> amount // visszaadjuk a kiadást
+            "bevétel" -> amount.negate()
+            "kiadás" -> amount
             else -> BigDecimal.ZERO
         }
 
@@ -1131,6 +1165,16 @@ class ElemzesActivity : BaseActivity() {
         }.addOnSuccessListener { newBalance ->
             Log.d("ElemzesActivity", "Main balance updated to $newBalance after deletion")
             onSuccess()
+
+            // ÚJ: ha a tranzakciós blokk (napiContainer) üres maradt, távolítsuk el azt is a nézetből
+            val mainLayout = findViewById<LinearLayout>(R.id.CategoriesLinearLayout)
+            val parentView = currentFocus?.parent as? LinearLayout ?: return@addOnSuccessListener
+            val container = parentView.parent as? LinearLayout ?: return@addOnSuccessListener
+            if (container.childCount <= 1) {
+                // csak a dátum TextView maradt
+                (container.parent as? LinearLayout)?.removeView(container)
+            }
+
         }.addOnFailureListener { e ->
             Log.e("ElemzesActivity", "Failed to delete transaction: ${e.message}")
             onFailure(e)
