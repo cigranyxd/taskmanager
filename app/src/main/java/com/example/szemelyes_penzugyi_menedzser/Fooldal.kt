@@ -16,6 +16,8 @@ import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.work.OneTimeWorkRequestBuilder
+import androidx.work.WorkManager
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FieldPath
 import com.google.firebase.firestore.FirebaseFirestore
@@ -42,6 +44,9 @@ class Telefonszam :  BaseActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContentView(R.layout.activity_fooldal)
+
+        val autoLevonas = OneTimeWorkRequestBuilder<RendszeresLevonásWorker>().build()
+        WorkManager.getInstance(this).enqueue(autoLevonas)
 
         aktualisPenzTextView = findViewById(R.id.JelenlegiText)
         AktualisPenzEditText = findViewById(R.id.Aktualis_penz)

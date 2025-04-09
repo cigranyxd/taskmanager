@@ -1,15 +1,19 @@
 package com.example.szemelyes_penzugyi_menedzser
 
 import android.content.Context
+import android.util.Log
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
 import com.google.firebase.Timestamp
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.tasks.await
+import java.util.*
 
-class RendszeresLevonásWorker(context: Context, workerParams: WorkerParameters) :
-    CoroutineWorker(context, workerParams) {
+class RendszeresLevonásWorker(
+    context: Context,
+    params: WorkerParameters
+) : CoroutineWorker(context, params) {
 
     private val adatbazis = FirebaseFirestore.getInstance()
     private val auth = FirebaseAuth.getInstance()
@@ -17,58 +21,82 @@ class RendszeresLevonásWorker(context: Context, workerParams: WorkerParameters)
     override suspend fun doWork(): Result {
         val felhasznalo = auth.currentUser
         if (felhasznalo == null) {
-            return Result.success()  // Ha nincs felhasználó, sikeresen befejezi a munkát
+            Log.d("RendszeresLevonásWorker", "Nincs bejelentkezett felhasználó.")
+            return Result.success()
         }
 
         val felhasznaloId = felhasznalo.uid
+        val docId = inputData.getString("docId")
         val aktualisIdoMillis = System.currentTimeMillis()
 
         try {
-            // Lekérdezzük a rendszeres kifizetéseket
-            val kifizetesek = adatbazis.collection("users")
-                .document(felhasznaloId)
-                .collection("kifizetesek")
-                .get()
-                .await()
+            val kifizetesek = if (docId != null) {
+                listOf(
+                    adatbazis.collection("users")
+                        .document(felhasznaloId)
+                        .collection("kifizetesek")
+                        .document(docId)
+                        .get()
+                        .await()
+                )
+            } else {
+                adatbazis.collection("users")
+                    .document(felhasznaloId)
+                    .collection("kifizetesek")
+                    .get()
+                    .await()
+            }
 
             for (dokumentum in kifizetesek) {
-                val utolsoLevonasMillis = dokumentum.getTimestamp("utolsoLevonas")?.toDate()?.time ?: 0L
-                val period = dokumentum.getString("period") ?: continue
-                val kifizetesOsszeg = dokumentum.getDouble("osszeg") ?: continue
+                if (!dokumentum.exists()) continue
 
-                // Intervallumok millimásodpercben
+                val docAzonosito = dokumentum.id
+                val utolsoLevonas = dokumentum.getTimestamp("utolsoLevonas")?.toDate() ?: Date(0)
+                val utolsoLevonasMillis = utolsoLevonas.time
+                val period = dokumentum.getString("period") ?: continue
+                val osszeg = dokumentum.getDouble("osszeg") ?: continue
+
                 val intervallumMillis = when (period) {
                     "Naponta" -> 24 * 60 * 60 * 1000L
                     "Hetente" -> 7 * 24 * 60 * 60 * 1000L
-                    "Havonta" -> 30 * 24 * 60 * 60 * 1000L
-                    "Évente" -> 365 * 24 * 60 * 60 * 1000L
+                    "Havonta" -> 30L * 24 * 60 * 60 * 1000
+                    "Évente" -> 365L * 24 * 60 * 60 * 1000
                     else -> 0L
                 }
 
-                // Ellenőrizzük, hogy elég idő telt-e el az utolsó levonás óta
-                if (intervallumMillis > 0 && aktualisIdoMillis - utolsoLevonasMillis >= intervallumMillis) {
-                    val felhasznaloDok = adatbazis.collection("users").document(felhasznaloId)
+                val eltelt = aktualisIdoMillis - utolsoLevonasMillis
 
-                    // Tranzakciót hajtunk végre az egyenleg frissítésére
-                    adatbazis.runTransaction { tranzakcio ->
-                        val snapshot = tranzakcio.get(felhasznaloDok)
-                        val aktualisEgyenleg = snapshot.getDouble("aktualisPenz") ?: 0.0
+                Log.d("RendszeresLevonásWorker", "Dokumentum: $docAzonosito, Period: $period, Eltelt: $eltelt ms")
 
-                        // Ellenőrizzük, hogy van elegendő egyenleg
-                        if (aktualisEgyenleg >= kifizetesOsszeg) {
-                            tranzakcio.update(felhasznaloDok, "aktualisPenz", aktualisEgyenleg - kifizetesOsszeg)
-                        }
-                    }.addOnSuccessListener {
-                        // Frissítjük a 'utolsoLevonas' mezőt
-                        dokumentum.reference.update("utolsoLevonas", Timestamp.now())
+                if (intervallumMillis > 0 && eltelt >= intervallumMillis) {
+                    val userRef = adatbazis.collection("users").document(felhasznaloId)
+
+                    val sikeres = adatbazis.runTransaction { tranzakcio ->
+                        val userSnapshot = tranzakcio.get(userRef)
+                        val aktualisEgyenleg = userSnapshot.getDouble("aktualisPenz") ?: 0.0
+
+                        // Levonás mínuszba is engedve
+                        tranzakcio.update(userRef, "aktualisPenz", aktualisEgyenleg - osszeg)
+                        true
+                    }.await()
+
+                    if (sikeres) {
+                        dokumentum.reference.update("utolsoLevonas", Timestamp.now()).await()
+
+                        // Következő levonás időzítése
+                        RendszeresLevonasHelper.scheduleNext(applicationContext, docAzonosito, period)
+
+                        Log.d("RendszeresLevonásWorker", "Sikeres levonás (mínuszba is lehet menni): $docAzonosito")
                     }
+                } else {
+                    Log.d("RendszeresLevonásWorker", "Nem telt el elég idő. Skip: $docAzonosito")
                 }
             }
 
             return Result.success()
 
         } catch (e: Exception) {
-            // Ha bármi hiba történik, újrapróbálkozik
+            Log.e("RendszeresLevonásWorker", "Hiba történt a levonás során", e)
             return Result.retry()
         }
     }

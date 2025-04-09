@@ -51,7 +51,7 @@
         android:popupBackground="@drawable/spinner_lenyitott_bg"
         android:background="@drawable/spinner_bg" />
 
-    <!-- Fő összeg kijelzése (3 karakterenként szóközzel) -->
+    <!-- Fő összeg kijelzése -->
     <TextView
         android:id="@+id/osszegTextView"
         android:layout_width="wrap_content"
@@ -96,20 +96,31 @@
         android:textColor="@android:color/black"
         android:textColorHint="@android:color/black" />
 
-
     <!-- Hozzáadás gomb -->
     <Button
         android:id="@+id/hozzaadButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Hozzáadás"
-        android:layout_marginBottom="16dp"
+        android:layout_marginBottom="8dp"
         app:layout_constraintTop_toBottomOf="@id/osszegEditText"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         android:backgroundTint="@android:color/white"
         android:textColor="@android:color/black" />
 
+    <!-- Levonás teszt gomb -->
+    <Button
+        android:id="@+id/inditasButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Levonás teszt indítása"
+        android:layout_marginBottom="8dp"
+        app:layout_constraintTop_toBottomOf="@id/hozzaadButton"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:backgroundTint="@android:color/holo_blue_light"
+        android:textColor="@android:color/black" />
 
     <!-- Kijelöltek törlése gomb -->
     <Button
@@ -118,7 +129,7 @@
         android:layout_height="wrap_content"
         android:text="Kijelöltek törlése"
         android:layout_marginBottom="16dp"
-        app:layout_constraintTop_toBottomOf="@id/hozzaadButton"
+        app:layout_constraintTop_toBottomOf="@id/inditasButton"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         android:backgroundTint="@android:color/white"
@@ -135,6 +146,5 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
         android:layoutAnimation="@anim/elrendezes_anim_felhalovanyzas" />
-
 
 </androidx.constraintlayout.widget.ConstraintLayout>

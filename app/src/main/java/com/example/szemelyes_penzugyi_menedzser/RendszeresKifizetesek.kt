@@ -9,17 +9,16 @@ import android.util.Log
 import android.view.View
 import android.widget.*
 import androidx.activity.enableEdgeToEdge
-import androidx.work.*
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ListenerRegistration
 import java.text.DecimalFormat
 import java.text.DecimalFormatSymbols
-import java.util.Locale
-import java.util.concurrent.TimeUnit
+import java.util.*
+import androidx.work.OneTimeWorkRequestBuilder
+import androidx.work.WorkManager
+import com.example.szemelyes_penzugyi_menedzser.RendszeresLevonásWorker
 
 @Suppress("DEPRECATION")
 class RendszeresKifizetesek : BaseActivity() {
@@ -62,7 +61,7 @@ class RendszeresKifizetesek : BaseActivity() {
         val osszegEditText: EditText = findViewById(R.id.osszegEditText)
         val hozzaadGomb: Button = findViewById(R.id.hozzaadButton)
         val torlesGomb: Button = findViewById(R.id.torlesButton)
-
+        val inditasGomb: Button = findViewById(R.id.inditasButton)
 
         navigaciosSpinner = findViewById(R.id.lenyilo_menu)
         val lehetosegek = listOf("Főoldal", "Elemzés", "Kategóriák", "Rendszeres kifizetések", "Beállítások", "Kijelentkezés")
@@ -107,6 +106,7 @@ class RendszeresKifizetesek : BaseActivity() {
             val nev = nevEditText.text.toString().trim()
             val osszegInput = osszegEditText.text.toString().trim().toDoubleOrNull()
             val idoszak = idoszakSpinner.selectedItem.toString()
+
             if (nev.isNotEmpty() && osszegInput != null) {
                 val ujKifizetes = hashMapOf(
                     "nev" to nev,
@@ -114,13 +114,17 @@ class RendszeresKifizetesek : BaseActivity() {
                     "period" to idoszak,
                     "utolsoLevonas" to com.google.firebase.Timestamp.now()
                 )
+
                 adatbazis.collection("users").document(felhasznaloId)
                     .collection("kifizetesek")
                     .add(ujKifizetes)
-                    .addOnSuccessListener {
+                    .addOnSuccessListener { dokumentumRef ->
                         Toast.makeText(this, "Kifizetés hozzáadva!", Toast.LENGTH_SHORT).show()
                         nevEditText.text.clear()
                         osszegEditText.text.clear()
+
+                        // 🔔 Levonás időzítése
+                        RendszeresLevonasHelper.scheduleNext(this, dokumentumRef.id, idoszak)
                     }
                     .addOnFailureListener { e ->
                         Toast.makeText(this, "Hiba: ${e.message}", Toast.LENGTH_LONG).show()
@@ -138,14 +142,12 @@ class RendszeresKifizetesek : BaseActivity() {
             }
         }
 
-
-
-        val levonasMunkafutas = PeriodicWorkRequestBuilder<RendszeresLevonásWorker>(1, TimeUnit.DAYS).build()
-        WorkManager.getInstance(this).enqueueUniquePeriodicWork(
-            "RendszeresLevonas",
-            ExistingPeriodicWorkPolicy.KEEP,
-            levonasMunkafutas
-        )
+        inditasGomb.setOnClickListener {
+            val tesztLevonas = OneTimeWorkRequestBuilder<RendszeresLevonásWorker>().build()
+            WorkManager.getInstance(this).enqueue(tesztLevonas)
+            Toast.makeText(this, "Levonás teszt elindítva!", Toast.LENGTH_SHORT).show()
+            Log.d("RendszeresKifizetesek", "Teszt levonás indítva")
+        }
     }
 
     private fun egyenlegBetoltes(felhasznaloId: String, osszegTextView: TextView) {
