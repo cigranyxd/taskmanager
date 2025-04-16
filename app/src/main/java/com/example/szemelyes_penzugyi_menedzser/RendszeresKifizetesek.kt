@@ -61,7 +61,7 @@ class RendszeresKifizetesek : BaseActivity() {
         val osszegEditText: EditText = findViewById(R.id.osszegEditText)
         val hozzaadGomb: Button = findViewById(R.id.hozzaadButton)
         val torlesGomb: Button = findViewById(R.id.torlesButton)
-        val inditasGomb: Button = findViewById(R.id.inditasButton)
+
 
         navigaciosSpinner = findViewById(R.id.lenyilo_menu)
         val lehetosegek = listOf("Főoldal", "Elemzés", "Kategóriák", "Rendszeres kifizetések", "Beállítások", "Kijelentkezés")
@@ -142,12 +142,7 @@ class RendszeresKifizetesek : BaseActivity() {
             }
         }
 
-        inditasGomb.setOnClickListener {
-            val tesztLevonas = OneTimeWorkRequestBuilder<RendszeresLevonásWorker>().build()
-            WorkManager.getInstance(this).enqueue(tesztLevonas)
-            Toast.makeText(this, "Levonás teszt elindítva!", Toast.LENGTH_SHORT).show()
-            Log.d("RendszeresKifizetesek", "Teszt levonás indítva")
-        }
+      
     }
 
     private fun egyenlegBetoltes(felhasznaloId: String, osszegTextView: TextView) {
